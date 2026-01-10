@@ -44,7 +44,7 @@ export default function Dashboard() {
                     <div className="mb-6">
                         <textarea
                             className="w-full h-64 p-4 font-mono text-sm bg-gray-900 text-gray-100 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none resize-none"
-                            placeholder="// Paste your Python details here..."
+                            placeholder="// Paste your Python code here..."
                             value={codeText}
                             onChange={(e) => setCodeText(e.target.value)}
                         />
