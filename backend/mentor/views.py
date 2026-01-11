@@ -162,6 +162,7 @@ class SubmitTestView(views.APIView):
         roadmap_steps = rg.generate()
 
         # Limit projects to 1
+        pg = ProjectGenerator(language, level)
         projects_data = pg.generate()[:1]
 
         # Generate Tasks (3 for kids, 5 for adults)
