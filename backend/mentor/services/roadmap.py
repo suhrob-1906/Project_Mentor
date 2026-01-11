@@ -34,19 +34,31 @@ class RoadmapGenerator:
                     {"topic": "Docker", "description": "Containerization basics."},
                 ]
 
-        elif self.language == 'javascript':
-            # Simplified JS roadmap
-             if self.level == 'beginner':
+        elif self.language == 'go':
+            if self.level == 'beginner':
                 roadmap = [
-                    {"topic": "Syntax Basics", "description": "Variables (let/const), Types."},
-                    {"topic": "DOM Manipulation", "description": "Selectors, Events."},
-                    {"topic": "Functions", "description": "Arrow functions, callbacks."},
+                    {"topic": "Go Basics", "description": "Variables, Types, Functions."},
+                    {"topic": "Structs & Interfaces", "description": "Data modeling in Go."},
+                    {"topic": "Goroutines", "description": "Concurrency basics."},
                 ]
-             else:
+            else:
                 roadmap = [
-                    {"topic": "Async JS", "description": "Promises, Async/Await."},
-                    {"topic": "Modern ES6+", "description": "Destructuring, spread, modules."},
-                    {"topic": "React.js", "description": "Components, Hooks, State."},
+                    {"topic": "Channels", "description": "Communication between goroutines."},
+                    {"topic": "Error Handling", "description": "Idiomatic Go errors."},
+                    {"topic": "Context & Timeouts", "description": "Managing request lifecycles."},
+                ]
+
+        elif self.language == 'java':
+            if self.level == 'beginner':
+                roadmap = [
+                    {"topic": "Java Syntax", "description": "Main method, Types, Loops."},
+                    {"topic": "OOP Fundamentals", "description": "Classes, Objects, Inheritance."},
+                ]
+            else:
+                roadmap = [
+                    {"topic": "Collections Framework", "description": "Lists, Sets, Maps."},
+                    {"topic": "Spring Boot", "description": "Building REST APIs."},
+                    {"topic": "JVM Internals", "description": "Memory management and GC."},
                 ]
 
         return roadmap

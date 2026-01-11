@@ -34,12 +34,32 @@ class ProjectGenerator:
                     "features": ["Product variants", "Low stock alerts", "Order processing"]
                 })
 
-        elif self.language == 'javascript':
-             projects.append({
-                "title": "Weather Dashboard",
-                "description": "Frontend app showing weather forecast.",
-                "tech_stack": ["React", "CSS", "Fetch API"],
-                "features": ["Search city", "5-day forecast", "Responsive UI"]
+        elif self.language == 'go':
+            projects.append({
+                "title": "Concurrent URL Checker",
+                "description": "A high-performance CLI tool that checks website availability using goroutines.",
+                "tech_stack": ["Go", "Goroutines", "Net/HTTP"],
+                "features": ["Parallel requests", "Timeout handling", "Detailed report"]
+            })
+            projects.append({
+                "title": "REST API with Fiber",
+                "description": "A fast and minimal backend for a blogging platform.",
+                "tech_stack": ["Go", "Gofiber", "GORM"],
+                "features": ["JWT Auth", "Post management", "Validation"]
+            })
+
+        elif self.language == 'java':
+            projects.append({
+                "title": "Employee Management System",
+                "description": "A full-scale enterprise application to manage staff records.",
+                "tech_stack": ["Java", "Spring Boot", "MySQL"],
+                "features": ["CRUD operations", "Role-based access", "PDF reports"]
+            })
+            projects.append({
+                "title": "Android Quiz App",
+                "description": "A mobile application for taking interactive quizzes.",
+                "tech_stack": ["Java", "Android SDK", "SQLite"],
+                "features": ["Timer", "Score tracking", "Animations"]
             })
 
         return projects
