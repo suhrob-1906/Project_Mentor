@@ -102,7 +102,7 @@ class TestQuestionsView(views.APIView):
     permission_classes = [permissions.IsAuthenticated]
 
     def get(self, request):
-        language = request.query_params.get('language', 'python')
+        language = request.query_params.get('language', 'python').lower()
         # Get 20 random questions for the language
         questions = TestQuestion.objects.filter(language=language)
         if questions.count() > 20:
@@ -115,7 +115,7 @@ class SubmitTestView(views.APIView):
     permission_classes = [permissions.IsAuthenticated]
 
     def post(self, request):
-        language = request.data.get('language')
+        language = (request.data.get('language') or 'python').lower()
         answers = request.data.get('answers') # List of {"id": question_id, "option": selected_index}
         
         if not answers:

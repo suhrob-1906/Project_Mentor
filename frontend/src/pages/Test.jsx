@@ -19,11 +19,19 @@ export default function Test({ isChild }) {
 
     useEffect(() => {
         const fetchQuestions = async () => {
+            const url = `/api/questions/?language=${language}`;
+            console.log(`[Diagnostic] Fetching questions from: ${url}`);
             try {
-                const res = await api.get(`/api/questions/?language=${language}`);
+                const res = await api.get(url);
+                console.log(`[Diagnostic] Response status: ${res.status}`);
+                console.log(`[Diagnostic] Questions received:`, res.data);
+                if (Array.isArray(res.data) && res.data.length === 0) {
+                    console.warn(`[Diagnostic] Received empty questions list from server for language: ${language}`);
+                }
                 setQuestions(res.data);
                 setLoading(false);
             } catch (err) {
+                console.error(`[Diagnostic] Error fetching questions:`, err);
                 setError("Failed to load questions. Please try again.");
                 setLoading(false);
             }

@@ -111,4 +111,9 @@ class Command(BaseCommand):
         for q in questions:
             TestQuestion.objects.create(**q)
         
-        self.stdout.write(self.style.SUCCESS(f'Successfully seeded {len(questions)} questions'))
+        self.stdout.write(self.style.SUCCESS('--- SEEDING COMPLETE ---'))
+        self.stdout.write(self.style.SUCCESS(f'Total questions seeded: {len(questions)}'))
+        for lang in ['python', 'javascript', 'go', 'java']:
+            count = TestQuestion.objects.filter(language=lang).count()
+            self.stdout.write(f' - {lang.capitalize()}: {count} questions')
+        self.stdout.write(self.style.SUCCESS('------------------------'))
