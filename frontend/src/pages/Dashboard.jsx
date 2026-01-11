@@ -58,7 +58,7 @@ export default function Dashboard({ isChild }) {
                     <div className="flex items-center gap-2 cursor-pointer" onClick={() => navigate('/')}>
                         {isChild ? <Rocket className="w-8 h-8 text-black" /> : <Sparkles className="w-6 h-6 text-indigo-600" />}
                         <span className={`font-black text-xl tracking-tight ${isChild ? 'text-black italic text-2xl' : 'text-gray-900'}`}>
-                            {isChild ? 'SUPER MENTOR!' : 'MentorAI'}
+                            {isChild ? t('dashboard.super_mentor') : 'MentorAI'}
                         </span>
                     </div>
 
@@ -75,10 +75,10 @@ export default function Dashboard({ isChild }) {
             <main className="container mx-auto px-4 py-12 max-w-5xl relative">
                 <div className="text-center mb-16">
                     <h1 className={`font-black mb-4 tracking-tight ${isChild ? 'text-6xl text-black uppercase scale-110' : 'text-4xl md:text-5xl text-gray-900'}`}>
-                        {isChild ? 'ARE YOU READY?' : t('dashboard.title')}
+                        {isChild ? t('dashboard.ready') : t('dashboard.title')}
                     </h1>
                     <p className={`text-lg ${isChild ? 'text-black font-bold uppercase tracking-widest' : 'text-gray-500'}`}>
-                        {isChild ? 'Choose your magic language! 🚀' : t('dashboard.subtitle')}
+                        {isChild ? t('dashboard.choose_magic') : t('dashboard.subtitle')}
                     </p>
                 </div>
 
@@ -116,11 +116,11 @@ export default function Dashboard({ isChild }) {
 
                             <div className="relative z-10">
                                 <div className={`inline-flex px-3 py-1 rounded-full text-xs font-bold uppercase tracking-widest mb-6 ${isChild ? 'bg-yellow-400 text-black border-2 border-black' : 'bg-indigo-500/20 text-indigo-300'}`}>
-                                    {isChild ? 'FUN CHALLENGE' : 'Assessment'}
+                                    {isChild ? t('dashboard.fun_challenge') : t('dashboard.assessment')}
                                 </div>
-                                <h3 className={`font-bold mb-4 ${isChild ? 'text-4xl italic' : 'text-3xl'}`}>{isChild ? 'TAKE THE QUIZ!' : t('dashboard.start_test')}</h3>
+                                <h3 className={`font-bold mb-4 ${isChild ? 'text-4xl italic' : 'text-3xl'}`}>{isChild ? t('dashboard.take_quiz') : t('dashboard.start_test')}</h3>
                                 <p className={`leading-relaxed mb-8 ${isChild ? 'text-white font-bold' : 'text-gray-400'}`}>
-                                    {isChild ? '20 magical questions to win your hero badge!' : 'Complete a specialized 20-question challenge to verify your skills.'}
+                                    {isChild ? t('dashboard.quiz_desc_child') : t('dashboard.quiz_desc_adult')}
                                 </p>
                             </div>
 
@@ -128,7 +128,7 @@ export default function Dashboard({ isChild }) {
                                 onClick={handleStartTest}
                                 className={`w-full py-5 rounded-2xl font-black text-lg transition-all shadow-lg flex items-center justify-center gap-2 group-hover:gap-4 ${isChild ? 'bg-yellow-400 text-black border-4 border-black active:translate-y-2 active:shadow-none' : 'bg-white text-gray-900 hover:bg-indigo-50'}`}
                             >
-                                {isChild ? "LET'S GO!" : t('dashboard.start_test')}
+                                {isChild ? t('dashboard.lets_go') : t('dashboard.start_test')}
                                 <ArrowRight className="w-5 h-5" />
                             </button>
                         </div>
@@ -139,13 +139,13 @@ export default function Dashboard({ isChild }) {
                         <div className={`${isChild ? 'bg-white border-4 border-black shadow-[12px_12px_0px_0px_rgba(0,0,0,1)]' : 'bg-white border-gray-100 shadow-sm'} rounded-[2.5rem] p-10 h-full flex flex-col`}>
                             <h3 className={`font-bold text-gray-900 mb-6 flex items-center gap-2 ${isChild ? 'text-3xl italic' : 'text-2xl'}`}>
                                 {isChild ? <Sparkles className="w-8 h-8 text-indigo-600" /> : <Code2 className="w-6 h-6 text-indigo-600" />}
-                                {isChild ? 'PASTE YOUR MAGIC CODE!' : t('dashboard.code_analysis')}
+                                {isChild ? t('dashboard.paste_magic') : t('dashboard.code_analysis')}
                             </h3>
 
                             <textarea
                                 value={code}
                                 onChange={(e) => setCode(e.target.value)}
-                                placeholder={isChild ? 'Show me what you wrote! ✨' : t('dashboard.paste_code')}
+                                placeholder={isChild ? t('dashboard.show_me') : t('dashboard.paste_code')}
                                 className={`flex-grow w-full h-64 p-6 rounded-3xl border-none focus:ring-2 focus:ring-indigo-500 text-sm font-mono text-gray-700 mb-6 resize-none ${isChild ? 'bg-yellow-50 border-2 border-black outline-none' : 'bg-gray-50'}`}
                             ></textarea>
 
@@ -154,7 +154,7 @@ export default function Dashboard({ isChild }) {
                                 disabled={isAnalyzing || !code.trim()}
                                 className={`w-full py-5 rounded-2xl font-black text-lg transition-all shadow-lg flex items-center justify-center gap-2 ${isChild ? 'bg-black text-white hover:bg-gray-800' : 'bg-indigo-600 text-white hover:bg-indigo-700 disabled:opacity-50 shadow-indigo-100'}`}
                             >
-                                {isAnalyzing ? <Loader2 className="w-6 h-6 animate-spin" /> : (isChild ? 'ANALYZE MY MAGIC!' : t('dashboard.analyze'))}
+                                {isAnalyzing ? <Loader2 className="w-6 h-6 animate-spin" /> : (isChild ? t('dashboard.analyze_magic') : t('dashboard.analyze'))}
                             </button>
                         </div>
                     </div>

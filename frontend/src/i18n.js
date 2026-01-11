@@ -25,7 +25,19 @@ const resources = {
                 "code_analysis": "Or Analyze Existing Code",
                 "paste_code": "Paste your code here...",
                 "analyze": "Analyze Code",
-                "select_lang": "Select Language"
+                "select_lang": "Select Language",
+                "super_mentor": "SUPER MENTOR!",
+                "ready": "ARE YOU READY?",
+                "choose_magic": "Choose your magic language! 🚀",
+                "fun_challenge": "FUN CHALLENGE",
+                "assessment": "Assessment",
+                "take_quiz": "TAKE THE QUIZ!",
+                "quiz_desc_child": "20 magical questions to win your hero badge!",
+                "quiz_desc_adult": "Complete a specialized 20-question challenge to verify your skills.",
+                "lets_go": "LET'S GO!",
+                "paste_magic": "PASTE YOUR MAGIC CODE!",
+                "show_me": "Show me what you wrote! ✨",
+                "analyze_magic": "ANALYZE MY MAGIC!"
             },
             "register": {
                 "title": "Create Account",
@@ -83,7 +95,19 @@ const resources = {
                 "code_analysis": "Или проанализируй готовый код",
                 "paste_code": "Вставь свой код здесь...",
                 "analyze": "Проанализировать код",
-                "select_lang": "Выбери язык"
+                "select_lang": "Выбери язык",
+                "super_mentor": "СУПЕР МЕНТОР!",
+                "ready": "ТЫ ГОТОВ?",
+                "choose_magic": "Выбери свой магический язык! 🚀",
+                "fun_challenge": "МАГИЧЕСКИЙ ВЫЗОВ",
+                "assessment": "Оценка",
+                "take_quiz": "ПРОЙТИ ТЕСТ!",
+                "quiz_desc_child": "20 магических вопросов, чтобы получить значок героя!",
+                "quiz_desc_adult": "Пройдите специализированный тест из 20 вопросов, чтобы подтвердить свои навыки.",
+                "lets_go": "ПОЕХАЛИ!",
+                "paste_magic": "ВСТАВЬ СВОЙ МАГИЧЕСКИЙ КОД!",
+                "show_me": "Покажи мне, что ты написал! ✨",
+                "analyze_magic": "АНАЛИЗ МОЕЙ МАГИИ!"
             },
             "register": {
                 "title": "Создать аккаунт",
