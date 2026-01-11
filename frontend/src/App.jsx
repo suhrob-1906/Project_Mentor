@@ -6,6 +6,7 @@ import Results from './pages/Results';
 import Landing from './pages/Landing';
 import Test from './pages/Test';
 import { useState, useEffect } from 'react';
+import api from './api';
 
 // Simple Protected Route
 const ProtectedRoute = ({ children }) => {
