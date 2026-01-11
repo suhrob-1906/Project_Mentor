@@ -170,6 +170,12 @@ class SubmitTestView(views.APIView):
 
         # Save Result
         try:
+            print(f"[DEBUG] Saving TestResult for user {request.user.username}")
+            print(f"[DEBUG] Data: lang={language}, level={level}, score={correct_count}/{total}")
+            print(f"[DEBUG] Roadmap steps: {len(roadmap_steps)}")
+            print(f"[DEBUG] Projects: {len(projects_data)}")
+            print(f"[DEBUG] Tasks: {len(tasks)}")
+            
             result = TestResult.objects.create(
                 user=request.user,
                 language=language,
