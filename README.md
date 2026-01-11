@@ -1,72 +1,81 @@
-# MentorAI - AI-Powered Programming Mentor Platform
+# 🌟 MentorAI: Your Intelligent Path to Coding Mastery
+
+MentorAI is the world's first **age-aware programming mentor platform**. We bridge the gap between "knowing syntax" and "building careers" by providing a personalized learning ecosystem that grows with you.
+
+---
 
 ## 🎯 What is MentorAI?
 
-MentorAI is an intelligent platform that analyzes your programming skills to determine your true level, then generates a personalized learning roadmap, portfolio project recommendations, and practical coding tasks to accelerate your career growth.
+Stop guessing your skill level. MentorAI uses advanced static analysis and psychometric assessment to determine exactly where you stand in the developer journey. Whether you're a curious 10-year-old writing your first "Hello World" or a professional transitioning to a new stack, MentorAI provides:
 
-Whether through **direct code analysis** or our new **comprehensive language tests**, MentorAI gives you an honest assessment of where you stand.
+1.  **Honest Skill Analysis**: Deep code analysis or comprehensive language tests.
+2.  **Personalized Roadmaps**: Step-by-step paths to mastery.
+3.  **Real-World Projects**: One signature project recommendation to build your portfolio.
+4.  **Practical Tasks**: Exactly 3 (for kids) or 5 (for adults) specific assignments to practice immediately.
 
-## 🚀 Purpose
+---
 
-**Stop guessing. Know your true code level.**
+## 🎭 The Two Faces of MentorAI
 
-MentorAI helps developers:
-- **Determine their level** (Beginner, Junior, Strong Junior, Middle) via specialized tests or code analysis.
-- **Get personalized roadmaps** tailored to Python, JavaScript, Go, and Java.
-- **Receive coding tasks** (1-5 practical assignments) to solidify knowledge.
-- **Build portfolio projects** designed for real-world impact.
-- **Study in their language** with full English and Russian support.
+We believe learning should be tailored to the learner's experience. MentorAI automatically transforms its entire interface based on your age:
 
-## ✨ Key Features
+### 🚀 Magical Child Mode (Age ≤ 14)
+*   **The Vibe**: An intergalactic adventure! Vibrant Sun-Yellow themes, bouncy animations, and playful characters.
+*   **The Language**: "Missions" instead of tests, "Adventure Maps" instead of roadmaps.
+*   **The Reward**: Gamified feedback and "Magic Points" to keep young minds engaged and excited.
 
-### 1. **Specialized Programming Tests**
-- 20-question deep-dives for Python, JavaScript, Go, and Java.
-- Evaluates core concepts, syntax, and advanced patterns.
-- Randomly generated from a robust pool of questions.
+### 💼 Professional Adult Mode (Age > 14)
+*   **The Vibe**: A premium, minimalist workspace. Clean indigo accents, deep focus aesthetics, and professional layouts.
+*   **The Language**: Direct, career-focused feedback and high-value industry standard terminology.
+*   **The Goal**: Efficiency and clarity for rapid professional growth.
 
-### 2. **Deep Code Analysis**
-- Static analysis of Python code for complexity and anti-patterns.
-- Actionable feedback on naming, structure, and best practices.
+---
 
-### 3. **Personalized Learning Roadmaps**
-- Step-by-step paths based on exact skill gaps.
-- Tailored to career goals (Job, Freelance, Startup).
+## ✨ Features at a Glance
 
-### 4. **Practical Coding Tasks**
-- **NEW**: 1-5 specific coding challenges to practice after the assessment.
+*   **Deep Language Support**: Specialized tracks for **Python, JavaScript, Go, and Java**.
+*   **Multilingual Core**: Full interface and content support for **English and Russian**.
+*   **80+ Seeded Questions**: A robust database of localized technical questions.
+*   **Smart Assessment**: Dynamic level determination (Beginner, Junior, Strong Junior, Middle).
+*   **Persistent Experience**: Your theme and progress follow you everywhere.
 
-### 6. **Adaptive Age-Based UI**
-- **NEW**: The platform now adapts its tone and visual style based on the user's age.
-- **Child Mode (≤14)**: Features friendly icons, softer colors (rose/amber), and simplified learning paths.
-- **Adult Mode (>14)**: Premium minimalist professional aesthetic.
+---
 
 ## 🛠️ Tech Stack
 
-### Backend
-- **Django 6.0**, **DRF**, **JWT Auth**
-- **Radon** (Static Analysis)
-- **SQLite/PostgreSQL**
+### Backend (The Brain)
+- **Django 5.1/6.0** & **Django Rest Framework**
+- **JWT Authentication** (Secure persistent sessions)
+- **Radon** (Python code complexity analysis)
+- **PostgreSQL/SQLite** support
 
-### Frontend
-- **React 18**, **Vite**, **Tailwind CSS**
-- **i18next** (Multilingual Support)
-- **Lucide React** (Icons)
-
-## 📦 Quick Start
-
-### Backend
-1. `cd backend`
-2. `python -m venv venv`
-3. Activate venv
-4. `pip install -r requirements.txt`
-5. `python manage.py migrate`
-6. `python manage.py seed_questions` (Seed the test database)
-7. `python manage.py runserver`
-
-### Frontend
-1. `cd frontend`
-2. `npm install`
-3. `npm run dev`
+### Frontend (The Heart)
+- **React 18** & **Vite** (Ultra-fast development)
+- **Tailwind CSS** (Custom design system)
+- **i18next** (Flawless localization)
+- **Lucide React** (Beautiful iconography)
 
 ---
-**Built with ❤️ by an expert team to help you grow.**
+
+## 📦 Getting Started
+
+### 1. Backend Setup
+```bash
+cd backend
+python -m venv venv
+# Activate venv (Source venv/bin/activate or .\venv\Scripts\activate)
+pip install -r requirements.txt
+python manage.py migrate
+python manage.py seed_questions  # Essential: Populate the test bank!
+python manage.py runserver
+```
+
+### 2. Frontend Setup
+```bash
+cd frontend
+npm install
+npm run dev
+```
+
+---
+**Built with ❤️ for the next generation of developers.**
