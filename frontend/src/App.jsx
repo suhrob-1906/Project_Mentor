@@ -15,18 +15,49 @@ const ProtectedRoute = ({ children }) => {
 };
 
 function App() {
+  const [user, setUser] = useState(null);
+  const [loading, setLoading] = useState(true);
+
+  const fetchProfile = async () => {
+    const token = localStorage.getItem('access_token');
+    if (!token) {
+      setLoading(false);
+      return;
+    }
+    try {
+      const res = await api.get('/auth/profile/');
+      setUser(res.data);
+    } catch (err) {
+      console.error("Profile fetch failed:", err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchProfile();
+  }, []);
+
+  const isChild = user?.age <= 14;
+
+  if (loading) return (
+    <div className="min-h-screen flex items-center justify-center bg-gray-50">
+      <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600"></div>
+    </div>
+  );
+
   return (
     <Router>
-      <div className="min-h-screen bg-gray-50 text-gray-900 font-sans">
+      <div className={`min-h-screen transition-colors duration-500 ${isChild ? 'bg-yellow-400 font-["Outfit"]' : 'bg-gray-50 font-sans'}`}>
         <Routes>
           <Route path="/" element={<Landing />} />
-          <Route path="/login" element={<Login />} />
+          <Route path="/login" element={<Login onLoginSuccess={fetchProfile} />} />
           <Route path="/register" element={<Register />} />
           <Route
             path="/dashboard"
             element={
               <ProtectedRoute>
-                <Dashboard />
+                <Dashboard isChild={isChild} />
               </ProtectedRoute>
             }
           />
@@ -34,7 +65,7 @@ function App() {
             path="/test"
             element={
               <ProtectedRoute>
-                <Test />
+                <Test isChild={isChild} />
               </ProtectedRoute>
             }
           />
@@ -42,7 +73,7 @@ function App() {
             path="/results"
             element={
               <ProtectedRoute>
-                <Results />
+                <Results isChild={isChild} />
               </ProtectedRoute>
             }
           />

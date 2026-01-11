@@ -12,8 +12,6 @@ export default function Register() {
         username: '',
         password: '',
         email: '',
-        primary_language: 'python',
-        goal: 'job',
         age: 18
     });
     const [error, setError] = useState('');
@@ -91,33 +89,17 @@ export default function Register() {
                         />
                     </div>
 
-                    <div className="grid grid-cols-3 gap-4">
-                        <div className="col-span-1">
-                            <label className="block text-xs font-black text-gray-400 uppercase tracking-widest mb-1 ml-1">{t('register.age') || 'Age'}</label>
-                            <input
-                                type="number"
-                                className="w-full px-5 py-3 bg-gray-50 border-none rounded-2xl focus:ring-2 focus:ring-indigo-500 outline-none font-medium"
-                                value={formData.age}
-                                onChange={(e) => setFormData({ ...formData, age: e.target.value })}
-                                required
-                                min="1"
-                                max="100"
-                            />
-                        </div>
-                        <div className="col-span-2">
-                            <label className="block text-xs font-black text-gray-400 uppercase tracking-widest mb-1 ml-1">{t('dashboard.select_lang')}</label>
-                            <select
-                                className="w-full px-5 py-3 bg-gray-50 border-none rounded-2xl focus:ring-2 focus:ring-indigo-500 outline-none font-bold text-gray-700 h-[52px]"
-                                value={formData.primary_language}
-                                onChange={(e) => setFormData({ ...formData, primary_language: e.target.value })}
-                            >
-                                <option value="python">Python</option>
-                                <option value="javascript">JavaScript</option>
-                                <option value="go">Go</option>
-                                <option value="java">Java</option>
-                                <option value="other">Other</option>
-                            </select>
-                        </div>
+                    <div>
+                        <label className="block text-xs font-black text-gray-400 uppercase tracking-widest mb-1 ml-1">{t('register.age') || 'Age'}</label>
+                        <input
+                            type="number"
+                            className="w-full px-5 py-3 bg-gray-50 border-none rounded-2xl focus:ring-2 focus:ring-indigo-500 outline-none font-medium"
+                            value={formData.age}
+                            onChange={(e) => setFormData({ ...formData, age: e.target.value })}
+                            required
+                            min="1"
+                            max="100"
+                        />
                     </div>
 
                     <button
@@ -137,5 +119,15 @@ export default function Register() {
                 </p>
             </div>
         </div>
+    );
+
+    <p className="mt-8 text-center text-gray-500 font-medium text-sm">
+        {t('register.have_account') || 'Already have an account?'} {' '}
+        <Link to="/login" className="text-indigo-600 font-black hover:underline ml-1">
+            {t('landing.login')}
+        </Link>
+    </p>
+            </div >
+        </div >
     );
 }

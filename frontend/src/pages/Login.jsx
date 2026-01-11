@@ -18,7 +18,11 @@ export default function Login() {
             const res = await api.post('/auth/login/', formData);
             localStorage.setItem('access_token', res.data.access);
             localStorage.setItem('refresh_token', res.data.refresh);
-            navigate('/dashboard');
+            if (window.location.pathname === '/login') {
+                // Trigger profile fetch in App
+                navigate('/dashboard');
+                window.location.reload(); // Simple way to reset state and trigger App.useEffect
+            }
         } catch (err) {
             setError('Invalid credentials');
         } finally {

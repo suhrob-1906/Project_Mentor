@@ -153,13 +153,11 @@ class SubmitTestView(views.APIView):
         rg = RoadmapGenerator(language, level, request.user.goal)
         roadmap_steps = rg.generate()
 
-        pg = ProjectGenerator(language, level)
-        projects_data = pg.generate()
+        # Limit projects to 1
+        projects_data = pg.generate()[:1]
 
-        # Generate Tasks (1-5 targets)
-        tasks = self._generate_tasks(language, level)
-        if is_child:
-            tasks = [f"🌟 {task}" for task in tasks] # Add friendly icons
+        # Generate Tasks (3 for kids, 5 for adults)
+        tasks = self._generate_tasks(language, level, is_child)
 
         # Save Result
         result = TestResult.objects.create(
@@ -185,36 +183,43 @@ class SubmitTestView(views.APIView):
             "age": request.user.age
         })
 
-    def _generate_tasks(self, language, level):
+    def _generate_tasks(self, language, level, is_child):
         # Basic task sets
         all_tasks = {
             'python': {
-                'beginner': ["Write a basic calculator", "Create a loop that prints prime numbers"],
-                'junior': ["Build a web scraper with BeautifulSoup", "Create a simple CRUD with Flask"],
-                'strong_junior': ["Implement a decorator for logging", "Write unit tests for a library"],
-                'middle': ["Design a microservice using FastAPI", "Optimize a slow SQL query with Django ORM"]
+                'beginner': ["Write a basic calculator", "Create a loop that prints prime numbers", "Build a guessing game", "List all files in a folder", "Calculate area of a circle"],
+                'junior': ["Build a web scraper with BeautifulSoup", "Create a simple CRUD with Flask", "Automate email sending", "Parse a CSV file", "Create a basic CLI tool"],
+                'strong_junior': ["Implement a decorator for logging", "Write unit tests for a library", "Design a simple API with Django", "Optimize a dictionary search", "Handle JSON data from an API"],
+                'middle': ["Design a microservice using FastAPI", "Optimize a slow SQL query with Django ORM", "Implement a custom caching layer", "Build a real-time notification system", "Architect a scalable backend"]
             },
             'javascript': {
-                'beginner': ["Create a To-Do list with vanilla JS", "Build a countdown timer"],
-                'junior': ["Fetch data from an API and display it", "Use localStorage to save user preferences"],
-                'strong_junior': ["Implement a custom React Hook", "Setup routing with React Router"],
-                'middle': ["Build a real-time chat with Socket.io", "Setup Next.js with SSR"]
+                'beginner': ["Create a To-Do list with vanilla JS", "Build a countdown timer", "Change background color on click", "Validate a simple form", "Create a digital clock"],
+                'junior': ["Fetch data from an API and display it", "Use localStorage to save user preferences", "Build a photo gallery", "Implement a search filter", "Create a toggle-able accordion"],
+                'strong_junior': ["Implement a custom React Hook", "Setup routing with React Router", "Build a state-managed store", "Handle async data with Redux", "Integrate a 3rd party library"],
+                'middle': ["Build a real-time chat with Socket.io", "Setup Next.js with SSR", "Optimize bundle size", "Implement advanced animations", "Architect an enterprise React app"]
             },
             'go': {
-                'beginner': ["Hello world with Go routines", "Write a program that reads a JPG"],
-                'junior': ["Create a concurrent URL checker", "Build a REST API with Fiber"],
-                'middle': ["Implement a worker pool", "Design a CLI tool for file encryption"]
+                'beginner': ["Hello world with Go routines", "Write a program that reads a JPG", "Simple CLI flag parser", "Math operations", "String manipulation"],
+                'junior': ["Create a concurrent URL checker", "Build a REST API with Fiber", "Handle JSON files", "Simple TCP echo server", "File encryption tool"],
+                'middle': ["Implement a worker pool", "Design a CLI tool for file encryption", "Optimize memory usage", "Build a high-performance proxy", "Microservice communication"]
             },
             'java': {
-                'beginner': ["Inheritance example with Animals", "File IO basics"],
-                'junior': ["Spring Boot Hello World", "Connect to MySQL with JDBC"],
-                'middle': ["Microservices with Spring Cloud", "JVM performance tuning basics"]
+                'beginner': ["Inheritance example with Animals", "File IO basics", "Simple geometry shapes", "Calculator", "User Input handling"],
+                'junior': ["Spring Boot Hello World", "Connect to MySQL with JDBC", "Build a library manager", "HTTP Client example", "Unit testing with JUnit"],
+                'middle': ["Microservices with Spring Cloud", "JVM performance tuning basics", "Hibernate optimizations", "Multithreading systems", "Enterprise patterns"]
             }
         }
         
         lang_tasks = all_tasks.get(language, {})
         level_tasks = lang_tasks.get(level, lang_tasks.get('junior', ["Explore the official documentation"]))
         
-        # Return 1-5 tasks
-        count = min(len(level_tasks), 5)
-        return random.sample(level_tasks, count) if level_tasks else []
+        # Enforce counts: 3 for kids, 5 for adults
+        count = 3 if is_child else 5
+        if not level_tasks:
+             return [f"Complete your {language} quest!"] * count
+             
+        # Add friendly icons for kids
+        if is_child:
+            return [f"🌟 {task}" for task in random.sample(level_tasks * 2, count)]
+        
+        return random.sample(level_tasks * 2, count)
