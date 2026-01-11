@@ -120,14 +120,4 @@ export default function Register() {
             </div>
         </div>
     );
-
-    <p className="mt-8 text-center text-gray-500 font-medium text-sm">
-        {t('register.have_account') || 'Already have an account?'} {' '}
-        <Link to="/login" className="text-indigo-600 font-black hover:underline ml-1">
-            {t('landing.login')}
-        </Link>
-    </p>
-            </div >
-        </div >
-    );
 }
