@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import axios from 'axios';
+import api from '../api';
 import { useTranslation } from 'react-i18next';
 import {
     Code2, Terminal, Cpu, Globe, ArrowRight,
