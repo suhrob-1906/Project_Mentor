@@ -13,12 +13,13 @@ export default function Dashboard() {
         setLoading(true);
         try {
             const res = await api.post('/api/analyze/', { code_text: codeText });
+            // Clear loading state BEFORE navigation to avoid unmounted component update
+            setLoading(false);
             navigate('/results', { state: { data: res.data } });
         } catch (err) {
             console.error(err);
-            alert("Analysis failed. Please try again.");
-        } finally {
             setLoading(false);
+            alert("Analysis failed. Please try again.");
         }
     };
 

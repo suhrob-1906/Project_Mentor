@@ -15,7 +15,10 @@ export default function Results() {
         );
     }
 
-    const { level, feedback, roadmap, projects } = data;
+    const level = data?.level || 'beginner';
+    const feedback = data?.feedback || '';
+    const roadmap = Array.isArray(data?.roadmap) ? data.roadmap : [];
+    const projects = Array.isArray(data?.projects) ? data.projects : [];
 
     const levelColor = {
         'beginner': 'text-green-600 bg-green-50 border-green-200',
@@ -54,7 +57,7 @@ export default function Results() {
                         </div>
                         <div className="space-y-4">
                             {roadmap.map((step, idx) => (
-                                <div key={idx} className="bg-white p-6 rounded-xl border border-gray-100 shadow-sm flex gap-4 hover:shadow-md transition">
+                                <div key={`roadmap-step-${idx}`} className="bg-white p-6 rounded-xl border border-gray-100 shadow-sm flex gap-4 hover:shadow-md transition">
                                     <div className="flex-shrink-0 w-8 h-8 rounded-full bg-indigo-100 text-indigo-600 flex items-center justify-center font-bold text-sm">
                                         {idx + 1}
                                     </div>
@@ -75,15 +78,15 @@ export default function Results() {
                         </div>
                         <div className="space-y-4">
                             {projects.map((proj, idx) => (
-                                <div key={idx} className="bg-white p-6 rounded-xl border border-gray-100 shadow-sm hover:shadow-md transition group">
+                                <div key={`project-rec-${idx}`} className="bg-white p-6 rounded-xl border border-gray-100 shadow-sm hover:shadow-md transition group">
                                     <h3 className="font-bold text-gray-900 flex justify-between">
                                         {proj.title}
                                         <ArrowRight className="w-4 h-4 text-gray-300 group-hover:text-pink-600 transition" />
                                     </h3>
                                     <p className="text-gray-500 text-sm mt-2 mb-4">{proj.description}</p>
                                     <div className="flex flex-wrap gap-2">
-                                        {proj.tech_stack.map((tech, i) => (
-                                            <span key={i} className="text-xs px-2 py-1 bg-gray-100 text-gray-600 rounded-md font-medium">
+                                        {(proj.tech_stack || []).map((tech, i) => (
+                                            <span key={`tech-${idx}-${i}`} className="text-xs px-2 py-1 bg-gray-100 text-gray-600 rounded-md font-medium">
                                                 {tech}
                                             </span>
                                         ))}
