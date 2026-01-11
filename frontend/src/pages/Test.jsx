@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import api from '../api';
 import { useTranslation } from 'react-i18next';
-import { ChevronRight, CheckCircle2, Loader2, AlertCircle } from 'lucide-react';
+import { ChevronRight, CheckCircle2, Loader2, AlertCircle, Sparkles } from 'lucide-react';
 
 export default function Test({ isChild }) {
     const { t, i18n } = useTranslation();

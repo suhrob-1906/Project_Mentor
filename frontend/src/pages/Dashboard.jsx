@@ -4,7 +4,7 @@ import api from '../api';
 import { useTranslation } from 'react-i18next';
 import {
     Code2, Terminal, Cpu, Globe, ArrowRight,
-    BookOpen, Sparkles, Languages, Check, Code
+    BookOpen, Sparkles, Languages, Check, Code, Rocket
 } from 'lucide-react';
 
 export default function Dashboard({ isChild }) {
