@@ -61,4 +61,18 @@ class RoadmapGenerator:
                     {"topic": "JVM Internals", "description": "Memory management and GC."},
                 ]
 
+        elif self.language == 'javascript':
+            if self.level == 'beginner':
+                roadmap = [
+                    {"topic": "JS Basics", "description": "Variables (let, const), Types, Functions."},
+                    {"topic": "DOM Manipulation", "description": "Event listeners, selectors, style updates."},
+                    {"topic": "Arrays & Objects", "description": "Methods like map, filter, push."},
+                ]
+            else:
+                roadmap = [
+                    {"topic": "Asynchronous JS", "description": "Promises, Async/Await, Fetch API."},
+                    {"topic": "ES6+ Features", "description": "Destructuring, Spread, Modules."},
+                    {"topic": "React.js", "description": "Components, State, Hooks, Props."},
+                ]
+
         return roadmap

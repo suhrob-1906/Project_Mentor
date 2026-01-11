@@ -27,6 +27,14 @@ const resources = {
                 "analyze": "Analyze Code",
                 "select_lang": "Select Language"
             },
+            "register": {
+                "title": "Create Account",
+                "username": "Username",
+                "email": "Email",
+                "password": "Password",
+                "age": "Age",
+                "have_account": "Already have an account?"
+            },
             "test": {
                 "question": "Question",
                 "next": "Next",
@@ -40,7 +48,16 @@ const resources = {
                 "projects": "Recommended Projects",
                 "tasks": "Practical Tasks",
                 "score": "Score",
-                "new_analysis": "New Analysis"
+                "new_analysis": "New Analysis",
+                "hero": "YOU ARE A HERO!",
+                "score_card": "SCORE CARD",
+                "magic_points": "MAGIC POINTS",
+                "adventure_map": "MY ADVENTURE MAP!",
+                "fun_quests": "FUN QUESTS!",
+                "my_game": "MY GAME!",
+                "super_results": "Super Results!",
+                "home": "HOME",
+                "finished_all": "You've finished everything! Amazing! ✨"
             }
         }
     },
@@ -80,7 +97,8 @@ const resources = {
                 "question": "Вопрос",
                 "next": "Далее",
                 "submit": "Завершить тест",
-                "progress": "Прогресс"
+                "progress": "Прогресс",
+                "no_questions": "К сожалению, мы еще не добавили вопросы для этого языка. Попробуйте другой!"
             },
             "results": {
                 "title": "Результаты анализа",
@@ -89,7 +107,16 @@ const resources = {
                 "projects": "Рекомендуемые проекты",
                 "tasks": "Практические задания",
                 "score": "Баллы",
-                "new_analysis": "Новый анализ"
+                "new_analysis": "Новый анализ",
+                "hero": "ТЫ ГЕРОЙ!",
+                "score_card": "КАРТОЧКА",
+                "magic_points": "МАГИЧЕСКИЕ ОЧКИ",
+                "adventure_map": "КАРТА ПРИКЛЮЧЕНИЙ!",
+                "fun_quests": "ВЕСЕЛЫЕ ЗАДАНИЯ!",
+                "my_game": "МОЯ ИГРА!",
+                "super_results": "Супер Результаты!",
+                "home": "ДОМОЙ",
+                "finished_all": "Ты всё выполнил! Невероятно! ✨"
             }
         }
     }
@@ -103,6 +130,10 @@ i18n
         fallbackLng: 'en',
         interpolation: {
             escapeValue: false
+        },
+        detection: {
+            order: ['localStorage', 'cookie', 'navigator'],
+            caches: ['localStorage', 'cookie']
         }
     });
 

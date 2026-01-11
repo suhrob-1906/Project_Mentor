@@ -84,7 +84,9 @@ export default function Test({ isChild }) {
             <div className={`p-8 rounded-2xl shadow-xl max-w-md text-center ${isChild ? 'bg-white border-4 border-black' : 'bg-white'}`}>
                 <AlertCircle className="w-16 h-16 text-yellow-500 mx-auto mb-4" />
                 <h2 className="text-2xl font-bold mb-2">No Questions</h2>
-                <p className="text-gray-600 mb-6">We don't have questions for {language} yet. Please try another language.</p>
+                <p className="text-gray-600 mb-6">
+                    {t('test.no_questions') || `We don't have questions for ${language} yet. Please try another language.`}
+                </p>
                 <button onClick={() => navigate('/dashboard')} className={`w-full py-3 rounded-xl font-bold ${isChild ? 'bg-black text-white' : 'bg-gray-900 text-white'}`}>Back to Dashboard</button>
             </div>
         </div>

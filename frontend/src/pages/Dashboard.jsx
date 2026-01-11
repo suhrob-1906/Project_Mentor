@@ -22,7 +22,8 @@ export default function Dashboard({ isChild }) {
     ];
 
     const toggleLanguageUI = () => {
-        i18n.changeLanguage(i18n.language === 'ru' ? 'en' : 'ru');
+        const newLang = i18n.language.startsWith('ru') ? 'en' : 'ru';
+        i18n.changeLanguage(newLang);
     };
 
     const handleStartTest = () => {

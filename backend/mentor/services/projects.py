@@ -62,4 +62,20 @@ class ProjectGenerator:
                 "features": ["Timer", "Score tracking", "Animations"]
             })
 
+        elif self.language == 'javascript':
+            if self.level == 'beginner':
+                projects.append({
+                    "title": "Interactive Todo App",
+                    "description": "A feature-rich todo list with local storage persistence.",
+                    "tech_stack": ["HTML", "CSS", "JavaScript"],
+                    "features": ["Add/Delete tasks", "Strikethrough completion", "Filter tasks"]
+                })
+            else:
+                projects.append({
+                    "title": "Real-time Chat App",
+                    "description": "A chat application using WebSockets for instant messaging.",
+                    "tech_stack": ["React", "Node.js", "Socket.io"],
+                    "features": ["Message history", "Online users list", "Typing indicators"]
+                })
+
         return projects

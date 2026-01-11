@@ -31,12 +31,9 @@ export default function Results({ isChild: propIsChild }) {
     const { level, roadmap, projects, tasks, score, total, feedback, is_child: dataIsChild, age } = data;
     const is_child = propIsChild !== undefined ? propIsChild : dataIsChild;
 
-    const toggleLanguage = async () => {
-        const newLang = i18n.language === 'ru' ? 'en' : 'ru';
+    const toggleLanguage = () => {
+        const newLang = i18n.language.startsWith('ru') ? 'en' : 'ru';
         i18n.changeLanguage(newLang);
-
-        // Re-generate if needed, but for now we'll just toggle UI
-        // If the backend supported lang param, we could refetch here.
     };
 
     // Adult Mode Styles (Professional Minimalist)
@@ -76,7 +73,7 @@ export default function Results({ isChild: propIsChild }) {
                             <div className="bg-yellow-400 p-2 rounded-xl border-2 border-black group-hover:rotate-12 transition-transform">
                                 <Rocket className="w-8 h-8 text-black" />
                             </div>
-                            <span className="font-black text-3xl tracking-tight text-black italic uppercase">Super Results!</span>
+                            <span className="font-black text-3xl tracking-tight text-black italic uppercase">{t('results.super_results')}</span>
                         </div>
 
                         <div className="flex items-center gap-4">
@@ -89,7 +86,7 @@ export default function Results({ isChild: propIsChild }) {
                             </button>
                             <Link to="/dashboard" className="px-6 py-3 bg-indigo-500 border-b-4 border-black text-white rounded-2xl font-black text-sm hover:translate-y-1 hover:border-b-0 transition-all flex items-center gap-2">
                                 <Home className="w-5 h-5" />
-                                HOME
+                                {t('results.home')}
                             </Link>
                         </div>
                     </div>
@@ -110,18 +107,18 @@ export default function Results({ isChild: propIsChild }) {
                         </div>
 
                         <div className="flex-grow text-center md:text-left">
-                            <h2 className="text-2xl font-black text-orange-500 uppercase tracking-[0.3em] mb-4 drop-shadow-sm">YOU ARE A HERO!</h2>
+                            <h2 className="text-2xl font-black text-orange-500 uppercase tracking-[0.3em] mb-4 drop-shadow-sm">{t('results.hero')}</h2>
                             <h1 className="text-7xl md:text-9xl font-black text-black leading-none mb-8 tracking-tighter uppercase italic">
                                 {level.replace('_', ' ')}!
                             </h1>
                             <div className="bg-yellow-50 p-8 rounded-[2.5rem] border-4 border-dashed border-yellow-200 text-black text-2xl font-bold leading-relaxed shadow-inner">
-                                " {feedback || "You are doing an amazing job! Keep coding and having fun!"} "
+                                " {feedback || t('results.finished_all')} "
                             </div>
                         </div>
 
                         <div className="bg-black p-10 rounded-[3rem] text-white flex flex-col items-center min-w-[240px] shadow-2xl relative">
-                            <div className="absolute -top-6 bg-pink-500 px-6 py-2 rounded-full border-4 border-black font-black text-sm uppercase tracking-widest -rotate-6">SCORE CARD</div>
-                            <span className="text-yellow-400 font-black text-xl uppercase tracking-widest mb-4 mt-2">MAGIC POINTS</span>
+                            <div className="absolute -top-6 bg-pink-500 px-6 py-2 rounded-full border-4 border-black font-black text-sm uppercase tracking-widest -rotate-6">{t('results.score_card')}</div>
+                            <span className="text-yellow-400 font-black text-xl uppercase tracking-widest mb-4 mt-2">{t('results.magic_points')}</span>
                             <div className="text-9xl font-black text-white shrink-0 tracking-tighter">
                                 {score}<span className="text-3xl text-gray-400">/{total}</span>
                             </div>
@@ -140,7 +137,7 @@ export default function Results({ isChild: propIsChild }) {
                                 <div className="p-6 bg-cyan-400 border-6 border-black rounded-[2rem] shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] -rotate-3">
                                     <Map className="w-12 h-12 text-black" />
                                 </div>
-                                <h2 className="text-7xl font-black text-black tracking-tight uppercase underline decoration-yellow-400 decoration-8 underline-offset-8">MY ADVENTURE MAP!</h2>
+                                <h2 className="text-7xl font-black text-black tracking-tight uppercase underline decoration-yellow-400 decoration-8 underline-offset-8">{t('results.adventure_map')}</h2>
                             </div>
 
                             <div className="grid md:grid-cols-3 gap-8">
@@ -162,7 +159,7 @@ export default function Results({ isChild: propIsChild }) {
                                 <div className="p-4 bg-pink-400 border-4 border-black rounded-[1.5rem] shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
                                     <Target className="w-10 h-10 text-black" />
                                 </div>
-                                <h2 className="text-6xl font-black text-black italic">FUN QUESTS!</h2>
+                                <h2 className="text-6xl font-black text-black italic">{t('results.fun_quests')}</h2>
                             </div>
                             <div className="space-y-8">
                                 {tasks?.map((task, idx) => (
@@ -173,7 +170,7 @@ export default function Results({ isChild: propIsChild }) {
                                         <p className="text-black font-black text-2xl leading-tight">{task}</p>
                                     </div>
                                 ))}
-                                {tasks?.length === 0 && <p className="text-black font-black text-2xl italic">You've finished everything! Amazing! ✨</p>}
+                                {tasks?.length === 0 && <p className="text-black font-black text-2xl italic">{t('results.finished_all')}</p>}
                             </div>
                         </div>
 
@@ -182,7 +179,7 @@ export default function Results({ isChild: propIsChild }) {
                                 <div className="p-4 bg-indigo-400 border-4 border-black rounded-[1.5rem] shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
                                     <FolderGit2 className="w-10 h-10 text-black" />
                                 </div>
-                                <h2 className="text-6xl font-black text-black uppercase">MY GAME!</h2>
+                                <h2 className="text-6xl font-black text-black uppercase">{t('results.my_game')}</h2>
                             </div>
                             <div className="space-y-8">
                                 {projects?.map((proj, idx) => (
