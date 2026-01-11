@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import axios from 'axios';
+import api from '../api';
 import { useTranslation } from 'react-i18next';
 import { ChevronRight, CheckCircle2, Loader2, AlertCircle } from 'lucide-react';
 
@@ -20,10 +20,7 @@ export default function Test() {
     useEffect(() => {
         const fetchQuestions = async () => {
             try {
-                const token = localStorage.getItem('access_token');
-                const res = await axios.get(`http://localhost:8000/api/questions/?language=${language}`, {
-                    headers: { Authorization: `Bearer ${token}` }
-                });
+                const res = await api.get(`/api/questions/?language=${language}`);
                 setQuestions(res.data);
                 setLoading(false);
             } catch (err) {
@@ -49,14 +46,11 @@ export default function Test() {
     const handleSubmit = async () => {
         setSubmitting(true);
         try {
-            const token = localStorage.getItem('access_token');
             const data = {
                 language,
                 answers: Object.entries(answers).map(([id, option]) => ({ id: parseInt(id), option }))
             };
-            const res = await axios.post('http://localhost:8000/api/submit-test/', data, {
-                headers: { Authorization: `Bearer ${token}` }
-            });
+            const res = await api.post('/api/submit-test/', data);
             navigate('/results', { state: { data: res.data } });
         } catch (err) {
             setError("Failed to submit test. Please try again.");

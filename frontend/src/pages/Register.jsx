@@ -28,7 +28,12 @@ export default function Register() {
             await api.post('/auth/register/', formData);
             navigate('/login');
         } catch (err) {
-            setError(err.response?.data?.username?.[0] || 'Registration failed');
+            const detail = err.response?.data;
+            let msg = 'Registration failed';
+            if (detail) {
+                msg = typeof detail === 'string' ? detail : JSON.stringify(detail);
+            }
+            setError(msg);
         } finally {
             setLoading(false);
         }

@@ -33,12 +33,9 @@ export default function Dashboard() {
         if (!code.trim()) return;
         setIsAnalyzing(true);
         try {
-            const token = localStorage.getItem('access_token');
-            const res = await axios.post('http://localhost:8000/api/analyze/', {
+            const res = await api.post('/api/analyze/', {
                 code_text: code,
                 language: selectedLanguage
-            }, {
-                headers: { Authorization: `Bearer ${token}` }
             });
             navigate('/results', { state: { data: res.data } });
         } catch (err) {
