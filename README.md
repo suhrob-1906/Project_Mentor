@@ -2,144 +2,71 @@
 
 ## 🎯 What is MentorAI?
 
-MentorAI is an intelligent platform that analyzes your actual code to determine your true programming skill level, then generates a personalized learning roadmap and portfolio project recommendations to accelerate your career growth.
+MentorAI is an intelligent platform that analyzes your programming skills to determine your true level, then generates a personalized learning roadmap, portfolio project recommendations, and practical coding tasks to accelerate your career growth.
 
-Unlike traditional coding assessment platforms that rely on quizzes or algorithmic challenges, MentorAI performs **static code analysis** on your real projects to evaluate complexity, code quality, patterns, and best practices—giving you an honest assessment of where you stand.
+Whether through **direct code analysis** or our new **comprehensive language tests**, MentorAI gives you an honest assessment of where you stand.
 
 ## 🚀 Purpose
 
 **Stop guessing. Know your true code level.**
 
-Many developers struggle to objectively assess their skills or know what to learn next. MentorAI solves this by:
-- **Analyzing your actual code** (not quiz answers) to determine if you're a Beginner, Junior, Strong Junior, or Middle-level developer
-- **Generating personalized roadmaps** tailored to your exact skill gaps and career goals
-- **Recommending real-world portfolio projects** that solve actual business problems, not just another To-Do app
+MentorAI helps developers:
+- **Determine their level** (Beginner, Junior, Strong Junior, Middle) via specialized tests or code analysis.
+- **Get personalized roadmaps** tailored to Python, JavaScript, Go, and Java.
+- **Receive coding tasks** (1-5 practical assignments) to solidify knowledge.
+- **Build portfolio projects** designed for real-world impact.
+- **Study in their language** with full English and Russian support.
 
 ## ✨ Key Features
 
-### 1. **Deep Code Analysis**
-- Static analysis of Python and JavaScript code
-- Evaluates cyclomatic complexity, code patterns, and best practices
-- Identifies common mistakes and anti-patterns
-- Provides detailed feedback with actionable recommendations
+### 1. **Specialized Programming Tests**
+- 20-question deep-dives for Python, JavaScript, Go, and Java.
+- Evaluates core concepts, syntax, and advanced patterns.
+- Randomly generated from a robust pool of questions.
 
-### 2. **Personalized Learning Roadmaps**
-- Custom step-by-step learning paths based on your skill level
-- Tailored to your primary programming language (Python, JavaScript, Java, C++, Go)
-- Aligned with your career goal (Get a Job, Freelance, Build a Startup)
-- Focuses on filling your specific knowledge gaps
+### 2. **Deep Code Analysis**
+- Static analysis of Python code for complexity and anti-patterns.
+- Actionable feedback on naming, structure, and best practices.
 
-### 3. **Portfolio Project Recommendations**
-- 3-5 unique project ideas that match your skill level
-- Business-value projects that solve real problems
-- Complete with tech stack recommendations and feature lists
-- Designed to impress potential employers or clients
+### 3. **Personalized Learning Roadmaps**
+- Step-by-step paths based on exact skill gaps.
+- Tailored to career goals (Job, Freelance, Startup).
 
-### 4. **Modern, Intuitive UI**
-- Clean, professional interface built with React and Tailwind CSS
-- Responsive design that works on all devices
-- Real-time analysis with loading states and error handling
+### 4. **Practical Coding Tasks**
+- **NEW**: 1-5 specific coding challenges to practice after the assessment.
 
-## 👥 Target Audience
-
-MentorAI is perfect for:
-- **Self-taught developers** who want to know where they stand
-- **Bootcamp graduates** looking to identify skill gaps before job hunting
-- **Junior developers** seeking a clear path to mid-level positions
-- **Career changers** who need guidance on what to learn next
-- **Freelancers** wanting to build an impressive portfolio
+### 6. **Adaptive Age-Based UI**
+- **NEW**: The platform now adapts its tone and visual style based on the user's age.
+- **Child Mode (≤14)**: Features friendly icons, softer colors (rose/amber), and simplified learning paths.
+- **Adult Mode (>14)**: Premium minimalist professional aesthetic.
 
 ## 🛠️ Tech Stack
 
 ### Backend
-- **Django 6.0** - Robust Python web framework
-- **Django REST Framework** - RESTful API development
-- **JWT Authentication** - Secure token-based auth
-- **Radon** - Python code metrics and complexity analysis
-- **PostgreSQL/SQLite** - Database (SQLite for dev, PostgreSQL for production)
+- **Django 6.0**, **DRF**, **JWT Auth**
+- **Radon** (Static Analysis)
+- **SQLite/PostgreSQL**
 
 ### Frontend
-- **React 18** - Modern UI library
-- **Vite** - Lightning-fast build tool
-- **Tailwind CSS** - Utility-first CSS framework
-- **React Router** - Client-side routing
-- **Axios** - HTTP client for API calls
-- **Lucide React** - Beautiful icon library
+- **React 18**, **Vite**, **Tailwind CSS**
+- **i18next** (Multilingual Support)
+- **Lucide React** (Icons)
 
 ## 📦 Quick Start
 
-### Prerequisites
-- Python 3.10+
-- Node.js 18+
+### Backend
+1. `cd backend`
+2. `python -m venv venv`
+3. Activate venv
+4. `pip install -r requirements.txt`
+5. `python manage.py migrate`
+6. `python manage.py seed_questions` (Seed the test database)
+7. `python manage.py runserver`
 
-### Backend Setup
-```bash
-cd backend
-python -m venv venv
-
-# Windows
-.\venv\Scripts\activate
-# Linux/Mac
-source venv/bin/activate
-
-pip install -r requirements.txt
-python manage.py migrate
-python manage.py runserver 8001
-```
-Backend runs on `http://127.0.0.1:8001`
-
-### Frontend Setup
-```bash
-cd frontend
-npm install
-npm run dev
-```
-Frontend runs on `http://localhost:5173`
-
-## 🌐 Deployment
-
-### Backend (Render/Railway)
-1. Set environment variables:
-   - `SECRET_KEY` - Django secret key
-   - `DEBUG=False` - Disable debug mode
-   - `ALLOWED_HOSTS` - Your domain
-   - `DATABASE_URL` - PostgreSQL connection string
-2. Build command: `./build.sh`
-3. Start command: `gunicorn config.wsgi:application`
-
-### Frontend (Vercel/Netlify)
-1. Set environment variable:
-   - `VITE_API_URL` - Your backend URL (e.g., `https://your-backend.onrender.com`)
-2. Build command: `npm run build`
-3. Output directory: `dist`
-
-**⚠️ IMPORTANT**: The frontend will not work in production without setting `VITE_API_URL`!
-
-See [.env.example](.env.example) for all required environment variables.
-
-## 📝 How It Works
-
-1. **Register/Login** - Create an account with your programming language and career goal
-2. **Submit Code** - Paste your code or upload a file on the Dashboard
-3. **Get Analysis** - Receive your skill level assessment with detailed feedback
-4. **View Roadmap** - Get a personalized learning path tailored to your gaps
-5. **Build Projects** - Start working on recommended portfolio projects
-
-## 🔒 Security
-
-- JWT-based authentication with access and refresh tokens
-- Password validation and hashing
-- CORS protection (configurable for production)
-- Environment-based configuration for sensitive data
-
-## 📄 License
-
-This project is open source and available for educational purposes.
-
-## 🤝 Contributing
-
-Contributions are welcome! Feel free to submit issues or pull requests.
+### Frontend
+1. `cd frontend`
+2. `npm install`
+3. `npm run dev`
 
 ---
-
-**Built with ❤️ to help developers grow their careers**
+**Built with ❤️ by an expert team to help you grow.**

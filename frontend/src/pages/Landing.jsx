@@ -1,90 +1,96 @@
 import { Link } from 'react-router-dom';
-import { Terminal, Code, Cpu, ArrowRight } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
+import { Terminal, Code, Cpu, ArrowRight, Sparkles, Languages } from 'lucide-react';
 
 export default function Landing() {
+    const { t, i18n } = useTranslation();
+
+    const toggleLanguage = () => {
+        i18n.changeLanguage(i18n.language === 'ru' ? 'en' : 'ru');
+    };
+
     return (
-        <div className="bg-white">
+        <div className="bg-white min-h-screen">
             {/* Navbar */}
-            <nav className="flex items-center justify-between px-8 py-4 bg-white border-b border-gray-100 sticky top-0 z-50">
+            <nav className="flex items-center justify-between px-8 py-6 bg-white/80 backdrop-blur-md sticky top-0 z-50 border-b border-gray-50">
                 <div className="flex items-center gap-2">
-                    <Cpu className="w-8 h-8 text-indigo-600" />
-                    <span className="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-indigo-600 to-violet-600">
-                        MentorAI
+                    <Sparkles className="w-8 h-8 text-indigo-600" />
+                    <span className="text-2xl font-black tracking-tight text-gray-900">
+                        Mentor<span className="text-indigo-600">AI</span>
                     </span>
                 </div>
-                <div className="flex gap-4">
-                    <Link to="/login" className="px-4 py-2 text-gray-600 hover:text-gray-900 font-medium transition">Login</Link>
-                    <Link to="/register" className="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition font-medium shadow-md shadow-indigo-200">
-                        Get Started
+                <div className="flex items-center gap-6">
+                    <button onClick={toggleLanguage} className="p-2 hover:bg-gray-50 rounded-xl transition-colors text-gray-500 flex items-center gap-2 font-bold text-sm">
+                        <Languages className="w-4 h-4" />
+                        {i18n.language.toUpperCase()}
+                    </button>
+                    <Link to="/login" className="text-sm font-bold text-gray-500 hover:text-gray-900 transition">{t('landing.login')}</Link>
+                    <Link to="/register" className="px-6 py-3 bg-gray-900 text-white rounded-2xl hover:bg-gray-800 transition font-black text-sm shadow-xl shadow-gray-200">
+                        {t('landing.get_started')}
                     </Link>
                 </div>
             </nav>
 
             {/* Hero */}
-            <section className="relative pt-20 pb-32 overflow-hidden">
-                <div className="absolute inset-0 bg-[radial-gradient(#e5e7eb_1px,transparent_1px)] [background-size:16px_16px] [mask-image:radial-gradient(ellipse_50%_50%_at_50%_50%,#000_70%,transparent_100%)]"></div>
+            <section className="relative pt-32 pb-40 overflow-hidden">
+                <div className="absolute inset-0 bg-[#fafafa]"></div>
+                <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[1000px] h-[600px] bg-indigo-50/50 rounded-full blur-3xl opacity-50"></div>
 
                 <div className="container mx-auto px-6 relative text-center">
-                    <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-50 text-indigo-700 text-sm font-semibold mb-6 border border-indigo-100">
+                    <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-indigo-50 text-indigo-700 text-xs font-black tracking-widest uppercase mb-8 border border-indigo-100/50 shadow-sm">
                         <span className="w-2 h-2 rounded-full bg-indigo-600 animate-pulse"></span>
-                        AI-Powered Career Growth
+                        {t('landing.features.analysis')}
                     </div>
 
-                    <h1 className="text-5xl md:text-7xl font-extrabold text-gray-900 tracking-tight mb-8 leading-tight">
-                        Stop Guessing. <br className="hidden md:block" />
-                        <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600">
-                            Know Your True Code Level.
+                    <h1 className="text-6xl md:text-8xl font-black text-gray-900 tracking-tight mb-8 leading-[0.9]">
+                        {t('landing.title')} <br />
+                        <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-600 via-violet-600 to-indigo-600">
+                            {t('landing.subtitle')}
                         </span>
                     </h1>
 
-                    <p className="text-xl text-gray-500 max-w-2xl mx-auto mb-10 leading-relaxed">
-                        Analyze your code, discover your real skill level, and get a personalized roadmap
-                        to land your dream job or build your startup.
+                    <p className="text-xl text-gray-500 max-w-2xl mx-auto mb-12 leading-relaxed font-medium">
+                        {t('landing.description')}
                     </p>
 
                     <div className="flex flex-col sm:flex-row justify-center gap-4">
-                        <Link to="/register" className="group px-8 py-4 bg-gray-900 text-white rounded-xl font-bold text-lg hover:bg-gray-800 transition shadow-lg hover:shadow-xl flex items-center justify-center gap-2">
-                            Analyze My Code
-                            <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
+                        <Link to="/register" className="group px-10 py-5 bg-gray-900 text-white rounded-[2rem] font-black text-xl hover:bg-gray-800 transition shadow-2xl hover:shadow-gray-300 flex items-center justify-center gap-3">
+                            {t('landing.get_started')}
+                            <ArrowRight className="w-6 h-6 group-hover:translate-x-1 transition-transform" />
                         </Link>
-                        <a href="#how-it-works" className="px-8 py-4 bg-white text-gray-700 border border-gray-200 rounded-xl font-bold text-lg hover:bg-gray-50 transition shadow-sm flex items-center justify-center">
-                            How it Works
-                        </a>
                     </div>
                 </div>
             </section>
 
             {/* Features */}
-            <section id="how-it-works" className="py-24 bg-gray-50">
+            <section className="py-32 bg-white">
                 <div className="container mx-auto px-6">
-                    <h2 className="text-3xl font-bold text-center mb-16">How MentorAI Accelerates You</h2>
-                    <div className="grid md:grid-cols-3 gap-8">
+                    <div className="grid md:grid-cols-3 gap-12">
                         {[
                             {
-                                icon: <Code className="w-8 h-8 text-blue-600" />,
-                                title: "Deep Code Analysis",
-                                desc: "Not a quiz. We statically analyze your actual code for complexity, style, and patterns to determine if you are Junior or Middle.",
-                                color: "bg-blue-50"
+                                icon: <Code className="w-10 h-10 text-indigo-600" />,
+                                title: t('landing.features.analysis'),
+                                color: "bg-indigo-50"
                             },
                             {
-                                icon: <Terminal className="w-8 h-8 text-purple-600" />,
-                                title: "Tailored Roadmap",
-                                desc: "Get a step-by-step learning plan based on your exact gaps. Don't waste time on tutorials you don't need.",
-                                color: "bg-purple-50"
+                                icon: <Terminal className="w-10 h-10 text-violet-600" />,
+                                title: t('landing.features.roadmap'),
+                                color: "bg-violet-50"
                             },
                             {
-                                icon: <Cpu className="w-8 h-8 text-pink-600" />,
-                                title: "Portfolio Ideas",
-                                desc: "Generate 3-5 unique, business-value project ideas that solve real problems, not just another To-Do App.",
+                                icon: <Cpu className="w-10 h-10 text-pink-600" />,
+                                title: t('landing.features.projects'),
                                 color: "bg-pink-50"
                             }
                         ].map((f, i) => (
-                            <div key={i} className="bg-white p-8 rounded-2xl shadow-sm border border-gray-100 hover:shadow-md transition duration-300">
-                                <div className={`w-14 h-14 rounded-xl ${f.color} flex items-center justify-center mb-6`}>
+                            <div key={i} className="group p-10 rounded-[2.5rem] bg-[#fafafa] border border-gray-50 hover:bg-white hover:shadow-2xl hover:shadow-gray-100 transition-all duration-500">
+                                <div className={`w-20 h-20 rounded-3xl ${f.color} flex items-center justify-center mb-10 group-hover:scale-110 transition-transform duration-500`}>
                                     {f.icon}
                                 </div>
-                                <h3 className="text-xl font-bold mb-3">{f.title}</h3>
-                                <p className="text-gray-500 leading-relaxed">{f.desc}</p>
+                                <h3 className="text-2xl font-black mb-4 text-gray-900 tracking-tight">{f.title}</h3>
+                                <p className="text-gray-500 leading-relaxed font-medium">
+                                    Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore.
+                                </p>
                             </div>
                         ))}
                     </div>

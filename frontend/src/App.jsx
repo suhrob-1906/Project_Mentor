@@ -4,6 +4,7 @@ import Register from './pages/Register';
 import Dashboard from './pages/Dashboard';
 import Results from './pages/Results';
 import Landing from './pages/Landing';
+import Test from './pages/Test';
 import { useState, useEffect } from 'react';
 
 // Simple Protected Route
@@ -26,6 +27,14 @@ function App() {
             element={
               <ProtectedRoute>
                 <Dashboard />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/test"
+            element={
+              <ProtectedRoute>
+                <Test />
               </ProtectedRoute>
             }
           />

@@ -20,6 +20,7 @@ class User(AbstractUser):
 
     primary_language = models.CharField(max_length=20, choices=LANGUAGE_CHOICES, default='python')
     goal = models.CharField(max_length=20, choices=GOAL_CHOICES, default='job')
+    age = models.PositiveIntegerField(default=18)
 
     def __str__(self):
         return self.username

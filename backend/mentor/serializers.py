@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import Submission, AnalysisResult, Roadmap, ProjectRecommendation
+from .models import Submission, AnalysisResult, Roadmap, ProjectRecommendation, TestQuestion, TestResult
 
 class AnalysisResultSerializer(serializers.ModelSerializer):
     class Meta:
@@ -22,4 +22,24 @@ class RoadmapSerializer(serializers.ModelSerializer):
 class ProjectRecommendationSerializer(serializers.ModelSerializer):
     class Meta:
         model = ProjectRecommendation
+        fields = '__all__'
+
+class TestQuestionSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = TestQuestion
+        fields = ('id', 'language', 'text_en', 'text_ru', 'options_en', 'options_ru', 'difficulty')
+
+class TestResultSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = TestResult
+        fields = '__all__'
+
+class TestQuestionSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = TestQuestion
+        fields = ('id', 'language', 'text_en', 'text_ru', 'options_en', 'options_ru', 'difficulty')
+
+class TestResultSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = TestResult
         fields = '__all__'

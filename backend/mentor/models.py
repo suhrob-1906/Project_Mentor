@@ -39,3 +39,32 @@ class ProjectRecommendation(models.Model):
     tech_stack = models.JSONField() # ["React", "Django"]
     features = models.JSONField() # ["Auth", "Dashboard"]
     created_at = models.DateTimeField(auto_now_add=True)
+
+class TestQuestion(models.Model):
+    LANGUAGE_CHOICES = [
+        ('python', 'Python'),
+        ('javascript', 'JavaScript'),
+        ('go', 'Go'),
+        ('java', 'Java'),
+    ]
+    language = models.CharField(max_length=20, choices=LANGUAGE_CHOICES)
+    text_en = models.TextField()
+    text_ru = models.TextField()
+    options_en = models.JSONField() # List of strings
+    options_ru = models.JSONField() # List of strings
+    correct_option = models.IntegerField() # index
+    difficulty = models.CharField(max_length=20, choices=[('beginner', 'Beginner'), ('junior', 'Junior'), ('middle', 'Middle')])
+
+    def __str__(self):
+        return f"{self.language} - {self.difficulty} - {self.text_en[:30]}"
+
+class TestResult(models.Model):
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='test_results')
+    language = models.CharField(max_length=20)
+    score = models.IntegerField()
+    total_questions = models.IntegerField()
+    level = models.CharField(max_length=20)
+    roadmap = models.JSONField(default=list)
+    projects = models.JSONField(default=list)
+    tasks = models.JSONField(default=list)
+    created_at = models.DateTimeField(auto_now_add=True)
