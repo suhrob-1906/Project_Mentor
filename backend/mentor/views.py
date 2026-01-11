@@ -169,16 +169,22 @@ class SubmitTestView(views.APIView):
         tasks = self._generate_tasks(language, level, is_child)
 
         # Save Result
-        result = TestResult.objects.create(
-            user=request.user,
-            language=language,
-            score=correct_count,
-            total_questions=total,
-            level=level,
-            roadmap=roadmap_steps,
-            projects=projects_data,
-            tasks=tasks
-        )
+        try:
+            result = TestResult.objects.create(
+                user=request.user,
+                language=language,
+                score=correct_count,
+                total_questions=total,
+                level=level,
+                roadmap=roadmap_steps,
+                projects=projects_data,
+                tasks=tasks
+            )
+        except Exception as e:
+            print(f"[ERROR] Failed to create TestResult: {str(e)}")
+            import traceback
+            traceback.print_exc()
+            return Response({"error": "Internal server error during result saving", "details": str(e)}, status=500)
 
         return Response({
             "id": result.id,
