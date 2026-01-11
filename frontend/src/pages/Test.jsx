@@ -76,8 +76,19 @@ export default function Test() {
     );
 
     const q = questions[currentIndex];
-    const progress = ((currentIndex + 1) / questions.length) * 100;
+    const progress = questions.length > 0 ? ((currentIndex + 1) / questions.length) * 100 : 0;
     const currentLang = i18n.language === 'ru' ? 'ru' : 'en';
+
+    if (questions.length === 0 && !loading) return (
+        <div className="min-h-screen flex items-center justify-center bg-gray-50 p-4">
+            <div className="bg-white p-8 rounded-2xl shadow-xl max-w-md text-center">
+                <AlertCircle className="w-16 h-16 text-yellow-500 mx-auto mb-4" />
+                <h2 className="text-2xl font-bold mb-2">No Questions</h2>
+                <p className="text-gray-600 mb-6">We don't have questions for {language} yet. Please try another language.</p>
+                <button onClick={() => navigate('/dashboard')} className="w-full py-3 bg-gray-900 text-white rounded-xl font-bold">Back to Dashboard</button>
+            </div>
+        </div>
+    );
 
     return (
         <div className="min-h-screen bg-gray-50 py-12 px-4">
@@ -97,11 +108,11 @@ export default function Test() {
 
                 <div className="bg-white rounded-3xl p-8 md:p-12 shadow-sm border border-gray-100 mb-6">
                     <h2 className="text-2xl md:text-3xl font-bold text-gray-900 mb-10 leading-tight">
-                        {currentLang === 'ru' ? q.text_ru : q.text_en}
+                        {q ? (currentLang === 'ru' ? q.text_ru : q.text_en) : "Loading question..."}
                     </h2>
 
                     <div className="space-y-4">
-                        {(currentLang === 'ru' ? q.options_ru : q.options_en).map((opt, idx) => (
+                        {q && (currentLang === 'ru' ? q.options_ru : q.options_en).map((opt, idx) => (
                             <button
                                 key={idx}
                                 onClick={() => handleSelect(idx)}

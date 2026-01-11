@@ -79,7 +79,9 @@ class AnalyzeView(views.APIView):
             "level": result.level,
             "feedback": result.feedback,
             "roadmap": roadmap_steps,
-            "projects": projects_data
+            "projects": projects_data,
+            "is_child": request.user.age <= 14,
+            "age": request.user.age
         })
 
 class RoadmapView(generics.ListAPIView):
