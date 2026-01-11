@@ -95,7 +95,11 @@ DATABASES = {
 
 # Production Database (Render)
 db_from_env = dj_database_url.config(conn_max_age=600)
-DATABASES['default'].update(db_from_env)
+if db_from_env:
+    print("✅ DATABASE_URL detected. Using production database.")
+    DATABASES['default'].update(db_from_env)
+else:
+    print("⚠️ WARNING: No DATABASE_URL found. Falling back to local SQLite (non-persistent).")
 
 
 # Password validation

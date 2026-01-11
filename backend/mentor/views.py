@@ -109,7 +109,15 @@ class TestQuestionsView(views.APIView):
             questions = random.sample(list(questions), 20)
         
         serializer = TestQuestionSerializer(questions, many=True)
-        return Response(serializer.data)
+        response_data = serializer.data
+        
+        # Add metadata for debugging
+        if not response_data:
+            from django.db import connection
+            print(f"[DEBUG] No questions found for {language}. Current DB: {connection.vendor}")
+            print(f"[DEBUG] Total questions in DB: {TestQuestion.objects.count()}")
+
+        return Response(response_data)
 
 class SubmitTestView(views.APIView):
     permission_classes = [permissions.IsAuthenticated]
