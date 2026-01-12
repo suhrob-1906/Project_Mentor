@@ -31,14 +31,18 @@ class GeminiService:
 
     def _generate_with_fallback(self, prompt):
         """Attempts to generate content using the current model, falling back if it fails."""
-        if not self.model:
-            raise Exception("AI not initialized")
+        if not self.api_key:
+            raise Exception("AI not initialized (API Key missing)")
             
         # List of models to try in order
-        models_to_try = ['gemini-1.5-flash', 'gemini-1.5-flash-001', 'gemini-pro', 'gemini-1.0-pro']
-        
-        # Ensure current model is tried first if it's not in the list (or just rely on the loop)
-        # We'll just iterate through the list and create temporary models dynamically
+        models_to_try = [
+            'gemini-1.5-flash', 
+            'gemini-1.5-flash-001', 
+            'gemini-1.5-pro',
+            'gemini-1.5-pro-001',
+            'gemini-pro', 
+            'gemini-1.0-pro'
+        ]
         
         last_error = None
         for model_name in models_to_try:
@@ -51,7 +55,19 @@ class GeminiService:
                 print(f"Model {model_name} failed: {e}")
                 continue
         
-        raise last_error
+        # If we get here, all models failed.
+        # Try to diagnose by listing available models
+        try:
+            available = []
+            for m in genai.list_models():
+                if 'generateContent' in m.supported_generation_methods:
+                    available.append(m.name)
+            
+            error_msg = f"All models failed. Available models on server: {available}. Last error: {last_error}"
+            raise Exception(error_msg)
+        except Exception as diag_e:
+            # If diagnose fails (e.g. auth error), raise original
+            raise Exception(f"All models failed and could not list models ({diag_e}). Last error: {last_error}")
 
     def get_feedback(self, language, category, score, total, wrong_answers, is_child=False):
         if not self.api_key:
