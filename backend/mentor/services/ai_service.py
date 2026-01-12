@@ -40,28 +40,43 @@ class GeminiService:
         except Exception as e:
             return f"Ошибка ИИ: {str(e)}"
 
-    def generate_homework(self, language, category, is_child=False):
+    def generate_homework(self, language, category, wrong_concepts=[], is_child=False):
         if not self.model:
-            return "Реализуйте простую программу на выбранном языке."
+            return ["Реализуйте простую программу на выбранном языке."]
+
+        concepts_text = ""
+        if wrong_concepts:
+            concepts_text = f"The student struggled with these concepts: {', '.join(wrong_concepts)}."
+
+        count = 3 if is_child else 1
 
         prompt = f"""
-        Assign a small, practical homework task for a student learning {language}.
+        Generate {count} distinct practical homework task(s) for a student learning {language}.
         Level: {category}.
         Tone: {'fun and imaginative' if is_child else 'professional and challenging'}.
+        {concepts_text}
         
         Task requirements:
-        - Must be doable in 10-20 lines of code.
-        - Focus on the core aspects of {category}.
-        - The description should be clear and concise.
+        - Must be doable in 10-30 lines of code.
+        - Focus on the core aspects of {category} and specifically address the mentioned struggles if any.
+        - The description should be clear, concise, and practically useful.
         
         Language of response: Russian.
+        
+        Response format:
+        Return ONLY a JSON list of strings. Example:
+        ["Task 1 description...", "Task 2 description..."]
         """
 
         try:
             response = self.model.generate_content(prompt)
-            return response.text
+            import json
+            clean_text = response.text.strip().replace("```json", "").replace("```", "").strip()
+            tasks = json.loads(clean_text)
+            if isinstance(tasks, str): return [tasks]
+            return tasks
         except Exception as e:
-            return f"Не удалось создать задание: {str(e)}"
+            return [f"Напишите программу, использующую концепции {category}."]
 
     def check_homework(self, language, task, submission):
         if not self.model:

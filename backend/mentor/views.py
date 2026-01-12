@@ -308,7 +308,25 @@ class SubmitTestView(views.APIView):
                 is_child=is_child
             )
 
-            tasks = self._generate_tasks(language, level, is_child)
+            # Generate Homework Tasks (AI prioritized)
+            tasks = []
+            try:
+                tasks = ai.generate_homework(language, category, wrong_concepts, is_child)
+            except Exception as e:
+                print(f"AI Homework Gen failed: {e}")
+            
+            if not tasks:
+                tasks = self._generate_tasks(language, level, is_child)
+            
+            # Create Homework objects for the user
+            for task_desc in tasks:
+                Homework.objects.get_or_create(
+                    user=request.user,
+                    language=language,
+                    category=category,
+                    task_description=task_desc,
+                    defaults={'status': 'assigned'}
+                )
             
             # Generate/Update Roadmap
             rg = RoadmapGenerator(language, level, request.user.goal)
