@@ -35,7 +35,7 @@ class GeminiService:
 
         try:
             response = self.client.models.generate_content(
-                model='gemini-1.5-flash',
+                model='models/gemini-1.5-flash',
                 contents=prompt
             )
             return response.text
@@ -61,7 +61,7 @@ class GeminiService:
 
         try:
             response = self.client.models.generate_content(
-                model='gemini-1.5-flash',
+                model='models/gemini-1.5-flash',
                 contents=prompt
             )
             return response.text
@@ -93,7 +93,7 @@ class GeminiService:
 
         try:
             response = self.client.models.generate_content(
-                model='gemini-1.5-flash',
+                model='models/gemini-1.5-flash',
                 contents=prompt
             )
             text = response.text
@@ -127,7 +127,7 @@ class GeminiService:
 
         try:
             response = self.client.models.generate_content(
-                model='gemini-1.5-flash',
+                model='models/gemini-1.5-flash',
                 contents=prompt
             )
             clean_text = response.text.strip().replace("```json", "").replace("```", "").strip()
@@ -171,7 +171,7 @@ class GeminiService:
 
         try:
             response = self.client.models.generate_content(
-                model='gemini-1.5-flash',
+                model='models/gemini-1.5-flash',
                 contents=prompt
             )
             return response.text
