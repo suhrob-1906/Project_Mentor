@@ -9,4 +9,4 @@ gunicorn
 dj-database-url
 psycopg2-binary
 whitenoise
-google-generativeai
+google-generativeai==0.8.3
