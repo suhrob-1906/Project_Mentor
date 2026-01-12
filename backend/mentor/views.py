@@ -186,7 +186,7 @@ class DynamicQuestionView(views.APIView):
         
         try:
             response = ai.client.models.generate_content(
-                model='gemini-1.5-pro',
+                model='gemini-1.5-flash',
                 contents=prompt
             )
             # Remove markdown code blocks if present
