@@ -26,7 +26,7 @@ export default function Homework() {
     const fetchHomeworks = async () => {
         try {
             const token = localStorage.getItem('access_token');
-            const res = await api.get(`/api/mentor/homework/?language=${language}`);
+            const res = await api.get(`/api/homework/?language=${language}`);
             setHomeworks(res.data);
             if (res.data.length > 0 && !selectedHw) {
                 setSelectedHw(res.data[0]);
@@ -42,7 +42,7 @@ export default function Homework() {
         setLoading(true);
         try {
             const token = localStorage.getItem('access_token');
-            const res = await api.post(`/api/mentor/homework/`, {
+            const res = await api.post(`/api/homework/`, {
                 id: selectedHw.id,
                 submission: submission
             });
