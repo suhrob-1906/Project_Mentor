@@ -9,6 +9,7 @@ export default function Test({ isChild }) {
     const navigate = useNavigate();
     const { state } = useLocation();
     const language = state?.language || 'python';
+    const category = state?.category || 'basics';
 
     const [questions, setQuestions] = useState([]);
     const [currentIndex, setCurrentIndex] = useState(0);
@@ -19,14 +20,15 @@ export default function Test({ isChild }) {
 
     useEffect(() => {
         const fetchQuestions = async () => {
-            const url = `/api/questions/?language=${language}`;
+            let url = `/api/questions/?language=${language}&category=${category}`;
             console.log(`[Diagnostic] Fetching questions from: ${url}`);
             try {
-                const res = await api.get(url);
-                console.log(`[Diagnostic] Response status: ${res.status}`);
-                console.log(`[Diagnostic] Questions received:`, res.data);
+                let res = await api.get(url);
                 if (Array.isArray(res.data) && res.data.length === 0) {
-                    console.warn(`[Diagnostic] Received empty questions list from server for language: ${language}`);
+                    console.warn(`[Diagnostic] Standard questions empty. Trying AI dynamic generation...`);
+                    const dynamicUrl = `/api/dynamic-questions/?language=${language}&category=${category}`;
+                    const dynRes = await api.get(dynamicUrl);
+                    res = dynRes;
                 }
                 setQuestions(res.data);
                 setLoading(false);
@@ -37,7 +39,7 @@ export default function Test({ isChild }) {
             }
         };
         fetchQuestions();
-    }, [language]);
+    }, [language, category]);
 
     const handleSelect = (optionIndex) => {
         setAnswers({ ...answers, [questions[currentIndex].id]: optionIndex });
@@ -56,6 +58,7 @@ export default function Test({ isChild }) {
         try {
             const data = {
                 language,
+                category,
                 answers: Object.entries(answers).map(([id, option]) => ({ id: parseInt(id), option }))
             };
             const res = await api.post('/api/submit-test/', data);
@@ -106,7 +109,7 @@ export default function Test({ isChild }) {
                 <div className="mb-10">
                     <div className="flex justify-between items-end mb-4">
                         <span className={`text-sm font-black uppercase tracking-[0.2em] ${isChild ? 'text-black' : 'text-indigo-600'}`}>
-                            {isChild ? '🚀 MAGIC MISSION' : `${language} ASSESSMENT`}
+                            {isChild ? t('test.magic_mission', 'MAGIC MISSION') : t('test.assessment', 'ASSESSMENT')}
                         </span>
                         <span className={`text-sm font-black ${isChild ? 'text-black' : 'text-gray-400'}`}>
                             {currentIndex + 1} / {questions.length}
@@ -122,7 +125,7 @@ export default function Test({ isChild }) {
 
                 <div className={`rounded-[3rem] p-10 md:p-14 mb-8 transition-all duration-500 ${isChild ? 'bg-white border-[6px] border-black shadow-[16px_16px_0px_0px_rgba(0,0,0,1)]' : 'bg-white shadow-xl shadow-gray-100 border border-gray-100'}`}>
                     <h2 className={`text-3xl md:text-4xl font-black text-gray-900 mb-12 leading-tight tracking-tight ${isChild ? 'italic' : ''}`}>
-                        {q ? (currentLang === 'ru' ? q.text_ru : q.text_en) : "Loading question..."}
+                        {q ? (currentLang === 'ru' ? q.text_ru : q.text_en) : t('test.loading', 'Loading question...')}
                     </h2>
 
                     <div className="space-y-5">
@@ -160,7 +163,7 @@ export default function Test({ isChild }) {
                             <Loader2 className="w-8 h-8 animate-spin" />
                         ) : (
                             <>
-                                {currentIndex === questions.length - 1 ? (isChild ? "SHOW MAGIC!" : t('test.submit')) : (isChild ? "NEXT QUEST!" : t('test.next'))}
+                                {currentIndex === questions.length - 1 ? (isChild ? t('test.show_magic', 'SHOW MAGIC!') : t('test.submit')) : (isChild ? t('test.next_quest', "NEXT QUEST!") : t('test.next'))}
                                 <ChevronRight className="w-6 h-6 group-hover:translate-x-2 transition-transform" />
                             </>
                         )}

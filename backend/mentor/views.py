@@ -1,6 +1,6 @@
 from rest_framework import views, generics, permissions, status
 from rest_framework.response import Response
-from .models import Submission, AnalysisResult, Roadmap, ProjectRecommendation, TestQuestion, TestResult
+from .models import Submission, AnalysisResult, Roadmap, ProjectRecommendation, TestQuestion, TestResult, UserProgress
 from .serializers import (
     SubmissionSerializer, RoadmapSerializer, ProjectRecommendationSerializer,
     TestQuestionSerializer, TestResultSerializer
@@ -8,6 +8,7 @@ from .serializers import (
 from .services.analyzer import CodeAnalyzer
 from .services.roadmap import RoadmapGenerator
 from .services.projects import ProjectGenerator
+from .services.ai_service import GeminiService
 import random
 
 class AnalyzeView(views.APIView):
@@ -84,6 +85,117 @@ class AnalyzeView(views.APIView):
             "age": request.user.age
         })
 
+class UserProgressView(views.APIView):
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get(self, request):
+        language = request.query_params.get('language', 'python').lower()
+        progress, created = UserProgress.objects.get_or_create(user=request.user, language=language)
+        
+        # Ensure 'basics' is always unlocked for new users
+        if not progress.unlocked_categories:
+            progress.unlocked_categories = ['basics']
+            progress.save()
+            
+        return Response({
+            "unlocked": progress.unlocked_categories,
+            "completed": progress.completed_categories
+        })
+
+class HomeworkView(views.APIView):
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get(self, request):
+        language = request.query_params.get('language', 'python').lower()
+        homeworks = Homework.objects.filter(user=request.user, language=language).order_by('-created_at')
+        return Response([{
+            "id": h.id,
+            "category": h.category,
+            "task": h.task_description,
+            "status": h.status,
+            "feedback": h.ai_feedback,
+            "submission": h.submission_text,
+            "attempts": h.attempts,
+            "correct_solution": h.correct_solution
+        } for h in homeworks])
+
+    def post(self, request):
+        hw_id = request.data.get('id')
+        submission = request.data.get('submission')
+        
+        try:
+            hw = Homework.objects.get(id=hw_id, user=request.user)
+            hw.submission_text = submission
+            hw.attempts += 1
+            hw.status = 'submitted'
+            hw.save()
+            
+            # AI Check
+            ai = GeminiService()
+            passed, feedback = ai.check_homework(hw.language, hw.task_description, submission)
+            
+            if passed:
+                hw.status = 'passed'
+                hw.ai_feedback = feedback
+            else:
+                hw.status = 'failed'
+                hw.ai_feedback = feedback
+                # Check for 3 failures
+                if hw.attempts >= 3:
+                    # Generate official solution
+                    solution = ai.get_homework_solution(hw.language, hw.task_description)
+                    hw.correct_solution = solution
+                    # We might still keep status as 'failed' but the solution will be visible
+            
+            hw.save()
+            
+            return Response({
+                "passed": passed,
+                "feedback": feedback,
+                "attempts": hw.attempts,
+                "correct_solution": hw.correct_solution
+            })
+        except Homework.DoesNotExist:
+            return Response({"error": "Homework not found"}, status=404)
+
+class DynamicQuestionView(views.APIView):
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get(self, request):
+        language = request.query_params.get('language', 'python').lower()
+        category = request.query_params.get('category', 'basics').lower()
+        
+        from .services.ai_service import GeminiService
+        import json
+        
+        ai = GeminiService()
+        prompt = f"""
+        Generate 5 multiple choice questions for {language} learners on theme '{category}'.
+        Response MUST be a JSON list of objects:
+        [
+            {{
+                "id": "temp_1",
+                "text_en": "Question text...",
+                "text_ru": "Текст вопроса...",
+                "options_en": ["A", "B", "C", "D"],
+                "options_ru": ["А", "Б", "В", "Г"],
+                "correct_option": 0
+            }}
+        ]
+        """
+        
+        try:
+            response = ai.client.models.generate_content(
+                model='gemini-1.5-flash',
+                contents=prompt
+            )
+            # Remove markdown code blocks if present
+            clean_text = response.text.strip().replace("```json", "").replace("```", "").strip()
+            questions = json.loads(clean_text)
+            return Response(questions)
+        except Exception as e:
+            return Response({"error": str(e)}, status=500)
+
 class RoadmapView(generics.ListAPIView):
     serializer_class = RoadmapSerializer
     permission_classes = [permissions.IsAuthenticated]
@@ -103,105 +215,112 @@ class TestQuestionsView(views.APIView):
 
     def get(self, request):
         language = request.query_params.get('language', 'python').lower()
-        # Get 20 random questions for the language
-        questions = TestQuestion.objects.filter(language=language)
-        if questions.count() > 20:
-            questions = random.sample(list(questions), 20)
+        category = request.query_params.get('category', 'basics').lower()
+        
+        # Get questions for the language and category
+        questions = TestQuestion.objects.filter(language=language, category=category)
+        
+        # Hybrid Logic: If we have less than 10 questions, generate more using AI
+        if questions.count() < 10:
+            from .services.ai_service import GeminiService
+            ai = GeminiService()
+            needed = 10 - questions.count()
+            # Generate and save to DB
+            ai.generate_and_save_questions(language, category, count=needed)
+            # Re-fetch after generation
+            questions = TestQuestion.objects.filter(language=language, category=category)
+
+        # If still no questions for this category (e.g. AI failed or newly seeded), fallback to any for that language
+        if not questions.exists():
+            questions = TestQuestion.objects.filter(language=language)
+            
+        if questions.count() > 10:
+            import random
+            questions = random.sample(list(questions), 10)
         
         serializer = TestQuestionSerializer(questions, many=True)
-        response_data = serializer.data
-        
-        # Add metadata for debugging
-        if not response_data:
-            from django.db import connection
-            print(f"[DEBUG] No questions found for {language}. Current DB: {connection.vendor}")
-            print(f"[DEBUG] Total questions in DB: {TestQuestion.objects.count()}")
-
-        return Response(response_data)
+        return Response(serializer.data)
 
 class SubmitTestView(views.APIView):
     permission_classes = [permissions.IsAuthenticated]
 
     def post(self, request):
         language = (request.data.get('language') or 'python').lower()
+        category = (request.data.get('category') or 'basics').lower()
         answers = request.data.get('answers') # List of {"id": question_id, "option": selected_index}
         
         if not answers:
             return Response({"error": "No answers provided"}, status=400)
 
-        # Determine level
+        # Calculate score and collect wrong concepts for AI
         total = len(answers)
         correct_count = 0
+        wrong_concepts = []
+        
         for ans in answers:
             try:
                 q = TestQuestion.objects.get(id=ans['id'])
                 if q.correct_option == ans['option']:
                     correct_count += 1
+                else:
+                    # Collect the English text of the question as a concept hint for AI
+                    wrong_concepts.append(q.text_en)
             except TestQuestion.DoesNotExist:
                 continue
         
         score_percent = (correct_count / total * 100) if total > 0 else 0
-        
-        # Age-based level adjustment (softer evaluation for kids)
         is_child = request.user.age <= 14
         
-        if score_percent < (30 if is_child else 40):
-            level = 'beginner'
-        elif score_percent < (60 if is_child else 70):
-            level = 'junior'
-        elif score_percent < (85 if is_child else 90):
-            level = 'strong_junior'
-        else:
-            level = 'middle'
+        # Determine level (traditional calculation for backward compatibility)
+        if score_percent < 40: level = 'beginner'
+        elif score_percent < 70: level = 'junior'
+        elif score_percent < 90: level = 'strong_junior'
+        else: level = 'middle'
 
-        # Generate simplified content for kids if needed
-        # (In a real scenario, this would call different prompts or templates)
-        
-        # Generate components
-        rg = RoadmapGenerator(language, level, request.user.goal)
-        roadmap_steps = rg.generate()
+        # Duolingo-style Progress Logic
+        # AI Feedback Integration
+        ai = GeminiService()
+        ai_advice = ai.get_feedback(
+            language=language,
+            category=category,
+            score=correct_count,
+            total=total,
+            wrong_answers=wrong_concepts[:5], # Send top 5 mistakes
+            is_child=is_child
+        )
 
-        # Limit projects to 1
-        pg = ProjectGenerator(language, level)
-        projects_data = pg.generate()[:1]
-
-        # Generate Tasks (3 for kids, 5 for adults)
         tasks = self._generate_tasks(language, level, is_child)
 
         # Save Result
         try:
-            print(f"[DEBUG] Saving TestResult for user {request.user.username}")
-            print(f"[DEBUG] Data: lang={language}, level={level}, score={correct_count}/{total}")
-            print(f"[DEBUG] Roadmap steps: {len(roadmap_steps)}")
-            print(f"[DEBUG] Projects: {len(projects_data)}")
-            print(f"[DEBUG] Tasks: {len(tasks)}")
-            
             result = TestResult.objects.create(
                 user=request.user,
                 language=language,
+                category=category,
                 score=correct_count,
                 total_questions=total,
                 level=level,
+                ai_feedback=ai_advice,
                 roadmap=roadmap_steps,
                 projects=projects_data,
                 tasks=tasks
             )
         except Exception as e:
-            print(f"[ERROR] Failed to create TestResult: {str(e)}")
-            import traceback
-            traceback.print_exc()
-            return Response({"error": "Internal server error during result saving", "details": str(e)}, status=500)
+            return Response({"error": "Failed to save result", "details": str(e)}, status=500)
 
         return Response({
             "id": result.id,
-            "level": level,
+            "passed": passed,
             "score": correct_count,
             "total": total,
+            "percent": score_percent,
+            "ai_feedback": ai_advice,
+            "unlocked": progress.unlocked_categories,
+            "level": level,
             "roadmap": roadmap_steps,
             "projects": projects_data,
             "tasks": tasks,
-            "is_child": is_child,
-            "age": request.user.age
+            "is_child": is_child
         })
 
     def _generate_tasks(self, language, level, is_child):

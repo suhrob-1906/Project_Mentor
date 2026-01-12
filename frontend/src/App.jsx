@@ -5,6 +5,7 @@ import Dashboard from './pages/Dashboard';
 import Results from './pages/Results';
 import Landing from './pages/Landing';
 import Test from './pages/Test';
+import Homework from './pages/Homework';
 import { useState, useEffect } from 'react';
 import api from './api';
 
@@ -75,6 +76,14 @@ function App() {
             element={
               <ProtectedRoute>
                 <Results isChild={isChild} />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/homework"
+            element={
+              <ProtectedRoute>
+                <Homework isChild={isChild} />
               </ProtectedRoute>
             }
           />

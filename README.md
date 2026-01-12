@@ -9,9 +9,10 @@ MentorAI is the world's first **age-aware programming mentor platform**. We brid
 Stop guessing your skill level. MentorAI uses advanced static analysis and psychometric assessment to determine exactly where you stand in the developer journey. Whether you're a curious 10-year-old writing your first "Hello World" or a professional transitioning to a new stack, MentorAI provides:
 
 1.  **Honest Skill Analysis**: Deep code analysis or comprehensive language tests.
-2.  **Personalized Roadmaps**: Step-by-step paths to mastery.
-3.  **Real-World Projects**: One signature project recommendation to build your portfolio.
-4.  **Practical Tasks**: Exactly 3 (for kids) or 5 (for adults) specific assignments to practice immediately.
+2.  **10-Level Roadmap**: A comprehensive journey from Basics to Patterns and a Final Quest.
+3.  **Homework Lab**: Practical assignments checking after every level with an AI Mentor.
+4.  **"3-Strikes" Rule**: Get a master solution with deep explanation after 3 failed homework attempts.
+5.  **Hybrid AI generation**: The test bank automatically expands using Gemini if a category is empty.
 
 ---
 

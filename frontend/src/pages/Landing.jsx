@@ -71,16 +71,19 @@ export default function Landing() {
                             {
                                 icon: <Code className="w-10 h-10 text-indigo-600" />,
                                 title: t('landing.features.analysis'),
+                                desc: t('landing.features.analysis_desc'),
                                 color: "bg-indigo-50"
                             },
                             {
                                 icon: <Terminal className="w-10 h-10 text-violet-600" />,
                                 title: t('landing.features.roadmap'),
+                                desc: t('landing.features.roadmap_desc'),
                                 color: "bg-violet-50"
                             },
                             {
                                 icon: <Cpu className="w-10 h-10 text-pink-600" />,
                                 title: t('landing.features.projects'),
+                                desc: t('landing.features.projects_desc'),
                                 color: "bg-pink-50"
                             }
                         ].map((f, i) => (
@@ -90,7 +93,7 @@ export default function Landing() {
                                 </div>
                                 <h3 className="text-2xl font-black mb-4 text-gray-900 tracking-tight">{f.title}</h3>
                                 <p className="text-gray-500 leading-relaxed font-medium">
-                                    Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore.
+                                    {f.desc}
                                 </p>
                             </div>
                         ))}

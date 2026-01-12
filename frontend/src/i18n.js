@@ -15,7 +15,10 @@ const resources = {
                 "features": {
                     "analysis": "Deep Analysis",
                     "roadmap": "Tailored Roadmap",
-                    "projects": "Portfolio Ideas"
+                    "projects": "Portfolio Ideas",
+                    "analysis_desc": "Our AI dives deep into your syntax, logic, and patterns to pinpoint exactly where you stand.",
+                    "roadmap_desc": "A 10-level interactive guide built specifically for your current skills and future goals.",
+                    "projects_desc": "Get unique project assignments that help you build a world-class portfolio while you learn."
                 }
             },
             "dashboard": {
@@ -37,7 +40,14 @@ const resources = {
                 "lets_go": "LET'S GO!",
                 "paste_magic": "PASTE YOUR MAGIC CODE!",
                 "show_me": "Show me what you wrote! ✨",
-                "analyze_magic": "ANALYZE MY MAGIC!"
+                "analyze_magic": "ANALYZE MY MAGIC!",
+                "mastered": "Mastered!",
+                "best": "Best",
+                "start_learning": "Start Learning",
+                "locked": "Complete previous level",
+                "retry": "Retry",
+                "play": "Start",
+                "homework_lab": "Homework Lab"
             },
             "register": {
                 "title": "Create Account",
@@ -45,7 +55,17 @@ const resources = {
                 "email": "Email",
                 "password": "Password",
                 "age": "Age",
-                "have_account": "Already have an account?"
+                "have_account": "Already have an account?",
+                "subtitle": "Start your journey to mastery",
+                "fail": "Registration failed"
+            },
+            "login": {
+                "title": "Welcome Back",
+                "submit": "Log In",
+                "no_account": "Don't have an account?",
+                "register": "Register",
+                "fail": "Invalid credentials",
+                "username_ph": "Your username"
             },
             "test": {
                 "question": "Question",
@@ -69,7 +89,38 @@ const resources = {
                 "my_game": "MY GAME!",
                 "super_results": "Super Results!",
                 "home": "HOME",
-                "finished_all": "You've finished everything! Amazing! ✨"
+                "finished_all": "You've finished everything! Amazing! ✨",
+                "unlocked": "New Level Unlocked!",
+                "graduated": "Full Mastery Achieved! 🎓",
+                "graduated_adult": "Mastery Achieved"
+            },
+            "homework": {
+                "your_tasks": "Active Assignments",
+                "mentor_task": "AI Mentor Challenge",
+                "placeholder": "// Write your code here...",
+                "submit": "Check with Mentor",
+                "passed": "Challenge Passed!",
+                "failed": "Needs Improvement",
+                "empty": "No Task Selected",
+                "empty_desc": "Pass a level test to receive your first practical mission!",
+                "master_solution": "Master Solution & Deep Explanation",
+                "attempts": "Attempts",
+                "note": "Use this solution to understand the concepts and move forward!"
+            },
+            "roadmap": {
+                "basics": "1. Basics & Data Types",
+                "logic": "2. Variables & Logic",
+                "arrays": "3. Lists & Collections",
+                "functions": "4. Functions & Methods",
+                "objects": "5. Objects & Classes",
+                "errors": "6. Error Handling",
+                "async": "7. Asynchrony",
+                "apis": "8. APIs & Networking",
+                "patterns": "9. Architecture & Patterns",
+                "final": "10. Final Quest"
+            },
+            "common": {
+                "back": "Back to Roadmap"
             }
         }
     },
@@ -85,7 +136,10 @@ const resources = {
                 "features": {
                     "analysis": "Глубокий анализ",
                     "roadmap": "Персональная карта",
-                    "projects": "Идеи для портфолио"
+                    "projects": "Идеи для портфолио",
+                    "analysis_desc": "Наш ИИ глубоко анализирует ваш синтаксис и логику, чтобы точно определить ваш текущий уровень.",
+                    "roadmap_desc": "Интерактивный путь из 10 уровней, созданный специально под ваши навыки и цели.",
+                    "projects_desc": "Получайте уникальные идеи для проектов, которые помогут вам создать крутое портфолио во время обучения."
                 }
             },
             "dashboard": {
@@ -107,7 +161,14 @@ const resources = {
                 "lets_go": "ПОЕХАЛИ!",
                 "paste_magic": "ВСТАВЬ СВОЙ МАГИЧЕСКИЙ КОД!",
                 "show_me": "Покажи мне, что ты написал! ✨",
-                "analyze_magic": "АНАЛИЗ МОЕЙ МАГИИ!"
+                "analyze_magic": "АНАЛИЗ МОЕЙ МАГИИ!",
+                "mastered": "Пройдено!",
+                "best": "Лучший",
+                "start_learning": "Начать путь",
+                "locked": "Пройди предыдущий уровень",
+                "retry": "Повторить",
+                "play": "Начать",
+                "homework_lab": "Лаборатория ДЗ"
             },
             "register": {
                 "title": "Создать аккаунт",
@@ -115,7 +176,17 @@ const resources = {
                 "email": "Email",
                 "password": "Пароль",
                 "age": "Возраст",
-                "have_account": "Уже есть аккаунт?"
+                "have_account": "Уже есть аккаунт?",
+                "subtitle": "Начни свой путь к мастерству",
+                "fail": "Ошибка регистрации"
+            },
+            "login": {
+                "title": "С возвращением",
+                "submit": "Войти",
+                "no_account": "Нет аккаунта?",
+                "register": "Зарегистрироваться",
+                "fail": "Неверные данные",
+                "username_ph": "Ваше имя пользователя"
             },
             "test": {
                 "question": "Вопрос",
@@ -140,7 +211,38 @@ const resources = {
                 "my_game": "МОЯ ИГРА!",
                 "super_results": "Супер Результаты!",
                 "home": "ДОМОЙ",
-                "finished_all": "Ты всё выполнил! Невероятно! ✨"
+                "finished_all": "Ты всё выполнил! Невероятно! ✨",
+                "unlocked": "Новый уровень открыт!",
+                "graduated": "Мастерство достигнуто! 🎓",
+                "graduated_adult": "Мастерство подтверждено"
+            },
+            "homework": {
+                "your_tasks": "Активные задания",
+                "mentor_task": "Вызов от ИИ-Ментора",
+                "placeholder": "// Напиши свой код здесь...",
+                "submit": "Проверить у Ментора",
+                "passed": "Задание выполнено!",
+                "failed": "Нужно доработать",
+                "empty": "Задание не выбрано",
+                "empty_desc": "Пройди тест уровня, чтобы получить свою первую практическую миссию!",
+                "master_solution": "Мастер-решение и разбор",
+                "attempts": "Попытки",
+                "note": "Используй это решение, чтобы понять принципы и двигаться дальше!"
+            },
+            "roadmap": {
+                "basics": "1. Основы и Типы данных",
+                "logic": "2. Переменные и Логика",
+                "arrays": "3. Списки и Коллекции",
+                "functions": "4. Функции и Методы",
+                "objects": "5. Объекты и Классы",
+                "errors": "6. Обработка ошибок",
+                "async": "7. Асинхронность",
+                "apis": "8. Работа с API и Сетью",
+                "patterns": "9. Архитектура и Паттерны",
+                "final": "10. Финальное испытание"
+            },
+            "common": {
+                "back": "Назад к карте"
             }
         }
     }
