@@ -5,7 +5,7 @@ import { useTranslation } from 'react-i18next';
 import {
     Code2, Terminal, Cpu, Globe, ArrowRight,
     BookOpen, Sparkles, Languages, Check, Code, Rocket,
-    Lock, Star, Play, Award, Zap, AlertCircle, Clock, Shield
+    Lock, Star, Play, Award, Zap, AlertCircle, Clock, Shield, Trophy
 } from 'lucide-react';
 
 export default function Dashboard({ isChild }) {
