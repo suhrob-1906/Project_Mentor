@@ -178,6 +178,12 @@ CORS_ALLOWED_ORIGINS = [
     "https://project-mentor-one.vercel.app",
     "https://project-mentor-phwpgch68-suhrob-1906s-projects.vercel.app",
 ]
+
+CSRF_TRUSTED_ORIGINS = [
+    "https://project-mentor-one.vercel.app",
+    "https://project-mentor-phwpgch68-suhrob-1906s-projects.vercel.app",
+    "https://project-mentor-nis4.onrender.com",
+]
 CORS_ALLOW_CREDENTIALS = True
 CORS_ALLOW_METHODS = [
     "DELETE",
