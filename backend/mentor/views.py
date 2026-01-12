@@ -185,10 +185,7 @@ class DynamicQuestionView(views.APIView):
         """
         
         try:
-            response = ai.client.models.generate_content(
-                model='models/gemini-1.5-flash',
-                contents=prompt
-            )
+            response = ai.model.generate_content(prompt)
             # Remove markdown code blocks if present
             clean_text = response.text.strip().replace("```json", "").replace("```", "").strip()
             questions = json.loads(clean_text)

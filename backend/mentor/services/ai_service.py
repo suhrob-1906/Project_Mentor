@@ -1,5 +1,5 @@
 import os
-from google import genai
+import google.generativeai as genai
 from django.conf import settings
 
 class GeminiService:
@@ -10,12 +10,13 @@ class GeminiService:
             self.api_key = getattr(settings, 'GOOGLE_API_KEY', None)
         
         if self.api_key:
-            self.client = genai.Client(api_key=self.api_key)
+            genai.configure(api_key=self.api_key)
+            self.model = genai.GenerativeModel('gemini-1.5-flash')
         else:
-            self.client = None
+            self.model = None
 
     def get_feedback(self, language, category, score, total, wrong_answers, is_child=False):
-        if not self.client:
+        if not self.model:
             return "AI Mentor is currently unavailable (API Key missing)."
 
         prompt = f"""
@@ -34,16 +35,13 @@ class GeminiService:
         """
 
         try:
-            response = self.client.models.generate_content(
-                model='models/gemini-1.5-flash',
-                contents=prompt
-            )
+            response = self.model.generate_content(prompt)
             return response.text
         except Exception as e:
             return f"Ошибка ИИ: {str(e)}"
 
     def generate_homework(self, language, category, is_child=False):
-        if not self.client:
+        if not self.model:
             return "Реализуйте простую программу на выбранном языке."
 
         prompt = f"""
@@ -60,16 +58,13 @@ class GeminiService:
         """
 
         try:
-            response = self.client.models.generate_content(
-                model='models/gemini-1.5-flash',
-                contents=prompt
-            )
+            response = self.model.generate_content(prompt)
             return response.text
         except Exception as e:
             return f"Не удалось создать задание: {str(e)}"
 
     def check_homework(self, language, task, submission):
-        if not self.client:
+        if not self.model:
             return True, "API Key missing, automatically passed."
 
         prompt = f"""
@@ -92,10 +87,7 @@ class GeminiService:
         """
 
         try:
-            response = self.client.models.generate_content(
-                model='models/gemini-1.5-flash',
-                contents=prompt
-            )
+            response = self.model.generate_content(prompt)
             text = response.text
             passed = text.strip().startswith("PASSED")
             feedback = text.replace("PASSED", "").replace("FAILED", "").strip()
@@ -104,7 +96,7 @@ class GeminiService:
             return False, f"Ошибка проверки: {str(e)}"
 
     def generate_and_save_questions(self, language, category, count=5):
-        if not self.client:
+        if not self.model:
             return []
 
         import json
@@ -126,10 +118,7 @@ class GeminiService:
         """
 
         try:
-            response = self.client.models.generate_content(
-                model='models/gemini-1.5-flash',
-                contents=prompt
-            )
+            response = self.model.generate_content(prompt)
             clean_text = response.text.strip().replace("```json", "").replace("```", "").strip()
             data = json.loads(clean_text)
             
@@ -152,7 +141,7 @@ class GeminiService:
             return []
 
     def get_homework_solution(self, language, task):
-        if not self.client:
+        if not self.model:
             return "Решение временно недоступно."
 
         prompt = f"""
@@ -170,10 +159,7 @@ class GeminiService:
         """
 
         try:
-            response = self.client.models.generate_content(
-                model='models/gemini-1.5-flash',
-                contents=prompt
-            )
+            response = self.model.generate_content(prompt)
             return response.text
         except Exception as e:
             return f"Не удалось получить решение: {str(e)}"
