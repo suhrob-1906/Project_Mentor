@@ -1,6 +1,6 @@
 from rest_framework import views, generics, permissions, status
 from rest_framework.response import Response
-from .models import Submission, AnalysisResult, Roadmap, ProjectRecommendation, TestQuestion, TestResult, UserProgress
+from .models import Submission, AnalysisResult, Roadmap, ProjectRecommendation, TestQuestion, TestResult, UserProgress, Homework
 from .serializers import (
     SubmissionSerializer, RoadmapSerializer, ProjectRecommendationSerializer,
     TestQuestionSerializer, TestResultSerializer
@@ -245,82 +245,82 @@ class SubmitTestView(views.APIView):
     permission_classes = [permissions.IsAuthenticated]
 
     def post(self, request):
-        language = (request.data.get('language') or 'python').lower()
-        category = (request.data.get('category') or 'basics').lower()
-        answers = request.data.get('answers') # List of {"id": question_id, "option": selected_index}
-        
-        if not answers:
-            return Response({"error": "No answers provided"}, status=400)
-
-        # Calculate score and collect wrong concepts for AI
-        total = len(answers)
-        correct_count = 0
-        wrong_concepts = []
-        
-        for ans in answers:
-            try:
-                q = TestQuestion.objects.get(id=ans['id'])
-                if q.correct_option == ans['option']:
-                    correct_count += 1
-                else:
-                    # Collect the English text of the question as a concept hint for AI
-                    wrong_concepts.append(q.text_en)
-            except TestQuestion.DoesNotExist:
-                continue
-        
-        score_percent = (correct_count / total * 100) if total > 0 else 0
-        is_child = request.user.age <= 14
-        passed = score_percent >= 70
-        
-        # Duolingo-style Progress Logic
-        progress, created = UserProgress.objects.get_or_create(user=request.user, language=language)
-        if not progress.unlocked_categories:
-            progress.unlocked_categories = ['basics']
-        
-        # Update category score
-        progress.completed_categories[category] = max(progress.completed_categories.get(category, 0), int(score_percent))
-        
-        # Unlock next level if passed
-        if passed:
-            categories = [c[0] for c in TestQuestion.CATEGORY_CHOICES]
-            try:
-                curr_idx = categories.index(category)
-                if curr_idx < len(categories) - 1:
-                    next_cat = categories[curr_idx + 1]
-                    if next_cat not in progress.unlocked_categories:
-                        progress.unlocked_categories.append(next_cat)
-            except ValueError:
-                pass
-        progress.save()
-
-        # Determine level (for reporting)
-        if score_percent < 40: level = 'beginner'
-        elif score_percent < 70: level = 'junior'
-        elif score_percent < 90: level = 'strong_junior'
-        else: level = 'middle'
-
-        # AI Feedback Integration
-        ai = GeminiService()
-        ai_advice = ai.get_feedback(
-            language=language,
-            category=category,
-            score=correct_count,
-            total=total,
-            wrong_answers=wrong_concepts[:5], 
-            is_child=is_child
-        )
-
-        tasks = self._generate_tasks(language, level, is_child)
-        
-        # Get latest roadmap/projects or default to empty
-        roadmap = Roadmap.objects.filter(user=request.user).order_by('-created_at').first()
-        roadmap_steps = roadmap.steps if roadmap else []
-        
-        projects = ProjectRecommendation.objects.filter(user=request.user)
-        projects_data = ProjectRecommendationSerializer(projects, many=True).data
-
-        # Save Result
         try:
+            language = (request.data.get('language') or 'python').lower()
+            category = (request.data.get('category') or 'basics').lower()
+            answers = request.data.get('answers') # List of {"id": question_id, "option": selected_index}
+            
+            if not answers:
+                return Response({"error": "No answers provided"}, status=400)
+
+            # Calculate score and collect wrong concepts for AI
+            total = len(answers)
+            correct_count = 0
+            wrong_concepts = []
+            
+            for ans in answers:
+                try:
+                    q = TestQuestion.objects.get(id=ans['id'])
+                    if q.correct_option == ans['option']:
+                        correct_count += 1
+                    else:
+                        # Collect the English text of the question as a concept hint for AI
+                        wrong_concepts.append(q.text_en)
+                except TestQuestion.DoesNotExist:
+                    continue
+            
+            score_percent = (correct_count / total * 100) if total > 0 else 0
+            is_child = request.user.age <= 14
+            passed = score_percent >= 70
+            
+            # Duolingo-style Progress Logic
+            progress, created = UserProgress.objects.get_or_create(user=request.user, language=language)
+            if not progress.unlocked_categories:
+                progress.unlocked_categories = ['basics']
+            
+            # Update category score
+            progress.completed_categories[category] = max(progress.completed_categories.get(category, 0), int(score_percent))
+            
+            # Unlock next level if passed
+            if passed:
+                categories = [c[0] for c in TestQuestion.CATEGORY_CHOICES]
+                try:
+                    curr_idx = categories.index(category)
+                    if curr_idx < len(categories) - 1:
+                        next_cat = categories[curr_idx + 1]
+                        if next_cat not in progress.unlocked_categories:
+                            progress.unlocked_categories.append(next_cat)
+                except ValueError:
+                    pass
+            progress.save()
+
+            # Determine level (for reporting)
+            if score_percent < 40: level = 'beginner'
+            elif score_percent < 70: level = 'junior'
+            elif score_percent < 90: level = 'strong_junior'
+            else: level = 'middle'
+
+            # AI Feedback Integration
+            ai = GeminiService()
+            ai_advice = ai.get_feedback(
+                language=language,
+                category=category,
+                score=correct_count,
+                total=total,
+                wrong_answers=wrong_concepts[:5], 
+                is_child=is_child
+            )
+
+            tasks = self._generate_tasks(language, level, is_child)
+            
+            # Get latest roadmap/projects or default to empty
+            roadmap = Roadmap.objects.filter(user=request.user).order_by('-created_at').first()
+            roadmap_steps = roadmap.steps if roadmap else []
+            
+            projects = ProjectRecommendation.objects.filter(user=request.user)
+            projects_data = ProjectRecommendationSerializer(projects, many=True).data
+
+            # Save Result
             result = TestResult.objects.create(
                 user=request.user,
                 language=language,
@@ -333,23 +333,25 @@ class SubmitTestView(views.APIView):
                 projects=projects_data,
                 tasks=tasks
             )
-        except Exception as e:
-            return Response({"error": "Failed to save result", "details": str(e)}, status=500)
 
-        return Response({
-            "id": result.id,
-            "passed": passed,
-            "score": correct_count,
-            "total": total,
-            "percent": score_percent,
-            "ai_feedback": ai_advice,
-            "unlocked": progress.unlocked_categories,
-            "level": level,
-            "roadmap": roadmap_steps,
-            "projects": projects_data,
-            "tasks": tasks,
-            "is_child": is_child
-        })
+            return Response({
+                "id": result.id,
+                "passed": passed,
+                "score": correct_count,
+                "total": total,
+                "percent": score_percent,
+                "ai_feedback": ai_advice,
+                "unlocked": progress.unlocked_categories,
+                "level": level,
+                "roadmap": roadmap_steps,
+                "projects": projects_data,
+                "tasks": tasks,
+                "is_child": is_child
+            })
+        except Exception as e:
+            import traceback
+            print(traceback.format_exc())
+            return Response({"error": str(e)}, status=500)
 
     def _generate_tasks(self, language, level, is_child):
         # Basic task sets
@@ -383,11 +385,13 @@ class SubmitTestView(views.APIView):
         
         # Enforce counts: 3 for kids, 5 for adults
         count = 3 if is_child else 5
-        if not level_tasks:
-             return [f"Complete your {language} quest!"] * count
-             
+        
+        # Use random.choices to allow repetitions if pool is small, preventing crashes
+        import random
+        selected = random.choices(level_tasks, k=count)
+        
         # Add friendly icons for kids
         if is_child:
-            return [f"🌟 {task}" for task in random.sample(level_tasks * 2, count)]
+            return [f"🌟 {task}" for task in selected]
         
-        return random.sample(level_tasks * 2, count)
+        return selected
