@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useLocation, useNavigate, Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import axios from 'axios';
+import api from '../api';
 import {
     Code2, Terminal, Cpu, Globe, ArrowRight,
     BookOpen, Sparkles, Check, Code, Rocket,
@@ -26,9 +26,7 @@ export default function Homework() {
     const fetchHomeworks = async () => {
         try {
             const token = localStorage.getItem('access_token');
-            const res = await axios.get(`http://127.0.0.1:8000/api/mentor/homework/?language=${language}`, {
-                headers: { 'Authorization': `Bearer ${token}` }
-            });
+            const res = await api.get(`/api/mentor/homework/?language=${language}`);
             setHomeworks(res.data);
             if (res.data.length > 0 && !selectedHw) {
                 setSelectedHw(res.data[0]);
@@ -44,11 +42,9 @@ export default function Homework() {
         setLoading(true);
         try {
             const token = localStorage.getItem('access_token');
-            const res = await axios.post(`http://127.0.0.1:8000/api/mentor/homework/`, {
+            const res = await api.post(`/api/mentor/homework/`, {
                 id: selectedHw.id,
                 submission: submission
-            }, {
-                headers: { 'Authorization': `Bearer ${token}` }
             });
             setResult(res.data);
             fetchHomeworks();

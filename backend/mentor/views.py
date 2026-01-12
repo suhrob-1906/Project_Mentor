@@ -270,14 +270,35 @@ class SubmitTestView(views.APIView):
         
         score_percent = (correct_count / total * 100) if total > 0 else 0
         is_child = request.user.age <= 14
+        passed = score_percent >= 70
         
-        # Determine level (traditional calculation for backward compatibility)
+        # Duolingo-style Progress Logic
+        progress, created = UserProgress.objects.get_or_create(user=request.user, language=language)
+        if not progress.unlocked_categories:
+            progress.unlocked_categories = ['basics']
+        
+        # Update category score
+        progress.completed_categories[category] = max(progress.completed_categories.get(category, 0), int(score_percent))
+        
+        # Unlock next level if passed
+        if passed:
+            categories = [c[0] for c in TestQuestion.CATEGORY_CHOICES]
+            try:
+                curr_idx = categories.index(category)
+                if curr_idx < len(categories) - 1:
+                    next_cat = categories[curr_idx + 1]
+                    if next_cat not in progress.unlocked_categories:
+                        progress.unlocked_categories.append(next_cat)
+            except ValueError:
+                pass
+        progress.save()
+
+        # Determine level (for reporting)
         if score_percent < 40: level = 'beginner'
         elif score_percent < 70: level = 'junior'
         elif score_percent < 90: level = 'strong_junior'
         else: level = 'middle'
 
-        # Duolingo-style Progress Logic
         # AI Feedback Integration
         ai = GeminiService()
         ai_advice = ai.get_feedback(
@@ -285,11 +306,18 @@ class SubmitTestView(views.APIView):
             category=category,
             score=correct_count,
             total=total,
-            wrong_answers=wrong_concepts[:5], # Send top 5 mistakes
+            wrong_answers=wrong_concepts[:5], 
             is_child=is_child
         )
 
         tasks = self._generate_tasks(language, level, is_child)
+        
+        # Get latest roadmap/projects or default to empty
+        roadmap = Roadmap.objects.filter(user=request.user).order_by('-created_at').first()
+        roadmap_steps = roadmap.steps if roadmap else []
+        
+        projects = ProjectRecommendation.objects.filter(user=request.user)
+        projects_data = ProjectRecommendationSerializer(projects, many=True).data
 
         # Save Result
         try:
