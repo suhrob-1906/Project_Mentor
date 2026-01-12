@@ -34,14 +34,13 @@ class GeminiService:
         if not self.api_key:
             raise Exception("AI not initialized (API Key missing)")
             
-        # List of models to try in order
+        # List of models to try in order (based on server availability)
         models_to_try = [
-            'gemini-1.5-flash', 
-            'gemini-1.5-flash-001', 
-            'gemini-1.5-pro',
-            'gemini-1.5-pro-001',
-            'gemini-pro', 
-            'gemini-1.0-pro'
+            'gemini-2.5-flash',
+            'gemini-2.0-flash',
+            'gemini-flash-latest',
+            'gemini-2.5-pro',
+            'gemini-2.0-flash-001'
         ]
         
         last_error = None
