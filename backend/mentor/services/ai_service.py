@@ -11,12 +11,50 @@ class GeminiService:
         
         if self.api_key:
             genai.configure(api_key=self.api_key)
-            self.model = genai.GenerativeModel('gemini-1.5-flash')
+            
+            # Try to initialize with a list of preferred models
+            # Sometimes specific aliases like 'gemini-1.5-flash' might have issues on v1beta
+            self.model = None
+            for model_name in ['gemini-1.5-flash-001', 'gemini-1.5-flash', 'gemini-pro']:
+                try:
+                    # just verifying we can create the object, real check happens on generation
+                    self.model = genai.GenerativeModel(model_name)
+                    break 
+                except:
+                    continue
+            
+            if not self.model:
+                 # Last resort
+                 self.model = genai.GenerativeModel('gemini-pro')
         else:
             self.model = None
 
-    def get_feedback(self, language, category, score, total, wrong_answers, is_child=False):
+    def _generate_with_fallback(self, prompt):
+        """Attempts to generate content using the current model, falling back if it fails."""
         if not self.model:
+            raise Exception("AI not initialized")
+            
+        # List of models to try in order
+        models_to_try = ['gemini-1.5-flash', 'gemini-1.5-flash-001', 'gemini-pro', 'gemini-1.0-pro']
+        
+        # Ensure current model is tried first if it's not in the list (or just rely on the loop)
+        # We'll just iterate through the list and create temporary models dynamically
+        
+        last_error = None
+        for model_name in models_to_try:
+            try:
+                model = genai.GenerativeModel(model_name)
+                response = model.generate_content(prompt)
+                return response
+            except Exception as e:
+                last_error = e
+                print(f"Model {model_name} failed: {e}")
+                continue
+        
+        raise last_error
+
+    def get_feedback(self, language, category, score, total, wrong_answers, is_child=False):
+        if not self.api_key:
             return "AI Mentor is currently unavailable (API Key missing)."
 
         prompt = f"""
@@ -35,13 +73,13 @@ class GeminiService:
         """
 
         try:
-            response = self.model.generate_content(prompt)
+            response = self._generate_with_fallback(prompt)
             return response.text
         except Exception as e:
             return f"Ошибка ИИ: {str(e)}"
 
     def generate_homework(self, language, category, wrong_concepts=[], is_child=False):
-        if not self.model:
+        if not self.api_key:
             return ["Реализуйте простую программу на выбранном языке."]
 
         concepts_text = ""
@@ -69,7 +107,7 @@ class GeminiService:
         """
 
         try:
-            response = self.model.generate_content(prompt)
+            response = self._generate_with_fallback(prompt)
             import json
             clean_text = response.text.strip().replace("```json", "").replace("```", "").strip()
             tasks = json.loads(clean_text)
@@ -79,7 +117,7 @@ class GeminiService:
             return [f"Напишите программу, использующую концепции {category}."]
 
     def check_homework(self, language, task, submission):
-        if not self.model:
+        if not self.api_key:
             return True, "API Key missing, automatically passed."
 
         prompt = f"""
@@ -102,7 +140,7 @@ class GeminiService:
         """
 
         try:
-            response = self.model.generate_content(prompt)
+            response = self._generate_with_fallback(prompt)
             text = response.text
             passed = text.strip().startswith("PASSED")
             feedback = text.replace("PASSED", "").replace("FAILED", "").strip()
@@ -111,7 +149,7 @@ class GeminiService:
             return False, f"Ошибка проверки: {str(e)}"
 
     def generate_and_save_questions(self, language, category, count=5):
-        if not self.model:
+        if not self.api_key:
             return []
 
         import json
@@ -133,7 +171,7 @@ class GeminiService:
         """
 
         try:
-            response = self.model.generate_content(prompt)
+            response = self._generate_with_fallback(prompt)
             clean_text = response.text.strip().replace("```json", "").replace("```", "").strip()
             data = json.loads(clean_text)
             
@@ -156,7 +194,7 @@ class GeminiService:
             return []
 
     def get_homework_solution(self, language, task):
-        if not self.model:
+        if not self.api_key:
             return "Решение временно недоступно."
 
         prompt = f"""
@@ -174,7 +212,7 @@ class GeminiService:
         """
 
         try:
-            response = self.model.generate_content(prompt)
+            response = self._generate_with_fallback(prompt)
             return response.text
         except Exception as e:
             return f"Не удалось получить решение: {str(e)}"
