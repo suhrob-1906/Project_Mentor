@@ -313,12 +313,17 @@ class SubmitTestView(views.APIView):
 
             tasks = self._generate_tasks(language, level, is_child)
             
-            # Get latest roadmap/projects or default to empty
-            roadmap = Roadmap.objects.filter(user=request.user).order_by('-created_at').first()
-            roadmap_steps = roadmap.steps if roadmap else []
+            # Generate/Update Roadmap
+            rg = RoadmapGenerator(language, level, request.user.goal)
+            roadmap_steps = rg.generate()
+            Roadmap.objects.create(user=request.user, title=f"Path for {level.title()} {language}", steps=roadmap_steps)
             
-            projects = ProjectRecommendation.objects.filter(user=request.user)
-            projects_data = ProjectRecommendationSerializer(projects, many=True).data
+            # Generate/Update Projects
+            ProjectRecommendation.objects.filter(user=request.user).delete()
+            pg = ProjectGenerator(language, level)
+            projects_data = pg.generate()
+            for p in projects_data:
+                ProjectRecommendation.objects.create(user=request.user, **p)
 
             # Save Result
             result = TestResult.objects.create(
