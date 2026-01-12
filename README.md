@@ -1,77 +1,94 @@
-# 🌟 MentorAI: Your Intelligent Path to Coding Mastery
+# MentorAI — Персональный ИИ-Наставник для Программистов 🚀
 
-MentorAI is the world's first **age-aware programming mentor platform**. We bridge the gap between "knowing syntax" and "building careers" by providing a personalized learning ecosystem that grows with you.
-
----
-
-## 🎯 What is MentorAI?
-
-Stop guessing your skill level. MentorAI uses advanced static analysis and psychometric assessment to determine exactly where you stand in the developer journey. Whether you're a curious 10-year-old writing your first "Hello World" or a professional transitioning to a new stack, MentorAI provides:
-
-1.  **Honest Skill Analysis**: Deep code analysis or comprehensive language tests.
-2.  **10-Level Roadmap**: A comprehensive journey from Basics to Patterns and a Final Quest.
-3.  **Homework Lab**: Practical assignments checking after every level with an AI Mentor.
-4.  **"3-Strikes" Rule**: Get a master solution with deep explanation after 3 failed homework attempts.
-5.  **Hybrid AI generation**: The test bank automatically expands using Gemini if a category is empty.
+Добро пожаловать в **MentorAI** — инновационную платформу, которая превращает хаотичное обучение программированию в структурированный, увлекательный и персонализированный процесс.
 
 ---
 
-## 🎭 The Two Faces of MentorAI
+## 🎯 Зачем нужен этот проект? (Проблематика)
 
-We believe learning should be tailored to the learner's experience. MentorAI automatically transforms its entire interface based on your age:
+Самостоятельное обучение программированию часто сталкивается с критическими проблемами, которые мы решаем:
 
-### 🚀 Magical Child Mode (Age ≤ 14)
-*   **The Vibe**: An intergalactic adventure! Vibrant Sun-Yellow themes, bouncy animations, and playful characters.
-*   **The Language**: "Missions" instead of tests, "Adventure Maps" instead of roadmaps.
-*   **The Reward**: Gamified feedback and "Magic Points" to keep young minds engaged and excited.
+#### 1. "Что учить дальше?" (Проблема структуры)
+*   **Проблема**: Новички теряются в море информации, не зная, за что хвататься после "Hello World".
+*   **Решение MentorAI**: Четкая, геймифицированная **Дорожная Карта (Roadmap)** из 10 уровней для каждого языка. Вы не перейдете к сложным темам (ООП, Асинхронность), пока не закрепите базу.
 
-### 💼 Professional Adult Mode (Age > 14)
-*   **The Vibe**: A premium, minimalist workspace. Clean indigo accents, deep focus aesthetics, and professional layouts.
-*   **The Language**: Direct, career-focused feedback and high-value industry standard terminology.
-*   **The Goal**: Efficiency and clarity for rapid professional growth.
+#### 2. "Я выучил синтаксис, но не умею писать код" (Проблема практики)
+*   **Проблема**: Тесты с вариантами ответов не учат программировать.
+*   **Решение MentorAI**: **Умная генерация домашних заданий**. ИИ анализирует ваши ошибки в тесте и генерирует уникальную практическую задачу именно на те темы, которые вы не поняли.
 
----
-
-## ✨ Features at a Glance
-
-*   **Deep Language Support**: Specialized tracks for **Python, JavaScript, Go, and Java**.
-*   **Multilingual Core**: Full interface and content support for **English and Russian**.
-*   **80+ Seeded Questions**: A robust database of localized technical questions.
-*   **Smart Assessment**: Dynamic level determination (Beginner, Junior, Strong Junior, Middle).
-*   **Persistent Experience**: Your theme and progress follow you everywhere.
+#### 3. "Правильно ли я написал?" (Проблема обратной связи)
+*   **Проблема**: Без ментора некому проверить код и указать на ошибки стиля или логики.
+*   **Решение MentorAI**: **ИИ-Ревьюер**. Вы пишете код прямо в браузере, и ИИ мгновенно проверяет его, объясняет ошибки и показывает "Master Solution" (идеальное решение), если вы застряли.
 
 ---
 
-## 🛠️ Tech Stack
+## 🛠 Технологический Стек
 
-### Backend (The Brain)
-- **Django 5.1/6.0** & **Django Rest Framework**
-- **JWT Authentication** (Secure persistent sessions)
-- **Radon** (Python code complexity analysis)
-- **PostgreSQL/SQLite** support
+Мы использовали передовые технологии для создания надежной, быстрой и масштабируемой системы.
 
-### Frontend (The Heart)
-- **React 18** & **Vite** (Ultra-fast development)
-- **Tailwind CSS** (Custom design system)
-- **i18next** (Flawless localization)
-- **Lucide React** (Beautiful iconography)
+### 🧠 Backend (Серверная часть)
+
+**Язык**: Python 3.12
+**Фреймворк**: Django 5.0 + Django REST Framework (DRF)
+
+| Технология | Зачем использована? |
+| :--- | :--- |
+| **Django REST Framework** | Стандарт индустрии для создания мощных API. Обеспечивает строгую валидацию данных, удобную сериализацию и аутентификацию "из коробки". |
+| **Google Gemini API** (Models 2.5-Flash / 2.0-Flash) | Сердце проекта. Мы используем новейшие (Experimental) модели Gemini для анализа кода, генерации вопросов и проверки домашних заданий. Они быстрее и точнее предыдущих версий. |
+| **Radon** | Библиотека для статического анализа кода. Используется для вычисления цикломатической сложности кода (Cyclomatic Complexity), чтобы оценить "качество" и сложность решений студентов. |
+| **SimpleJWT** | Безопасная система аутентификации через JSON Web Tokens. Позволяет пользователям оставаться в системе без постоянного ввода пароля. |
+| **Gunicorn** | Промышленный WSGI-сервер для запуска Python-приложений. Обрабатывает множество одновременных запросов. |
+| **Whitenoise** | Позволяет Django эффективно раздавать статические файлы (CSS, картинки) без настройки отдельного Nginx сервера. |
+
+### 🎨 Frontend (Клиентская часть)
+
+**Библиотека**: React 18
+**Сборщик**: Vite
+
+| Технология | Зачем использована? |
+| :--- | :--- |
+| **React + Hooks** | Позволяет создавать динамичный интерфейс, который мгновенно реагирует на действия пользователя без перезагрузки страницы (SPA - Single Page Application). |
+| **Tailwind CSS** | Утилитарный CSS-фреймворк. Позволил создать уникальный, современный дизайн ("Dark futuristic mode") без написания тысяч строк кастомного CSS. |
+| **Lucide React** | Библиотека иконок. Легковесная, красивая и идеально вписывается в дизайн. |
+| **Axios** | Для выполнения HTTP-запросов к серверу. Удобнее встроенного fetch благодаря автоматической обработке JSON и перехватчикам ошибок. |
+| **React Router 6** | Обеспечивает навигацию между страницами (Dashboard, Test, Homework) без перезагрузки. |
+
+### ☁️ Инфраструктура и Базы Данных
+
+| Технология | Зачем использована? |
+| :--- | :--- |
+| **PostgreSQL** (через dj-database-url) | Основная реляционная база данных. Надежная, поддерживает сложные связи (Пользователь -> Прогресс -> Тесты -> ДЗ). |
+| **Render.com** | Платформа для хостинга Backend. Автоматически собирает Docker-контейнеры и поддерживает Python окружение. |
+| **Vercel** | Платформа для хостинга Frontend. Обеспечивает молниеносную доставку статики через CDN. |
 
 ---
 
-## 📦 Getting Started
+## 🚀 Ключевые возможности
 
-### 1. Backend Setup
+1.  **Адаптивное тестирование**: Если вопросов в базе мало, ИИ генерирует новые "на лету" и сохраняет их навсегда.
+2.  **Персонализация**:
+    *   **Для детей**: Интерфейс и ИИ переключаются в режим "Fun & Imaginative" (простые объяснения, игровые задания).
+    *   **Для взрослых**: Строгий режим "Professional" (технический язык, челленджи).
+3.  **Аналитика**:
+    *   Roadmap с визуализацией прогресса.
+    *   История попыток для каждого ДЗ.
+    *   Финальный сертификат (в разработке).
+
+---
+
+## 👨‍💻 Как запустить проект
+
+### Backend
 ```bash
 cd backend
-python -m venv venv
-# Activate venv (Source venv/bin/activate or .\venv\Scripts\activate)
+python -m venv .venv
+source .venv/bin/activate  # или .venv\Scripts\activate на Windows
 pip install -r requirements.txt
 python manage.py migrate
-python manage.py seed_questions  # Essential: Populate the test bank!
 python manage.py runserver
 ```
 
-### 2. Frontend Setup
+### Frontend
 ```bash
 cd frontend
 npm install
@@ -79,4 +96,5 @@ npm run dev
 ```
 
 ---
-**Built with ❤️ for the next generation of developers.**
+
+*Создано с ❤️ для будущих разработчиков.*
