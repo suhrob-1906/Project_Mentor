@@ -34,16 +34,17 @@ class GeminiService:
         if not self.api_key:
             raise Exception("AI not initialized (API Key missing)")
             
-        # List of models to try in order (based on server availability)
+        # List of models to try in order (Prioritize stable Flash for better quotas)
         models_to_try = [
-            'gemini-2.5-flash',
+            'gemini-flash-latest', 
             'gemini-2.0-flash',
-            'gemini-flash-latest',
+            'gemini-2.5-flash',
             'gemini-2.5-pro',
             'gemini-2.0-flash-001'
         ]
         
         last_error = None
+        import time
         for model_name in models_to_try:
             try:
                 model = genai.GenerativeModel(model_name)
@@ -51,6 +52,9 @@ class GeminiService:
                 return response
             except Exception as e:
                 last_error = e
+                # If quota error, wait a bit before trying next model
+                if "429" in str(e) or "Quota" in str(e):
+                    time.sleep(2)
                 print(f"Model {model_name} failed: {e}")
                 continue
         
