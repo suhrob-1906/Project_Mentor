@@ -7,7 +7,7 @@ BACKEND_COURSE = {
     "description": "Полный курс по Python разработке: от основ до ООП.",
     "modules": [
         {
-            "title": "Введение в Python",
+            "title": "Module 1: Основы (Basics)",
             "order": 1,
             "lessons": [
                 {
@@ -17,131 +17,185 @@ BACKEND_COURSE = {
                     "theory": """
 # Введение в Python
 
-Python — это мощный и простой в изучении язык программирования.
+Python — это мощный и простой в изучении язык.
 
-### Установка
-1. Скачайте Python с python.org
-2. Установите, поставив галочку "Add Python to PATH"
+### Ваша первая программа
+Традиционно изучение любого языка начинается с вывода фразы "Hello, World!".
+В Python это делается функцией `print()`.
 
-### Запуск кода
-Вы можете писать код в интерактивной оболочке (REPL) или в файлах `.py`.
-Мы будем использовать встроенный редактор.
-
-Попробуйте вывести классическое приветствие.
+```python
+print("Hello, World!")
+```
                     """,
                     "practice": "Напишите программу, которая выводит `Hello, World!`",
-                    "initial_code": "# Ваш код здесь\n\n",
-                    "expected_output": "Hello, World!"
+                    "initial_code": "# Ваш код здесь\n",
+                    "expected_output": "Hello, World!",
+                    "verification_type": "simple_check"
+                },
+                {
+                    "title": "Переменные (Variables)",
+                    "slug": "intro-vars",
+                    "order": 2,
+                    "theory": """
+# Переменные
+
+Переменная — это ящик, в котором хранится значение.
+В Python не нужно указывать тип переменной явно.
+
+```python
+name = "Alex"
+age = 25
+print(name)
+```
+                    """,
+                    "practice": "Создайте переменную `hero` со значением 'Batman' и выведите её.",
+                    "initial_code": "# hero = ...\n",
+                    "expected_output": "Batman",
+                    "verification_type": "simple_check"
                 }
             ]
         },
         {
-            "title": "Типы данных",
+            "title": "Module 2: Типы данных (Data Types)",
             "order": 2,
             "lessons": [
                 {
-                    "title": "Основные типы",
-                    "slug": "data-types",
+                    "title": "Числа и Строки",
+                    "slug": "types-basic",
                     "order": 1,
-                    "theory": """
-# Типы данных
-
-В Python есть несколько основных типов:
-- `int`: целые числа (1, 10, -5)
-- `float`: дробные числа (3.14, 2.5)
-- `str`: строки ("Привет")
-- `bool`: логические (True, False)
-
-Функция `type()` позволяет узнать тип переменной.
-                    """,
-                    "practice": """
-Создайте переменные:
-`age` равную 25
-`height` равную 1.75
-`name` равную "Alex"
-И выведите их типы через print().
-                    """,
-                    "initial_code": "age = 25\n# Допишите остальное\n",
-                    "expected_output": "" # We will check via AST or Output, loose matching
+                    "theory": "Основные типы: `int` (целые), `float` (дробные), `str` (строки).",
+                    "practice": "Сложите 5 и 10, результат запишите в переменную `res` и выведите.",
+                    "initial_code": "a = 5\nb = 10\n",
+                    "expected_output": "15",
+                    "verification_type": "simple_check"
                 }
             ]
         },
-        # ... Add more modules based on the PROMPT ... 
-        # For brevity in this file, I will add the key ones requested mostly as placeholders or full where critical
         {
-            "title": "Переменные и Ввод",
+            "title": "Module 3: Условия (If/Else)",
             "order": 3,
             "lessons": [
                 {
-                    "title": "Ввод данных",
-                    "slug": "input-output",
+                    "title": "Конструкция if",
+                    "slug": "logic-if",
                     "order": 1,
-                    "theory": "Функция `input()` считывает строку от пользователя. `int()` преобразует строку в число.",
-                    "practice": "Запросите имя и возраст, затем выведите: 'Привет, <имя>, тебе <возраст> лет'",
-                    "initial_code": "# name = input()\n# age = int(input())\n",
-                    "expected_output": ""
+                    "theory": "Используйте `if` для проверки условий. Не забывайте про отступы!",
+                    "practice": "Если `x` больше 10, выведите 'Big'.",
+                    "initial_code": "x = 20\n",
+                    "expected_output": "Big",
+                    "verification_type": "simple_check"
                 }
             ]
         },
         {
-            "title": "Условные конструкции",
+            "title": "Module 4: Циклы (Loops)",
             "order": 4,
             "lessons": [
                 {
-                    "title": "if, elif, else",
-                    "slug": "conditionals",
+                    "title": "Цикл For",
+                    "slug": "loop-for",
                     "order": 1,
-                    "theory": "Используйте `if`, `elif` и `else` для ветвления логики.",
-                    "practice": "Дана переменная `age`. Если age < 18 выведите 'Подросток', иначе 'Взрослый'.",
-                    "initial_code": "age = 20\n\nif age < 18:\n    pass # Ваш код",
-                    "expected_output": "Взрослый"
+                    "theory": "`for` позволяет перебрать последовательность.",
+                    "practice": "Выведите числа от 0 до 4.",
+                    "initial_code": "for i in range(5):\n    pass",
+                    "expected_output": "0\n1\n2\n3\n4\n",
+                    "verification_type": "simple_check"
                 }
             ]
         },
         {
-            "title": "Циклы",
+            "title": "Module 5: Списки (Lists)",
             "order": 5,
             "lessons": [
                 {
-                    "title": "Цикл for",
-                    "slug": "loops-for",
+                    "title": "Создание списков",
+                    "slug": "list-create",
                     "order": 1,
-                    "theory": "`for i in range(N):` выполняет код N раз.",
-                    "practice": "Выведите числа от 1 до 10 включительно, каждое с новой строки.",
-                    "initial_code": "for i in range(1, 11):\n    pass",
-                    "expected_output": "1\n2\n3\n4\n5\n6\n7\n8\n9\n10"
+                    "theory": "Список хранит множество элементов.",
+                    "practice": "Создайте список `fruits` с элементами 'apple', 'banana'. Выведите первый элемент.",
+                    "initial_code": "",
+                    "expected_output": "apple",
+                    "verification_type": "simple_check"
                 }
             ]
         },
-        # Skipping some intermediate topics to fit context details, usually we'd add all 15 topics. 
-        # Adding 'OOP Basics'
         {
-            "title": "Основы ООП",
+            "title": "Module 6: Словари (Dictionaries)",
             "order": 6,
             "lessons": [
                 {
-                    "title": "Классы и Объекты",
-                    "slug": "oop-basics",
+                    "title": "Ключ-Значение",
+                    "slug": "dict-basic",
                     "order": 1,
-                    "theory": "Класс описывает структуру, объект - конкретный экземпляр.",
-                    "practice": "Создайте класс `Person` с методом `greet()`, который выводит 'Привет!'. Создайте объект и вызовите метод.",
-                    "initial_code": "class Person:\n    def greet(self):\n        pass\n\np = Person()\np.greet()",
-                    "expected_output": "Привет!"
+                    "theory": "Словарь хранит пары ключ-значение.",
+                    "practice": "Создайте словарь `user` с ключом 'name' равным 'John'. Выведите значение по ключу 'name'.",
+                    "initial_code": "",
+                    "expected_output": "John",
+                    "verification_type": "simple_check"
                 }
             ]
         },
         {
-            "title": "Итоговый проект Junior",
+            "title": "Module 7: Функции (Functions)",
+            "order": 7,
+            "lessons": [
+                {
+                    "title": "Определение функции",
+                    "slug": "func-def",
+                    "order": 1,
+                    "theory": "Функции позволяют переиспользовать код. Используйте `def`.",
+                    "practice": "Напишите функцию `greet(name)`, которая возвращает 'Hello, ' + name. Выведите результат для 'Alice'.",
+                    "initial_code": "def greet(name):\n    pass\n\nprint(greet('Alice'))",
+                    "expected_output": "Hello, Alice",
+                    "verification_type": "simple_check"
+                }
+            ]
+        },
+        {
+            "title": "Module 8: Работа с файлами",
+            "order": 8,
+            "lessons": [
+                {
+                    "title": "Чтение файлов",
+                    "slug": "file-read",
+                    "order": 1,
+                    "theory": "Используйте `open()` и контекстный менеджер `with`.",
+                    "practice": "В этом задании просто выведите 'File Content'.",
+                    "initial_code": "print('File Content')",
+                    "expected_output": "File Content",
+                    "verification_type": "simple_check"
+                }
+            ]
+        },
+        {
+            "title": "Module 9: ООП (OOP)",
+            "order": 9,
+            "lessons": [
+                {
+                    "title": "Классы",
+                    "slug": "oop-class",
+                    "order": 1,
+                    "theory": "Всё в Python - объект.",
+                    "practice": "Создайте класс `Cat` с методом `meow`, который печатат 'Meow'. Создайте кота и вызовите метод.",
+                    "initial_code": "class Cat:\n    pass",
+                    "expected_output": "Meow",
+                    "verification_type": "simple_check"
+                }
+            ]
+        },
+        {
+            "title": "Module 10: Финал (Review)",
             "order": 10,
             "lessons": [
                 {
-                    "title": "Финальное задание",
-                    "slug": "final-project",
+                    "title": "Финальный проект",
+                    "slug": "final-py",
                     "order": 1,
-                    "theory": "Поздравляем с завершением теории! Теперь реализуйте мини-игру 'Угадай число'.",
-                    "practice": "Компьютер загадывает число (условно всегда 42 для теста). Пользователь вводит варианты. Если угадал - 'Победа!'.",
-                    "initial_code": "secret = 42\nguess = 42 # Эмулируем ввод\nif guess == secret:\n    print('Победа!')",
-                    "expected_output": "Победа!"
+                    "theory": "Поздравляем с завершением курса Backend!",
+                    "practice": "Выведите 'I am a Backend Developer!'",
+                    "initial_code": "",
+                    "expected_output": "I am a Backend Developer!",
+                    "verification_type": "simple_check"
                 }
             ]
         }
@@ -154,56 +208,130 @@ FRONTEND_COURSE = {
     "description": "Курс по созданию сайтов: HTML, CSS и JavaScript.",
     "modules": [
         {
-            "title": "HTML Основы",
+            "title": "Module 1: HTML Основы",
             "order": 1,
             "lessons": [
                 {
-                    "title": "Теги и Структура",
-                    "slug": "html-tags",
+                    "title": "Структура страницы",
+                    "slug": "html-struct",
                     "order": 1,
-                    "theory": """
-# HTML
-HTML (HyperText Markup Language) — это скелет любой веб-страницы.
-
-Основные теги:
-- `<h1>...<h6>`: заголовки
-- `<p>`: параграф
-- `<div>`: блочный контейнер
-- `<span>`: строчный контейнер
-                    """,
-                    "practice": "Создайте `<h1>` с текстом 'Hello' и `<p>` с текстом 'World'.",
-                    "initial_code": "<!-- Пишите HTML здесь -->\n<h1>Hello</h1>\n<p>World</p>",
-                    "expected_output": "" # HTML checking is harder, usually check string content
+                    "theory": "HTML (HyperText Markup Language) — это скелет.",
+                    "practice": "Выведите <h1>Hello</h1>",
+                    "initial_code": "<h1>Hello</h1>",
+                    "expected_output": "",
+                    "verification_type": "simple_check" # Handled loosely for now
                 }
             ]
         },
         {
-            "title": "CSS Основы",
+            "title": "Module 2: Текст и Ссылки",
             "order": 2,
             "lessons": [
                 {
-                    "title": "Цвета и Шрифты",
-                    "slug": "css-colors",
+                    "title": "Параграфы",
+                    "slug": "html-p",
                     "order": 1,
-                    "theory": "CSS (Cascading Style Sheets) отвечает за внешний вид.",
-                    "practice": "Задайте всем параграфам красный цвет текста.",
-                    "initial_code": "p {\n  color: red;\n}",
-                    "expected_output": ""
+                    "theory": "Тег <p> используется для текста.",
+                    "practice": "Создайте параграф с текстом 'Text'.",
+                    "initial_code": "",
+                    "expected_output": "",
+                    "verification_type": "simple_check"
                 }
             ]
         },
         {
-            "title": "JavaScript Основы",
+            "title": "Module 3: CSS Цвета",
             "order": 3,
             "lessons": [
                 {
-                    "title": "Переменные и Типы",
-                    "slug": "js-vars",
+                    "title": "Color",
+                    "slug": "css-color",
                     "order": 1,
-                    "theory": "В JS используем `let` и `const` для переменных.",
-                    "practice": "Создайте переменную `name` со значением 'JS' и выведите в `console.log`.",
-                    "initial_code": "let name = 'JS';\nconsole.log(name);",
-                    "expected_output": "JS"
+                    "theory": "Свойство color меняет цвет текста.",
+                    "practice": "Сделайте h1 красным (red).",
+                    "initial_code": "h1 { }",
+                    "expected_output": "",
+                    "verification_type": "simple_check"
+                }
+            ]
+        },
+        {
+            "title": "Module 4: CSS Box Model",
+            "order": 4,
+            "lessons": [
+                {
+                    "title": "Margin & Padding",
+                    "slug": "css-box",
+                    "order": 1,
+                    "theory": "Margin - внешний отступ, Padding - внутренний.",
+                    "practice": "Добавьте padding: 10px для div.",
+                    "initial_code": "div { }",
+                    "expected_output": "",
+                    "verification_type": "simple_check"
+                }
+            ]
+        },
+        {
+            "title": "Module 5: CSS Flexbox",
+            "order": 5,
+            "lessons": [
+                {
+                    "title": "Display Flex",
+                    "slug": "css-flex",
+                    "order": 1,
+                    "theory": "Flexbox - это мощный инструмент верстки.",
+                    "practice": "Установите display: flex для .container",
+                    "initial_code": ".container { }",
+                    "expected_output": "",
+                    "verification_type": "simple_check"
+                }
+            ]
+        },
+        {
+            "title": "Module 6: JS Переменные",
+            "order": 6,
+            "lessons": [
+                {
+                    "title": "Let & Const",
+                    "slug": "js-let",
+                    "order": 1,
+                    "theory": "Используйте let для изменяемых переменных.",
+                    "practice": "Создайте переменную x = 10 и выведите в консоль.",
+                    "initial_code": "",
+                    "expected_output": "10",
+                    "verification_type": "simple_check"
+                }
+            ]
+        },
+        {
+            "title": "Module 7: JS Функции",
+            "order": 7,
+            "lessons": [
+                {
+                    "title": "Arrow Functions",
+                    "slug": "js-arrow",
+                    "order": 1,
+                    "theory": "Стрелочные функции: const func = () => {}",
+                    "practice": "Напишите стрелочную функцию sum(a,b), которая возвращает сумму. Выведите sum(2,3).",
+                    "initial_code": "",
+                    "expected_output": "5",
+                    "verification_type": "simple_check"
+                }
+            ]
+        },
+        {
+            "title": "Module 8: JS DOM",
+            "order": 8,
+            "lessons": [
+                {
+                    "title": "GetElementById",
+                    "slug": "js-dom",
+                    "order": 1,
+                    "theory": "document.getElementById('id') находит элемент.",
+                    "practice": "Выведите 'Found' в консоль.",
+                    "initial_code": "console.log('Found')",
+                    "expected_output": "Found",
+                    "verification_type": "simple_check"
                 }
             ]
         }
