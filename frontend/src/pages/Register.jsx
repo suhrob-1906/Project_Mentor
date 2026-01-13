@@ -12,7 +12,8 @@ export default function Register() {
         username: '',
         password: '',
         email: '',
-        age: 18
+        age: 18,
+        track: 'backend'
     });
     const [error, setError] = useState('');
     const [loading, setLoading] = useState(false);
@@ -23,8 +24,14 @@ export default function Register() {
         setError('');
 
         try {
-            await api.post('/auth/register/', formData);
-            navigate('/login');
+            const resp = await api.post('/auth/register/', formData);
+            if (resp.data.access) {
+                localStorage.setItem('access_token', resp.data.access);
+                localStorage.setItem('refresh_token', resp.data.refresh);
+                navigate('/courses');
+            } else {
+                navigate('/login');
+            }
         } catch (err) {
             setError(t('register.fail', 'Registration failed'));
         } finally {
@@ -97,19 +104,34 @@ export default function Register() {
                         />
                     </div>
 
-                    <div>
-                        <label className="block text-xs font-black text-gray-400 uppercase tracking-widest mb-2 ml-1">
-                            {t('register.age', 'Age')}
-                        </label>
-                        <input
-                            type="number"
-                            className="w-full px-5 py-4 bg-gray-50 border-2 border-transparent focus:border-indigo-500 focus:bg-white rounded-2xl transition-all outline-none font-bold text-gray-700 shadow-sm"
-                            value={formData.age}
-                            onChange={(e) => setFormData({ ...formData, age: e.target.value })}
-                            required
-                            min="1"
-                            max="100"
-                        />
+                    <div className="grid grid-cols-2 gap-4">
+                        <div>
+                            <label className="block text-xs font-black text-gray-400 uppercase tracking-widest mb-2 ml-1">
+                                {t('register.age', 'Age')}
+                            </label>
+                            <input
+                                type="number"
+                                className="w-full px-5 py-4 bg-gray-50 border-2 border-transparent focus:border-indigo-500 focus:bg-white rounded-2xl transition-all outline-none font-bold text-gray-700 shadow-sm"
+                                value={formData.age}
+                                onChange={(e) => setFormData({ ...formData, age: e.target.value })}
+                                required
+                                min="1"
+                                max="100"
+                            />
+                        </div>
+                        <div>
+                            <label className="block text-xs font-black text-gray-400 uppercase tracking-widest mb-2 ml-1">
+                                Track
+                            </label>
+                            <select
+                                className="w-full px-5 py-4 bg-gray-50 border-2 border-transparent focus:border-indigo-500 focus:bg-white rounded-2xl transition-all outline-none font-bold text-gray-700 shadow-sm appearance-none"
+                                value={formData.track}
+                                onChange={(e) => setFormData({ ...formData, track: e.target.value })}
+                            >
+                                <option value="backend">Backend (Python)</option>
+                                <option value="frontend">Frontend (JS)</option>
+                            </select>
+                        </div>
                     </div>
 
                     <button

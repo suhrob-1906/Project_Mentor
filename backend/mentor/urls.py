@@ -1,7 +1,13 @@
-from django.urls import path
-from .views import AnalyzeView, RoadmapView, ProjectView, TestQuestionsView, SubmitTestView, UserProgressView, HomeworkView, DynamicQuestionView
+from django.urls import path, include
+from rest_framework.routers import DefaultRouter
+from .views import AnalyzeView, RoadmapView, ProjectView, TestQuestionsView, SubmitTestView, UserProgressView, HomeworkView, DynamicQuestionView, CourseViewSet, LessonViewSet
+
+router = DefaultRouter()
+router.register(r'courses', CourseViewSet)
+router.register(r'lessons', LessonViewSet)
 
 urlpatterns = [
+    path('', include(router.urls)),
     path('analyze/', AnalyzeView.as_view(), name='analyze'),
     path('roadmap/', RoadmapView.as_view(), name='roadmap'),
     path('projects/', ProjectView.as_view(), name='projects'),

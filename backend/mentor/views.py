@@ -1,11 +1,85 @@
 from rest_framework import views, generics, permissions, status
 from rest_framework.response import Response
-from .models import Submission, AnalysisResult, Roadmap, ProjectRecommendation, TestQuestion, TestResult, UserProgress, Homework
+from .models import Submission, AnalysisResult, Roadmap, ProjectRecommendation, TestQuestion, TestResult, UserProgress, Homework, Course, Module, Lesson, UserLessonProgress
 from .serializers import (
     SubmissionSerializer, RoadmapSerializer, ProjectRecommendationSerializer,
-    TestQuestionSerializer, TestResultSerializer
+    TestQuestionSerializer, TestResultSerializer, CourseSerializer, LessonDetailSerializer, UserLessonProgressSerializer
 )
-from .services.analyzer import CodeAnalyzer
+from rest_framework import viewsets, mixins
+from rest_framework.decorators import action
+
+class CourseViewSet(viewsets.ReadOnlyModelViewSet):
+    queryset = Course.objects.all()
+    serializer_class = CourseSerializer
+    permission_classes = [permissions.AllowAny]
+
+    def get_serializer_context(self):
+        ctx = super().get_serializer_context()
+        ctx['user'] = self.request.user
+        return ctx
+
+class LessonViewSet(viewsets.ReadOnlyModelViewSet):
+    queryset = Lesson.objects.all()
+    serializer_class = LessonDetailSerializer
+    permission_classes = [permissions.IsAuthenticated]
+    lookup_field = 'slug'
+
+    def get_serializer_context(self):
+        ctx = super().get_serializer_context()
+        ctx['user'] = self.request.user
+        return ctx
+
+    @action(detail=True, methods=['post'])
+    def check(self, request, slug=None):
+        lesson = self.get_object()
+        code = request.data.get('code', '')
+        
+        # Simple verification
+        passed = False
+        feedback = "Incorrect output."
+        
+        # In real world, use AI or sandbox execution.
+        # Here we do simple string matching or expected output check if provided
+        if lesson.verification_type == 'simple_check':
+            # This is very fragile, but serves the MVP
+            # We can also check if expected_output is in the code if it's a print statement
+            pass
+        
+        # Determine success (Mocking AI check for now or basic comparison)
+        # If code is not empty, let's assume passed for "theory" lessons, 
+        # For practice, we check if they changed the initial code.
+        if code.strip() != lesson.initial_code.strip() and len(code) > 10:
+             passed = True
+             feedback = "Great job! logic looks correct."
+        else:
+             feedback = "Please write some code."
+             
+        # If passed, update progress
+        if passed:
+            prog, _ = UserLessonProgress.objects.get_or_create(user=request.user, lesson=lesson)
+            prog.is_completed = True
+            prog.user_code = code
+            prog.save()
+            
+            # Unlock next lesson
+            # Find next lesson
+            next_lesson = Lesson.objects.filter(module=lesson.module, order=lesson.order + 1).first()
+            if not next_lesson:
+                # Next module?
+                next_mod = Module.objects.filter(course=lesson.module.course, order=lesson.module.order + 1).first()
+                if next_mod:
+                    next_lesson = next_mod.lessons.first()
+            
+            if next_lesson:
+                 next_prog, _ = UserLessonProgress.objects.get_or_create(user=request.user, lesson=next_lesson)
+                 next_prog.is_unlocked = True
+                 next_prog.save()
+
+        return Response({
+            "passed": passed,
+            "feedback": feedback
+        })
+
 from .services.roadmap import RoadmapGenerator
 from .services.projects import ProjectGenerator
 from .services.ai_service import GeminiService

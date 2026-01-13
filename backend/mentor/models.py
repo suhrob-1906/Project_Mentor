@@ -1,12 +1,12 @@
 from django.db import models
 from django.conf import settings
 
+# --- EXISTING MODELS ---
+
 class Submission(models.Model):
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='submissions')
     github_url = models.URLField(blank=True, null=True)
     code_text = models.TextField(blank=True, null=True) # For direct paste if needed
-    # File upload handling is tricky without S3/media config, let's stick to text/url for MVP or add FileField later.
-    # But requirement said "zip or text". I'll add FileField but need to set MEDIA_ROOT.
     code_file = models.FileField(upload_to='submissions/', blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
 
@@ -115,3 +115,65 @@ class Homework(models.Model):
 
     def __str__(self):
         return f"{self.user.username} - {self.language} - {self.category} ({self.status})"
+
+# --- NEW EDUCATIONAL CONTENT MODELS ---
+
+class Course(models.Model):
+    slug = models.SlugField(primary_key=True) # 'backend', 'frontend'
+    title = models.CharField(max_length=100)
+    description = models.TextField()
+
+    def __str__(self):
+        return self.title
+
+class Module(models.Model):
+    course = models.ForeignKey(Course, on_delete=models.CASCADE, related_name='modules')
+    title = models.CharField(max_length=100)
+    order = models.PositiveIntegerField() # 1, 2, 3...
+    description = models.TextField(blank=True)
+
+    class Meta:
+        ordering = ['order']
+
+    def __str__(self):
+        return f"{self.course.slug} - {self.order}. {self.title}"
+
+class Lesson(models.Model):
+    module = models.ForeignKey(Module, on_delete=models.CASCADE, related_name='lessons')
+    title = models.CharField(max_length=100)
+    slug = models.SlugField()
+    order = models.PositiveIntegerField()
+    theory_content = models.TextField() # Markdown supported
+    
+    # Practice
+    practice_task = models.TextField()
+    initial_code = models.TextField(default="", blank=True)
+    expected_output = models.TextField(blank=True, help_text="Simple match checks if needed")
+    
+    # AI/Verification Config
+    verification_type = models.CharField(
+        max_length=20, 
+        choices=[('simple_check', 'Simple Output Match'), ('ai_check', 'AI Verification')], 
+        default='ai_check'
+    )
+
+    class Meta:
+        ordering = ['order']
+        unique_together = ('module', 'slug')
+
+    def __str__(self):
+        return f"{self.title}"
+
+class UserLessonProgress(models.Model):
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='lesson_progress')
+    lesson = models.ForeignKey(Lesson, on_delete=models.CASCADE)
+    is_completed = models.BooleanField(default=False)
+    is_unlocked = models.BooleanField(default=False)
+    user_code = models.TextField(blank=True) # Last saved code
+    completed_at = models.DateTimeField(null=True, blank=True)
+    
+    class Meta:
+        unique_together = ('user', 'lesson')
+
+    def __str__(self):
+        return f"{self.user.username} - {self.lesson.title}"

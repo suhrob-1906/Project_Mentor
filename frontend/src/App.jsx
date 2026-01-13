@@ -6,6 +6,7 @@ import Results from './pages/Results';
 import Landing from './pages/Landing';
 import Test from './pages/Test';
 import Homework from './pages/Homework';
+import Course from './pages/Course';
 import { useState, useEffect } from 'react';
 import api from './api';
 
@@ -84,6 +85,14 @@ function App() {
             element={
               <ProtectedRoute>
                 <Homework isChild={isChild} />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/courses"
+            element={
+              <ProtectedRoute>
+                <Course />
               </ProtectedRoute>
             }
           />

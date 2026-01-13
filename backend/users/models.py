@@ -20,6 +20,11 @@ class User(AbstractUser):
 
     primary_language = models.CharField(max_length=20, choices=LANGUAGE_CHOICES, default='python')
     goal = models.CharField(max_length=20, choices=GOAL_CHOICES, default='job')
+    TRACK_CHOICES = [
+        ('backend', 'Backend (Python)'),
+        ('frontend', 'Frontend (HTML/CSS/JS)'),
+    ]
+    track = models.CharField(max_length=20, choices=TRACK_CHOICES, default='backend')
     age = models.PositiveIntegerField(default=18)
 
     def __str__(self):
