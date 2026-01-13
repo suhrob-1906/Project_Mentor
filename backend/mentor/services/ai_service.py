@@ -91,7 +91,10 @@ class GeminiService:
             response = self._generate_with_fallback(prompt)
             return response.text
         except Exception as e:
-            return f"Ошибка ИИ: {str(e)}"
+            error_str = str(e)
+            if "429" in error_str or "Quota" in error_str:
+                return "ИИ устал и отдыхает (Лимит запросов исчерпан). Попробуйте через минуту!"
+            return f"Ошибка ИИ: {error_str}"
 
     def generate_homework(self, language, category, wrong_concepts=[], is_child=False):
         if not self.api_key:
