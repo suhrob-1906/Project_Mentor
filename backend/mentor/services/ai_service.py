@@ -1,6 +1,10 @@
 import os
-import google.generativeai as genai
 from django.conf import settings
+
+try:
+    import google.generativeai as genai
+except ImportError:
+    genai = None
 
 class GeminiService:
     def __init__(self):
@@ -9,24 +13,28 @@ class GeminiService:
             # Fallback for local dev if not in env
             self.api_key = getattr(settings, 'GOOGLE_API_KEY', None)
         
-        if self.api_key:
-            genai.configure(api_key=self.api_key)
-            
-            # Try to initialize with a list of preferred models
-            # Sometimes specific aliases like 'gemini-1.5-flash' might have issues on v1beta
-            self.model = None
-            for model_name in ['gemini-1.5-flash-001', 'gemini-1.5-flash', 'gemini-pro']:
-                try:
-                    # just verifying we can create the object, real check happens on generation
-                    self.model = genai.GenerativeModel(model_name)
-                    break 
-                except:
-                    continue
-            
-            if not self.model:
-                 # Last resort
-                 self.model = genai.GenerativeModel('gemini-pro')
+        self.model = None
+        
+        if self.api_key and genai:
+            try:
+                genai.configure(api_key=self.api_key)
+                
+                # Try to initialize with a list of preferred models
+                for model_name in ['gemini-1.5-flash-001', 'gemini-1.5-flash', 'gemini-pro']:
+                    try:
+                        self.model = genai.GenerativeModel(model_name)
+                        break 
+                    except:
+                        continue
+                
+                if not self.model:
+                     self.model = genai.GenerativeModel('gemini-pro')
+            except Exception as e:
+                print(f"Failed to configure Gemini: {e}")
+                self.model = None
         else:
+            if not genai:
+                print("Warning: google-generativeai not installed.")
             self.model = None
 
     def _generate_with_fallback(self, prompt):
