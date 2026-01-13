@@ -298,6 +298,7 @@ class SubmitTestView(views.APIView):
             else: level = 'middle'
 
             # AI Feedback Integration
+            ai = None
             ai_advice = None
             try:
                 ai = GeminiService()
