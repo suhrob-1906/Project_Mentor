@@ -298,19 +298,26 @@ class SubmitTestView(views.APIView):
             else: level = 'middle'
 
             # AI Feedback Integration
-            ai = GeminiService()
-            ai_advice = ai.get_feedback(
-                language=language,
-                category=category,
-                score=correct_count,
-                total=total,
-                wrong_answers=wrong_concepts[:5], 
-                is_child=is_child
-            )
+            ai_advice = None
+            try:
+                ai = GeminiService()
+                ai_advice = ai.get_feedback(
+                    language=language,
+                    category=category,
+                    score=correct_count,
+                    total=total,
+                    wrong_answers=wrong_concepts[:5], 
+                    is_child=is_child
+                )
+            except Exception as e:
+                print(f"AI Feedback failed: {e}")
+                ai_advice = "AI Mentor is currently offline, but great job!"
 
             # Generate Homework Tasks (AI prioritized)
             tasks = []
             try:
+                # Re-init service or reuse? Reuse is fine.
+                if not ai: ai = GeminiService()
                 tasks = ai.generate_homework(language, category, wrong_concepts, is_child)
             except Exception as e:
                 print(f"AI Homework Gen failed: {e}")
@@ -318,27 +325,36 @@ class SubmitTestView(views.APIView):
             if not tasks:
                 tasks = self._generate_tasks(language, level, is_child)
             
-            # Create Homework objects for the user
-            for task_desc in tasks:
-                Homework.objects.get_or_create(
-                    user=request.user,
-                    language=language,
-                    category=category,
-                    task_description=task_desc,
-                    defaults={'status': 'assigned'}
-                )
-            
-            # Generate/Update Roadmap
-            rg = RoadmapGenerator(language, level, request.user.goal)
-            roadmap_steps = rg.generate()
-            Roadmap.objects.create(user=request.user, title=f"Path for {level.title()} {language}", steps=roadmap_steps)
-            
-            # Generate/Update Projects
-            ProjectRecommendation.objects.filter(user=request.user).delete()
-            pg = ProjectGenerator(language, level)
-            projects_data = pg.generate()
-            for p in projects_data:
-                ProjectRecommendation.objects.create(user=request.user, **p)
+            # Create Homework objects for the user safely
+            try:
+                for task_desc in tasks:
+                    # Avoid get_or_create on TextField for safety
+                    if not Homework.objects.filter(user=request.user, language=language, category=category, task_description=task_desc).exists():
+                        Homework.objects.create(
+                            user=request.user,
+                            language=language,
+                            category=category,
+                            task_description=task_desc,
+                            status='assigned'
+                        )
+            except Exception as e:
+                print(f"Homework saving failed: {e}")
+
+            # Generate/Update Roadmap & Projects (Non-critical)
+            roadmap_steps = []
+            projects_data = []
+            try:
+                rg = RoadmapGenerator(language, level, request.user.goal)
+                roadmap_steps = rg.generate()
+                Roadmap.objects.create(user=request.user, title=f"Path for {level.title()} {language}", steps=roadmap_steps)
+                
+                ProjectRecommendation.objects.filter(user=request.user).delete()
+                pg = ProjectGenerator(language, level)
+                projects_data = pg.generate()
+                for p in projects_data:
+                    ProjectRecommendation.objects.create(user=request.user, **p)
+            except Exception as e:
+                print(f"Roadmap/Project gen failed: {e}")
 
             # Save Result
             result = TestResult.objects.create(
@@ -369,9 +385,10 @@ class SubmitTestView(views.APIView):
                 "is_child": is_child
             })
         except Exception as e:
+            # Catch-all for Critical Failures (DB connection etc)
             import traceback
             print(traceback.format_exc())
-            return Response({"error": str(e)}, status=500)
+            return Response({"error": f"Critical Error: {str(e)}"}, status=500)
 
     def _generate_tasks(self, language, level, is_child):
         # Basic task sets
