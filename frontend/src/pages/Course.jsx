@@ -24,11 +24,11 @@ export default function Course() {
     const fetchCourse = async () => {
         try {
             // 1. Get Course Structure
-            const resp = await api.get(`/mentor/courses/${courseSlug}/`);
+            // Fix: The URL path in config/urls.py is 'api/', so full path is /api/courses/
+            const resp = await api.get(`/api/courses/${courseSlug}/`);
             setCourse(resp.data);
 
             // 2. Find first unlocked lesson to activate
-            // This logic should be smarter, but for now pick the first one.
             if (resp.data.modules.length > 0 && resp.data.modules[0].lessons.length > 0) {
                 loadLesson(resp.data.modules[0].lessons[0].slug);
             }
@@ -41,7 +41,7 @@ export default function Course() {
 
     const loadLesson = async (slug) => {
         try {
-            const resp = await api.get(`/mentor/lessons/${slug}/`);
+            const resp = await api.get(`/api/lessons/${slug}/`);
             setActiveLesson(resp.data);
             setCode(resp.data.initial_code || '');
             setResult(null);
@@ -54,7 +54,7 @@ export default function Course() {
         if (!activeLesson) return;
         setChecking(true);
         try {
-            const resp = await api.post(`/mentor/lessons/${activeLesson.slug}/check/`, { code });
+            const resp = await api.post(`/api/lessons/${activeLesson.slug}/check/`, { code });
             setResult(resp.data);
             if (resp.data.passed) {
                 // Refresh course to update locks
@@ -88,10 +88,10 @@ export default function Course() {
                                         onClick={() => lesson.is_unlocked && loadLesson(lesson.slug)}
                                         disabled={!lesson.is_unlocked}
                                         className={`w-full flex items-center gap-3 p-3 rounded-xl text-sm font-bold transition-all ${activeLesson?.id === lesson.id
-                                                ? 'bg-indigo-100 text-indigo-700'
-                                                : lesson.is_unlocked
-                                                    ? 'hover:bg-gray-50 text-gray-600'
-                                                    : 'opacity-50 cursor-not-allowed text-gray-400'
+                                            ? 'bg-indigo-100 text-indigo-700'
+                                            : lesson.is_unlocked
+                                                ? 'hover:bg-gray-50 text-gray-600'
+                                                : 'opacity-50 cursor-not-allowed text-gray-400'
                                             }`}
                                     >
                                         {lesson.is_completed ? <CheckCircle className="w-4 h-4 text-green-500" /> : (
