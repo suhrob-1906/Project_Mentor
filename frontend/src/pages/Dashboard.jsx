@@ -1,15 +1,15 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import api from '../api';
 import { useTranslation } from 'react-i18next';
 import {
-    Code2, Terminal, Cpu, Globe, ArrowRight,
-    BookOpen, Sparkles, Languages, Check, Code, Rocket,
+    Terminal, Cpu, Globe,
+    BookOpen, Sparkles, Languages, Code, Rocket,
     Lock, Star, Play, Award, Zap, AlertCircle, Clock, Shield, Trophy
 } from 'lucide-react';
 
 export default function Dashboard({ isChild }) {
-    const { t, i18n } = useTranslation();
+    const { i18n } = useTranslation();
     const navigate = useNavigate();
     const [selectedLanguage, setSelectedLanguage] = useState('python');
     const [progress, setProgress] = useState({ unlocked: ['basics'], completed: {} });
@@ -23,33 +23,33 @@ export default function Dashboard({ isChild }) {
     ];
 
     const modules = [
-        { id: 'basics', name: t('roadmap.basics', '1. Основы и Типы данных'), icon: <BookOpen />, color: 'indigo' },
-        { id: 'logic', name: t('roadmap.logic', '2. Переменные и Логика'), icon: <Sparkles />, color: 'blue' },
-        { id: 'arrays', name: t('roadmap.arrays', '3. Списки и Коллекции'), icon: <Terminal />, color: 'cyan' },
-        { id: 'functions', name: t('roadmap.functions', '4. Функции и Методы'), icon: <Zap />, color: 'amber' },
-        { id: 'objects', name: t('roadmap.objects', '5. Объекты и Классы'), icon: <Cpu />, color: 'rose' },
-        { id: 'errors', name: t('roadmap.errors', '6. Обработка ошибок'), icon: <AlertCircle />, color: 'red' },
-        { id: 'async', name: t('roadmap.async', '7. Асинхронность'), icon: <Clock />, color: 'purple' },
-        { id: 'apis', name: t('roadmap.apis', '8. Работа с API'), icon: <Globe />, color: 'indigo' },
-        { id: 'patterns', name: t('roadmap.patterns', '9. Паттерны проектирования'), icon: <Shield />, color: 'emerald' },
-        { id: 'final', name: t('roadmap.final', '10. Финальное испытание'), icon: <Trophy />, color: 'yellow' },
+        { id: 'basics', name: '1. Основы и Типы данных', icon: <BookOpen />, color: 'indigo' },
+        { id: 'logic', name: '2. Переменные и Логика', icon: <Sparkles />, color: 'blue' },
+        { id: 'arrays', name: '3. Списки и Коллекции', icon: <Terminal />, color: 'cyan' },
+        { id: 'functions', name: '4. Функции и Методы', icon: <Zap />, color: 'amber' },
+        { id: 'objects', name: '5. Объекты и Классы', icon: <Cpu />, color: 'rose' },
+        { id: 'errors', name: '6. Обработка ошибок', icon: <AlertCircle />, color: 'red' },
+        { id: 'async', name: '7. Асинхронность', icon: <Clock />, color: 'purple' },
+        { id: 'apis', name: '8. Работа с API', icon: <Globe />, color: 'indigo' },
+        { id: 'patterns', name: '9. Паттерны проектирования', icon: <Shield />, color: 'emerald' },
+        { id: 'final', name: '10. Финальное испытание', icon: <Trophy />, color: 'yellow' },
     ];
 
-    useEffect(() => {
-        fetchProgress();
-    }, [selectedLanguage]);
-
-    const fetchProgress = async () => {
+    const fetchProgress = useCallback(async () => {
         setIsLoading(true);
         try {
             const res = await api.get(`/api/progress/?language=${selectedLanguage}`);
             setProgress(res.data);
         } catch (err) {
-            console.error(err);
+            console.error("Progress fetch error:", err);
         } finally {
             setIsLoading(false);
         }
-    };
+    }, [selectedLanguage]);
+
+    useEffect(() => {
+        fetchProgress();
+    }, [selectedLanguage, fetchProgress]);
 
     const toggleLanguageUI = () => {
         const newLang = i18n.language.startsWith('ru') ? 'en' : 'ru';

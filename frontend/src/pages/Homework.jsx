@@ -1,11 +1,10 @@
-import { useState, useEffect } from 'react';
-import { useLocation, useNavigate, Link } from 'react-router-dom';
+import { useState, useEffect, useCallback } from 'react';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import api from '../api';
 import {
-    Code2, Terminal, Cpu, Globe, ArrowRight,
-    BookOpen, Sparkles, Check, Code, Rocket,
-    Lock, Star, Play, Award, Zap, AlertCircle, ChevronLeft, Send
+    Terminal, Sparkles, Check, Code, Rocket,
+    Award, Zap, AlertCircle, ChevronLeft, Send
 } from 'lucide-react';
 
 export default function Homework() {
@@ -19,13 +18,8 @@ export default function Homework() {
     const [result, setResult] = useState(null);
     const [language] = useState(state?.language || 'python');
 
-    useEffect(() => {
-        fetchHomeworks();
-    }, [language]);
-
-    const fetchHomeworks = async () => {
+    const fetchHomeworks = useCallback(async () => {
         try {
-            const token = localStorage.getItem('access_token');
             const res = await api.get(`/api/homework/?language=${language}`);
             setHomeworks(res.data);
             if (res.data.length > 0 && !selectedHw) {
@@ -35,13 +29,16 @@ export default function Homework() {
         } catch (err) {
             console.error("Failed to fetch homeworks", err);
         }
-    };
+    }, [language, selectedHw]);
+
+    useEffect(() => {
+        fetchHomeworks();
+    }, [fetchHomeworks]);
 
     const submitHomework = async () => {
         if (!selectedHw || !submission) return;
         setLoading(true);
         try {
-            const token = localStorage.getItem('access_token');
             const res = await api.post(`/api/homework/`, {
                 id: selectedHw.id,
                 submission: submission

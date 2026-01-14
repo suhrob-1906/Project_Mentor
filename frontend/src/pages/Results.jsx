@@ -1,11 +1,10 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { useLocation, useNavigate, Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import {
-    CheckCircle, Map, FolderGit2, Star,
-    ArrowRight, Trophy, Target, Sparkles,
-    Languages, Home, BookOpen, PartyPopper, Rocket,
-    Cloud, Sun, Tent, Zap, Ghost, Heart, Award, Play
+    CheckCircle,
+    ArrowRight, Trophy, Sparkles,
+    Rocket, Award
 } from 'lucide-react';
 
 export default function Results({ isChild: propIsChild }) {

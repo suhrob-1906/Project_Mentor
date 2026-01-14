@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import api from '../api';
 import { useTranslation } from 'react-i18next';
@@ -18,28 +18,28 @@ export default function Test({ isChild }) {
     const [submitting, setSubmitting] = useState(false);
     const [error, setError] = useState(null);
 
-    useEffect(() => {
-        const fetchQuestions = async () => {
-            let url = `/api/questions/?language=${language}&category=${category}`;
-            console.log(`[Diagnostic] Fetching questions from: ${url}`);
-            try {
-                let res = await api.get(url);
-                if (Array.isArray(res.data) && res.data.length === 0) {
-                    console.warn(`[Diagnostic] Standard questions empty. Trying AI dynamic generation...`);
-                    const dynamicUrl = `/api/dynamic-questions/?language=${language}&category=${category}`;
-                    const dynRes = await api.get(dynamicUrl);
-                    res = dynRes;
-                }
-                setQuestions(res.data);
-                setLoading(false);
-            } catch (err) {
-                console.error(`[Diagnostic] Error fetching questions:`, err);
-                setError("Failed to load questions. Please try again.");
-                setLoading(false);
+    const fetchQuestions = useCallback(async () => {
+        let url = `/api/questions/?language=${language}&category=${category}`;
+        console.log(`[Diagnostic] Fetching questions from: ${url}`);
+        try {
+            let res = await api.get(url);
+            if (Array.isArray(res.data) && res.data.length === 0) {
+                console.warn(`[Diagnostic] Standard questions empty. Trying AI dynamic generation...`);
+                const dynamicUrl = `/api/dynamic-questions/?language=${language}&category=${category}`;
+                const dynRes = await api.get(dynamicUrl);
+                res = dynRes;
             }
-        };
+            setQuestions(res.data);
+            setLoading(false);
+        } catch (err) {
+            console.error(`[Diagnostic] Error fetching questions:`, err);
+            setError("Failed to load questions. Please try again.");
+            setLoading(false);
+        }
+    }, [language, category, setQuestions, setLoading, setError]); // Added state setters to dependencies
+    useEffect(() => {
         fetchQuestions();
-    }, [language, category]);
+    }, [fetchQuestions]);
 
     const handleSelect = (optionIndex) => {
         setAnswers({ ...answers, [questions[currentIndex].id]: optionIndex });
@@ -64,6 +64,7 @@ export default function Test({ isChild }) {
             const res = await api.post('/api/submit-test/', data);
             navigate('/results', { state: { data: res.data } });
         } catch (err) {
+            console.error("Submit test error:", err);
             setError("Failed to submit test. Please try again.");
             setSubmitting(false);
         }

@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import api from '../api';
-import { Loader2, Sparkles, ShieldCheck } from 'lucide-react';
+import { Loader2, ShieldCheck } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 
 export default function Login() {
@@ -23,6 +23,7 @@ export default function Login() {
             navigate('/dashboard');
             window.location.reload();
         } catch (err) {
+            console.error("Login error:", err);
             setError(t('login.fail', 'Invalid credentials'));
         } finally {
             setLoading(false);

@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import api from '../api';
 import { Loader2, CheckCircle, Lock, Play, ChevronRight, Menu, ArrowLeft, X, Bot } from 'lucide-react';
@@ -6,7 +6,7 @@ import CourseMap from '../components/CourseMap';
 import { useTranslation } from 'react-i18next';
 
 export default function Course() {
-    const { t, i18n } = useTranslation();
+    const { i18n } = useTranslation();
     const navigate = useNavigate();
     const [course, setCourse] = useState(null);
     const [activeLesson, setActiveLesson] = useState(null);
@@ -26,6 +26,7 @@ export default function Course() {
             const resp = await api.post(`/api/lessons/${activeLesson.slug}/hint/`, { code });
             setMentorMessages(prev => [...prev, { role: 'user', text: 'Hint please!' }, { role: 'ai', text: resp.data.hint }]);
         } catch (err) {
+            console.error("Hint error:", err);
             setMentorMessages(prev => [...prev, { role: 'ai', text: 'Sorry, I cannot connect right now.' }]);
         } finally {
             setAiLoading(false);
@@ -58,22 +59,22 @@ export default function Course() {
             .catch(() => setCourseSlug('backend'));
     }, []);
 
-    useEffect(() => {
-        if (courseSlug) fetchCourse();
-    }, [courseSlug]);
-
-    const fetchCourse = async () => {
+    const fetchCourse = useCallback(async () => {
         try {
             // 1. Get Course Structure
             const resp = await api.get(`/api/courses/${courseSlug}/`);
             setCourse(resp.data);
             // Don't auto-load lesson in V2, show map first
         } catch (err) {
-            console.error(err);
+            console.error("Failed to fetch course:", err);
         } finally {
             setLoading(false);
         }
-    };
+    }, [courseSlug]);
+
+    useEffect(() => {
+        if (courseSlug) fetchCourse();
+    }, [courseSlug, fetchCourse]);
 
     const loadLesson = async (slug) => {
         try {

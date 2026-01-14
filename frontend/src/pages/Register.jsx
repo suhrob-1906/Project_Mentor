@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import api from '../api';
-import { Loader2, Sparkles, UserPlus } from 'lucide-react';
+import { Loader2, UserPlus } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 
 export default function Register() {
@@ -33,6 +33,7 @@ export default function Register() {
                 navigate('/login');
             }
         } catch (err) {
+            console.error("Registration error:", err);
             setError(t('register.fail', 'Registration failed'));
         } finally {
             setLoading(false);

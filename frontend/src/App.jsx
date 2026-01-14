@@ -59,51 +59,27 @@ function App() {
           <Route path="/register" element={<Register />} />
           <Route
             path="/dashboard"
-            element={
-              <ProtectedRoute>
-                <Dashboard isChild={isChild} />
-              </ProtectedRoute>
-            }
+            element={<ProtectedRoute><Dashboard isChild={isChild} /></ProtectedRoute>}
           />
           <Route
             path="/test"
-            element={
-              <ProtectedRoute>
-                <Test isChild={isChild} />
-              </ProtectedRoute>
-            }
+            element={<ProtectedRoute><Test isChild={isChild} /></ProtectedRoute>}
           />
           <Route
             path="/results"
-            element={
-              <ProtectedRoute>
-                <Results isChild={isChild} />
-              </ProtectedRoute>
-            }
+            element={<ProtectedRoute><Results isChild={isChild} /></ProtectedRoute>}
           />
           <Route
             path="/homework"
-            element={
-              <ProtectedRoute>
-                <Homework isChild={isChild} />
-              </ProtectedRoute>
-            }
+            element={<ProtectedRoute><Homework isChild={isChild} /></ProtectedRoute>}
           />
           <Route
             path="/courses"
-            element={
-              <ProtectedRoute>
-                <Course />
-              </ProtectedRoute>
-            }
+            element={<ProtectedRoute><Course /></ProtectedRoute>}
           />
           <Route
             path="/courses/:slug/completion"
-            element={
-              <ProtectedRoute>
-                <CourseCompletion />
-              </ProtectedRoute>
-            }
+            element={<ProtectedRoute><CourseCompletion /></ProtectedRoute>}
           />
         </Routes>
       </div>
