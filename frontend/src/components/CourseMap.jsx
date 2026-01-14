@@ -1,9 +1,11 @@
 import React, { useRef, useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Check, Lock, Star, Play, Flag, BookOpen, Code2, Award } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 
 const CourseMap = ({ course, activeLesson, onSelectLesson, isCompact = false }) => {
     const { i18n } = useTranslation();
+    const navigate = useNavigate();
     if (!course) return null;
 
     // Flatten all lessons into a single list for easier path drawing
@@ -222,7 +224,7 @@ const CourseMap = ({ course, activeLesson, onSelectLesson, isCompact = false }) 
                 <div className="h-40 text-center text-gray-300 text-sm font-bold uppercase tracking-widest flex items-center justify-center gap-2">
                     {allLessons.every(l => l.is_completed) ? (
                         <button
-                            onClick={() => window.location.href = `/courses/${course.slug}/completion`}
+                            onClick={() => navigate(`/courses/${course.slug}/completion`)}
                             className="px-10 py-5 bg-gradient-to-r from-yellow-400 to-yellow-500 hover:from-yellow-300 hover:to-yellow-400 text-yellow-900 font-black rounded-[2rem] shadow-2xl shadow-yellow-200/50 transition-all hover:scale-105 active:scale-95 flex items-center gap-3 border-b-8 border-yellow-700 active:border-b-0 animate-bounce-slow"
                         >
                             <Award className="w-6 h-6" />

@@ -74,6 +74,10 @@ function App() {
             element={<ProtectedRoute><Homework isChild={isChild} /></ProtectedRoute>}
           />
           <Route
+            path="/courses"
+            element={<Navigate to="/dashboard" replace />}
+          />
+          <Route
             path="/courses/:slug"
             element={<ProtectedRoute><Course isChild={isChild} /></ProtectedRoute>}
           />

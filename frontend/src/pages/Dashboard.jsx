@@ -122,7 +122,7 @@ export default function Dashboard({ isChild }) {
                             ${isChild ? 'bg-black text-white' : 'bg-white border-2 border-indigo-600 text-indigo-600 shadow-xl shadow-indigo-100'}`}
                     >
                         <Map className={`w-5 h-5 group-hover:rotate-12 transition-transform ${isChild ? 'text-yellow-400' : 'text-indigo-600'}`} />
-                        {isRu ? 'Карта приключений' : 'View Journey Map'}
+                        {i18n.language.startsWith('ru') ? 'Карта приключений' : 'View Journey Map'}
                     </button>
                 </div>
 
