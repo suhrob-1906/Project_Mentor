@@ -16,4 +16,6 @@ if [ "$RESET_DB" == "true" ]; then
     echo "✅ Database flushed."
 fi
 
-python manage.py populate_courses
+# Run the massive curriculum population script
+echo "Running curriculum population..."
+python scripts/populate_massive_curriculum.py
