@@ -10,7 +10,14 @@ django.setup()
 from mentor.models import Course, Module, Lesson
 
 def populate():
-    print("Clearing old curriculum...")
+    # Only populate if Courses are empty to avoid resetting user progress periodically
+    # or use --force flag
+    force = '--force' in sys.argv
+    if Course.objects.exists() and not force:
+        print("✅ Database already contains data. Skipping population.")
+        return
+
+    print("🚀 Clearing old curriculum (FORCED RESET)..." if force else "🌱 Initializing curriculum for the first time...")
     Course.objects.all().delete()
 
     # --- 1. BACKEND (PYTHON) ---
