@@ -303,4 +303,63 @@ class GeminiService:
             response = self._generate_with_fallback(prompt)
             return response.text
         except Exception as e:
-             return f"Error explanation failed: {e}"
+            return f"Error explanation failed: {e}"
+
+    def mentor_chat(self, history, message, context_info, is_child=False):
+        """
+        history: list of {"role": "user/mentor", "content": "..."}
+        message: newest user message
+        context_info: dict with {lesson_title, lesson_content, user_code, language}
+        """
+        if not self.api_key:
+            return "Mentor chat is offline."
+
+        # Format context
+        ctx = f"""
+        Context:
+        Language: {context_info.get('language')}
+        Lesson: {context_info.get('lesson_title')}
+        Topic Content: {context_info.get('lesson_content')}
+        Student's Current Code:
+        ```
+        {context_info.get('user_code')}
+        ```
+        """
+
+        persona = "You are a friendly, encouraging AI programming tutor for children. Use emojis, keep it simple, and motivate them!" if is_child else \
+                  "You are a professional IT Mentor. Provide deep technical insights, encourage best practices, and be concise."
+
+        # Convert history for Gemini format
+        # Gemini expects 'user' and 'model' roles
+        gemini_history = []
+        for h in history:
+            role = 'user' if h['role'] == 'user' else 'model'
+            gemini_history.append({"role": role, "parts": [h['content']]})
+
+        prompt = f"""
+        {persona}
+        {ctx}
+        
+        Guidelines:
+        1. Answer the student's question based on the context above.
+        2. Do NOT just give the full solution if it's a practice task. Guide them.
+        3. If they ask something irrelevant to programming, politely lead them back to the lesson.
+        4. Response Language: Russian.
+        """
+
+        try:
+            # We use the model's start_chat if available or just generate with history
+            model_name = 'gemini-1.5-flash' # Using a specific good model for chat
+            model = genai.GenerativeModel(model_name)
+            
+            chat = model.start_chat(history=gemini_history)
+            response = chat.send_message(f"{prompt}\n\nUser: {message}")
+            return response.text
+        except Exception as e:
+            # Fallback to simple generation if chat fails
+            full_prompt = f"{persona}\n{ctx}\nHistory: {history}\nUser: {message}\nAssistant:"
+            try:
+                resp = self._generate_with_fallback(full_prompt)
+                return resp.text
+            except:
+                return f"Chat error: {str(e)}"

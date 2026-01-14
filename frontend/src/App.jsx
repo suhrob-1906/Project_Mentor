@@ -74,8 +74,8 @@ function App() {
             element={<ProtectedRoute><Homework isChild={isChild} /></ProtectedRoute>}
           />
           <Route
-            path="/courses"
-            element={<ProtectedRoute><Course /></ProtectedRoute>}
+            path="/courses/:slug"
+            element={<ProtectedRoute><Course isChild={isChild} /></ProtectedRoute>}
           />
           <Route
             path="/courses/:slug/completion"

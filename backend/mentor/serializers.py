@@ -79,12 +79,15 @@ class LessonDetailSerializer(LessonSimpleSerializer):
     # Compat: map content_en to theory_content/practice_task depending on type
     theory_content = serializers.SerializerMethodField()
     practice_task = serializers.SerializerMethodField()
+    theory_ref_en = serializers.SerializerMethodField()
+    theory_ref_ru = serializers.SerializerMethodField()
     
     class Meta(LessonSimpleSerializer.Meta):
         fields = LessonSimpleSerializer.Meta.fields + (
             'content_en', 'content_ru', 
             'initial_code', 'expected_output', 'solution_code',
-            'theory_content', 'practice_task' # Compat
+            'theory_content', 'practice_task', # Compat
+            'theory_ref_en', 'theory_ref_ru'
         )
 
     def get_theory_content(self, obj):
@@ -92,6 +95,18 @@ class LessonDetailSerializer(LessonSimpleSerializer):
 
     def get_practice_task(self, obj):
         return obj.content_en if obj.lesson_type == 'practice' else ''
+
+    def get_theory_ref_en(self, obj):
+        if obj.lesson_type == 'practice':
+            prev = Lesson.objects.filter(module=obj.module, order=obj.order - 1, lesson_type='theory').first()
+            return prev.content_en if prev else ""
+        return ""
+
+    def get_theory_ref_ru(self, obj):
+        if obj.lesson_type == 'practice':
+            prev = Lesson.objects.filter(module=obj.module, order=obj.order - 1, lesson_type='theory').first()
+            return prev.content_ru if prev else ""
+        return ""
 
 class ModuleSerializer(serializers.ModelSerializer):
     lessons = LessonSimpleSerializer(many=True, read_only=True)

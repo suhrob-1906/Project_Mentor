@@ -543,3 +543,73 @@ class SubmitTestView(views.APIView):
             return [f"🌟 {task}" for task in selected]
         
         return selected
+class MentorChatView(APIView):
+    permission_classes = [permissions.IsAuthenticated]
+
+    def post(self, request):
+        user = request.user
+        lesson_slug = request.data.get('lesson_slug')
+        message = request.data.get('message')
+        user_code = request.data.get('code', '')
+        
+        if not message:
+            return Response({"error": "Message is required"}, status=400)
+
+        lesson = None
+        if lesson_slug:
+            lesson = Lesson.objects.filter(slug=lesson_slug).first()
+
+        # Get or create active session for this lesson
+        session, _ = ChatSession.objects.get_or_create(
+            user=user, 
+            lesson=lesson, 
+            is_active=True
+        )
+
+        # Get last 10 messages for history
+        history_msgs = session.messages.all()[:10]
+        history = [
+            {"role": m.role, "content": m.content} 
+            for m in history_msgs
+        ]
+
+        # Save user message
+        ChatMessage.objects.create(session=session, role='user', content=message)
+
+        # AI Mentor Context
+        context_info = {
+            "language": lesson.module.course.slug if lesson else "Programming",
+            "lesson_title": lesson.title_en if lesson else "General Help",
+            "lesson_content": lesson.content_en if lesson else "",
+            "user_code": user_code
+        }
+
+        is_child = user.age <= 14 if hasattr(user, 'age') else False
+        
+        ai = GeminiService()
+        ai_response = ai.mentor_chat(history, message, context_info, is_child=is_child)
+
+        # Save mentor response
+        ChatMessage.objects.create(session=session, role='mentor', content=ai_response)
+
+        return Response({
+            "response": ai_response,
+            "session_id": session.id
+        })
+
+    def get(self, request):
+        lesson_slug = request.query_params.get('lesson_slug')
+        if not lesson_slug:
+            return Response([])
+        
+        lesson = Lesson.objects.filter(slug=lesson_slug).first()
+        session = ChatSession.objects.filter(user=request.user, lesson=lesson, is_active=True).first()
+        
+        if not session:
+            return Response([])
+            
+        msgs = session.messages.all()
+        return Response([
+            {"role": m.role, "content": m.content, "created_at": m.created_at}
+            for m in msgs
+        ])

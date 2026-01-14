@@ -4,55 +4,56 @@ import api from '../api';
 import { useTranslation } from 'react-i18next';
 import {
     Terminal, Cpu, Globe,
-    BookOpen, Sparkles, Languages, Code, Rocket,
+    BookOpen, Sparkles, Languages, Code, Rocket, Map,
     Lock, Star, Play, Award, Zap, AlertCircle, Clock, Shield, Trophy
 } from 'lucide-react';
 
 export default function Dashboard({ isChild }) {
-    const { i18n } = useTranslation();
+    const { t, i18n } = useTranslation();
     const navigate = useNavigate();
     const [selectedLanguage, setSelectedLanguage] = useState('python');
-    const [progress, setProgress] = useState({ unlocked: ['basics'], completed: {} });
+    const [modules, setModules] = useState([]);
+    const [progress, setProgress] = useState({ unlocked: [], completed: {} });
     const [isLoading, setIsLoading] = useState(true);
 
     const languages = [
-        { id: 'python', name: 'Python', icon: <Terminal className="w-6 h-6" />, color: 'bg-yellow-50 text-yellow-600 border-yellow-100' },
-        { id: 'javascript', name: 'JavaScript', icon: <Code className="w-6 h-6" />, color: 'bg-blue-50 text-blue-600 border-blue-100' },
-        { id: 'go', name: 'Go', icon: <Cpu className="w-6 h-6" />, color: 'bg-cyan-50 text-cyan-600 border-cyan-100' },
-        { id: 'java', name: 'Java', icon: <Globe className="w-6 h-6" />, color: 'bg-red-50 text-red-600 border-red-100' },
+        { id: 'python', name: 'Python', icon: <Terminal className="w-6 h-6" />, color: 'yellow' },
+        { id: 'javascript', name: 'JavaScript', icon: <Code className="w-6 h-6" />, color: 'blue' },
+        { id: 'go', name: 'Go', icon: <Cpu className="w-6 h-6" />, color: 'cyan' },
+        { id: 'java', name: 'Java', icon: <Globe className="w-6 h-6" />, color: 'red' },
     ];
 
-    const modules = [
-        { id: 'basics', name: '1. Основы и Типы данных', icon: <BookOpen />, color: 'indigo' },
-        { id: 'logic', name: '2. Переменные и Логика', icon: <Sparkles />, color: 'blue' },
-        { id: 'arrays', name: '3. Списки и Коллекции', icon: <Terminal />, color: 'cyan' },
-        { id: 'functions', name: '4. Функции и Методы', icon: <Zap />, color: 'amber' },
-        { id: 'objects', name: '5. Объекты и Классы', icon: <Cpu />, color: 'rose' },
-        { id: 'errors', name: '6. Обработка ошибок', icon: <AlertCircle />, color: 'red' },
-        { id: 'async', name: '7. Асинхронность', icon: <Clock />, color: 'purple' },
-        { id: 'apis', name: '8. Работа с API', icon: <Globe />, color: 'indigo' },
-        { id: 'patterns', name: '9. Паттерны проектирования', icon: <Shield />, color: 'emerald' },
-        { id: 'final', name: '10. Финальное испытание', icon: <Trophy />, color: 'yellow' },
-    ];
-
-    const fetchProgress = useCallback(async () => {
+    const fetchData = useCallback(async () => {
         setIsLoading(true);
         try {
-            const res = await api.get(`/api/progress/?language=${selectedLanguage}`);
-            setProgress(res.data);
+            // 1. Fetch Course Modules
+            const courseRes = await api.get(`/api/courses/${selectedLanguage}/`);
+            setModules(courseRes.data.modules.map(m => ({
+                id: m.slug || m.id,
+                name: (i18n.language || 'en').startsWith('ru') ? m.title_ru : m.title_en,
+                icon: <BookOpen />,
+                color: languages.find(l => l.id === selectedLanguage)?.color || 'indigo'
+            })));
+
+            // 2. Fetch Progress
+            const progRes = await api.get(`/api/progress/?language=${selectedLanguage}`);
+            setProgress(progRes.data);
         } catch (err) {
-            console.error("Progress fetch error:", err);
+            console.error("Data fetch error:", err);
+            // Fallback if course not found
+            setModules([]);
         } finally {
             setIsLoading(false);
         }
-    }, [selectedLanguage]);
+    }, [selectedLanguage, i18n.language]);
 
     useEffect(() => {
-        fetchProgress();
-    }, [selectedLanguage, fetchProgress]);
+        fetchData();
+    }, [fetchData]);
 
     const toggleLanguageUI = () => {
-        const newLang = i18n.language.startsWith('ru') ? 'en' : 'ru';
+        const currentLang = i18n.language || 'en';
+        const newLang = currentLang.startsWith('ru') ? 'en' : 'ru';
         i18n.changeLanguage(newLang);
     };
 
@@ -91,28 +92,38 @@ export default function Dashboard({ isChild }) {
                             className={`flex items-center gap-2 px-4 py-2 rounded-xl transition-all font-bold text-sm ${isChild ? 'bg-black text-white hover:scale-110' : 'hover:bg-gray-50 border border-gray-100 text-gray-700'}`}
                         >
                             <Languages className="w-4 h-4" />
-                            {i18n.language.toUpperCase()}
+                            {(i18n.language || 'en').toUpperCase()}
                         </button>
                     </div>
                 </div>
             </nav>
 
             <main className="container mx-auto px-4 py-12 max-w-4xl">
-                {/* Language Picker */}
-                <div className="flex justify-center gap-4 mb-16 flex-wrap">
-                    {languages.map((lang) => (
-                        <button
-                            key={lang.id}
-                            onClick={() => setSelectedLanguage(lang.id)}
-                            className={`px-6 py-3 rounded-2xl font-bold flex items-center gap-2 transition-all border-2
-                                ${selectedLanguage === lang.id
-                                    ? (isChild ? 'bg-white border-black border-4 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]' : 'bg-indigo-600 text-white border-indigo-600 scale-105')
-                                    : (isChild ? 'bg-white/40 border-black/10' : 'bg-white border-gray-100 text-gray-500 hover:border-gray-300')}`}
-                        >
-                            {lang.icon}
-                            {lang.name}
-                        </button>
-                    ))}
+                <div className="flex flex-col md:flex-row items-center justify-between gap-6 mb-16">
+                    <div className="flex gap-4 flex-wrap">
+                        {languages.map((lang) => (
+                            <button
+                                key={lang.id}
+                                onClick={() => setSelectedLanguage(lang.id)}
+                                className={`px-6 py-3 rounded-2xl font-bold flex items-center gap-2 transition-all border-2
+                                    ${selectedLanguage === lang.id
+                                        ? (isChild ? 'bg-white border-black border-4 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]' : 'bg-indigo-600 text-white border-indigo-600 scale-105')
+                                        : (isChild ? 'bg-white/40 border-black/10' : 'bg-white border-gray-100 text-gray-500 hover:border-gray-300')}`}
+                            >
+                                {lang.icon}
+                                {lang.name}
+                            </button>
+                        ))}
+                    </div>
+
+                    <button
+                        onClick={() => navigate(`/courses/${selectedLanguage}`)}
+                        className={`flex items-center gap-3 px-8 py-4 rounded-[2rem] font-black uppercase tracking-widest text-sm transition-all hover:scale-105 active:scale-95 group
+                            ${isChild ? 'bg-black text-white' : 'bg-white border-2 border-indigo-600 text-indigo-600 shadow-xl shadow-indigo-100'}`}
+                    >
+                        <Map className={`w-5 h-5 group-hover:rotate-12 transition-transform ${isChild ? 'text-yellow-400' : 'text-indigo-600'}`} />
+                        {isRu ? 'Карта приключений' : 'View Journey Map'}
+                    </button>
                 </div>
 
                 {/* Duolingo Roadmap Path */}
@@ -124,6 +135,15 @@ export default function Dashboard({ isChild }) {
                         const isUnlocked = progress.unlocked.includes(mod.id);
                         const isCompleted = progress.completed[mod.id] >= 70;
                         const score = progress.completed[mod.id];
+
+                        const colorMap = {
+                            yellow: 'bg-yellow-500 border-yellow-200',
+                            blue: 'bg-blue-500 border-blue-200',
+                            cyan: 'bg-cyan-500 border-cyan-200',
+                            red: 'bg-red-500 border-red-200',
+                            indigo: 'bg-indigo-500 border-indigo-200'
+                        };
+                        const colorClasses = colorMap[mod.color] || colorMap.indigo;
 
                         return (
                             <div
@@ -138,8 +158,8 @@ export default function Dashboard({ isChild }) {
                                     onClick={() => isUnlocked && handleStartModule(mod.id)}
                                 >
                                     <div className={`w-20 h-20 rounded-[2rem] flex items-center justify-center text-3xl shadow-lg border-4
-                                        ${isUnlocked
-                                            ? (isChild ? 'bg-indigo-500 text-white border-black' : `bg-${mod.color}-500 text-white border-${mod.color}-200`)
+                                            ${isUnlocked
+                                            ? (isChild ? 'bg-indigo-500 text-white border-black' : `${colorClasses} text-white`)
                                             : 'bg-gray-200 text-gray-400 border-gray-100'}`}
                                     >
                                         {isUnlocked ? mod.icon : <Lock className="w-8 h-8" />}
