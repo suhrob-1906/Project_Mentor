@@ -36,18 +36,21 @@ class TestResultSerializer(serializers.ModelSerializer):
 
 # --- COURSE SERIALIZERS ---
 
+# --- COURSE SERIALIZERS ---
+
 class LessonSimpleSerializer(serializers.ModelSerializer):
     is_completed = serializers.SerializerMethodField()
     is_unlocked = serializers.SerializerMethodField()
+    # Compat fields
+    title = serializers.CharField(source='title_en', read_only=True)
 
     class Meta:
         model = Lesson
-        fields = ('id', 'slug', 'title', 'order', 'is_completed', 'is_unlocked')
+        fields = ('id', 'slug', 'title', 'title_en', 'title_ru', 'order', 'lesson_type', 'is_completed', 'is_unlocked')
 
     def get_is_completed(self, obj):
         user = self.context.get('user')
         if user and user.is_authenticated:
-            # Optimize this with prefetch later
             progress = UserLessonProgress.objects.filter(user=user, lesson=obj).first()
             return progress.is_completed if progress else False
         return False
@@ -55,45 +58,58 @@ class LessonSimpleSerializer(serializers.ModelSerializer):
     def get_is_unlocked(self, obj):
         user = self.context.get('user')
         if not user or not user.is_authenticated:
-            return obj.order == 1 # First lesson always unlocked
+            return obj.order == 1
         
-        # Check explicit unlock
         progress = UserLessonProgress.objects.filter(user=user, lesson=obj).first()
         if progress and progress.is_unlocked:
             return True
             
-        # Logic: If previous lesson completed, this is unlocked
         if obj.order == 1:
             return True
         
-        # Find previous lesson in same module
+        # Unlock logic: Prev lesson in module must be completed
         prev_lesson = Lesson.objects.filter(module=obj.module, order=obj.order - 1).first()
         if prev_lesson:
              prev_prog = UserLessonProgress.objects.filter(user=user, lesson=prev_lesson).first()
              return prev_prog.is_completed if prev_prog else False
              
-        # If first lesson of module > 1, check previous module? 
-        # For simplicity, let's assume strict sequential order or just use explicit is_unlocked if we manager it.
-        # But simpler logic: user needs to complete previous lesson.
         return False
 
 class LessonDetailSerializer(LessonSimpleSerializer):
+    # Compat: map content_en to theory_content/practice_task depending on type
+    theory_content = serializers.SerializerMethodField()
+    practice_task = serializers.SerializerMethodField()
+    
     class Meta(LessonSimpleSerializer.Meta):
-        fields = LessonSimpleSerializer.Meta.fields + ('theory_content', 'practice_task', 'initial_code', 'expected_output')
+        fields = LessonSimpleSerializer.Meta.fields + (
+            'content_en', 'content_ru', 
+            'initial_code', 'expected_output', 'solution_code',
+            'theory_content', 'practice_task' # Compat
+        )
+
+    def get_theory_content(self, obj):
+        return obj.content_en if obj.lesson_type == 'theory' else ''
+
+    def get_practice_task(self, obj):
+        return obj.content_en if obj.lesson_type == 'practice' else ''
 
 class ModuleSerializer(serializers.ModelSerializer):
     lessons = LessonSimpleSerializer(many=True, read_only=True)
+    title = serializers.CharField(source='title_en', read_only=True)
+    description = serializers.CharField(source='description_en', read_only=True)
     
     class Meta:
         model = Module
-        fields = ('id', 'title', 'order', 'description', 'lessons')
+        fields = ('id', 'title', 'title_en', 'title_ru', 'order', 'description', 'description_en', 'description_ru', 'lessons')
 
 class CourseSerializer(serializers.ModelSerializer):
     modules = ModuleSerializer(many=True, read_only=True)
+    title = serializers.CharField(source='title_en', read_only=True)
+    description = serializers.CharField(source='description_en', read_only=True)
     
     class Meta:
         model = Course
-        fields = ('slug', 'title', 'description', 'modules')
+        fields = ('slug', 'title', 'title_en', 'title_ru', 'description', 'description_en', 'description_ru', 'modules')
 
 class UserLessonProgressSerializer(serializers.ModelSerializer):
     class Meta:

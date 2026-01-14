@@ -246,3 +246,61 @@ class GeminiService:
             return response.text
         except Exception as e:
             return f"Не удалось получить решение: {str(e)}"
+
+    def generate_hint(self, language, task, code):
+        if not self.api_key:
+            return "Hint unavailable (No API Key)."
+
+        prompt = f"""
+        You are a helpful IT Mentor. A student is stuck on this task:
+        "{task}"
+
+        Length constraints: Keep it short (max 2-3 sentences).
+        Language: {language}
+        Student's Code so far:
+        ```
+        {code}
+        ```
+
+        Task:
+        1. Give a subtle hint without solving the problem.
+        2. Point out syntax errors if any.
+        3. Determine what they are missing logically.
+        
+        Response Language: Russian.
+        """
+        try:
+           response = self._generate_with_fallback(prompt)
+           return response.text
+        except Exception as e:
+            return f"Hint failed: {e}"
+
+    def explain_error(self, language, task, code, error_message):
+        if not self.api_key:
+            return "Explanation unavailable."
+            
+        prompt = f"""
+        You are a Code Doctor. A student got an error.
+        Task: "{task}"
+        
+        Language: {language}
+        Code:
+        ```
+        {code}
+        ```
+        
+        Error Message:
+        "{error_message}"
+        
+        Your Mission:
+        1. Explain what the error means in simple terms.
+        2. Show which line might be responsible.
+        3. Suggest how to fix it (without just writing the full code).
+        
+        Response Language: Russian.
+        """
+        try:
+            response = self._generate_with_fallback(prompt)
+            return response.text
+        except Exception as e:
+             return f"Error explanation failed: {e}"

@@ -120,35 +120,55 @@ class Homework(models.Model):
 
 class Course(models.Model):
     slug = models.SlugField(primary_key=True) # 'backend', 'frontend'
-    title = models.CharField(max_length=100)
-    description = models.TextField()
+    title_en = models.CharField(max_length=100)
+    title_ru = models.CharField(max_length=100, default='')
+    description_en = models.TextField()
+    description_ru = models.TextField(default='')
 
     def __str__(self):
-        return self.title
+        return self.title_en
+
+    @property
+    def title(self):
+        return self.title_en # Default for admin
 
 class Module(models.Model):
     course = models.ForeignKey(Course, on_delete=models.CASCADE, related_name='modules')
-    title = models.CharField(max_length=100)
-    order = models.PositiveIntegerField() # 1, 2, 3...
-    description = models.TextField(blank=True)
+    title_en = models.CharField(max_length=100)
+    title_ru = models.CharField(max_length=100, default='')
+    description_en = models.TextField(blank=True)
+    description_ru = models.TextField(blank=True, default='')
+    order = models.PositiveIntegerField()
 
     class Meta:
         ordering = ['order']
 
     def __str__(self):
-        return f"{self.course.slug} - {self.order}. {self.title}"
+        return f"{self.course.slug} - {self.order}. {self.title_en}"
 
 class Lesson(models.Model):
+    TYPE_CHOICES = [
+        ('theory', 'Theory'),
+        ('practice', 'Practice')
+    ]
+    
     module = models.ForeignKey(Module, on_delete=models.CASCADE, related_name='lessons')
-    title = models.CharField(max_length=100)
     slug = models.SlugField()
     order = models.PositiveIntegerField()
-    theory_content = models.TextField() # Markdown supported
+    lesson_type = models.CharField(max_length=20, choices=TYPE_CHOICES, default='theory')
     
-    # Practice
-    practice_task = models.TextField()
+    # Bilingual Content
+    title_en = models.CharField(max_length=100)
+    title_ru = models.CharField(max_length=100, default='')
+    
+    # Content (Markdown)
+    content_en = models.TextField(help_text="Theory text or Task description (EN)", default='')
+    content_ru = models.TextField(help_text="Theory text or Task description (RU)", default='')
+    
+    # Practice Config
     initial_code = models.TextField(default="", blank=True)
-    expected_output = models.TextField(blank=True, help_text="Simple match checks if needed")
+    expected_output = models.TextField(blank=True, help_text="Simple match checks")
+    solution_code = models.TextField(blank=True, help_text="Reference solution for AI hints")
     
     # AI/Verification Config
     verification_type = models.CharField(
@@ -162,7 +182,7 @@ class Lesson(models.Model):
         unique_together = ('module', 'slug')
 
     def __str__(self):
-        return f"{self.title}"
+        return f"[{self.lesson_type.upper()}] {self.title_en}"
 
 class UserLessonProgress(models.Model):
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='lesson_progress')
@@ -176,4 +196,4 @@ class UserLessonProgress(models.Model):
         unique_together = ('user', 'lesson')
 
     def __str__(self):
-        return f"{self.user.username} - {self.lesson.title}"
+        return f"{self.user.username} - {self.lesson.title_en}"

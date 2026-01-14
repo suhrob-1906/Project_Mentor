@@ -9,4 +9,11 @@ pip install -r requirements.txt
 
 python manage.py collectstatic --no-input
 python manage.py migrate
+
+if [ "$RESET_DB" == "true" ]; then
+    echo "⚠️ RESET_DB is set to true. Flushing database..."
+    python manage.py flush --no-input
+    echo "✅ Database flushed."
+fi
+
 python manage.py populate_courses

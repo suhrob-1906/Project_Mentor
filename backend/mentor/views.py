@@ -80,6 +80,42 @@ class LessonViewSet(viewsets.ReadOnlyModelViewSet):
             "feedback": feedback
         })
 
+    @action(detail=True, methods=['post'])
+    def hint(self, request, slug=None):
+        lesson = self.get_object()
+        user_code = request.data.get('code', '')
+        
+        from .services.ai_service import GeminiService
+        ai = GeminiService()
+        
+        # Context: "language" might be inferred from course slug or a property
+        # For now, let's assume 'python' if lesson.module.course.slug == 'backend' etc.
+        course_slug = lesson.module.course.slug
+        lang = 'python' if 'backend' in course_slug else 'javascript'
+        
+        # Use content_en as task description for AI context
+        task_desc = lesson.content_en 
+        
+        hint_text = ai.generate_hint(lang, task_desc, user_code)
+        
+        return Response({"hint": hint_text})
+
+    @action(detail=True, methods=['post'])
+    def explain(self, request, slug=None):
+        lesson = self.get_object()
+        user_code = request.data.get('code', '')
+        error_msg = request.data.get('error', 'Unknown Error')
+        
+        from .services.ai_service import GeminiService
+        ai = GeminiService()
+        course_slug = lesson.module.course.slug
+        lang = 'python' if 'backend' in course_slug else 'javascript'
+        task_desc = lesson.content_en 
+        
+        explanation = ai.explain_error(lang, task_desc, user_code, error_msg)
+        
+        return Response({"explanation": explanation})
+
 from .services.roadmap import RoadmapGenerator
 from .services.projects import ProjectGenerator
 from .services.ai_service import GeminiService

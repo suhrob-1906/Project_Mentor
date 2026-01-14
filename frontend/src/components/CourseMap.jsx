@@ -1,5 +1,5 @@
 import React, { useRef, useEffect, useState } from 'react';
-import { Check, Lock, Star, Play, Flag } from 'lucide-react';
+import { Check, Lock, Star, Play, Flag, BookOpen, Code2 } from 'lucide-react';
 
 const CourseMap = ({ course, activeLesson, onSelectLesson }) => {
     if (!course) return null;
@@ -143,7 +143,11 @@ const CourseMap = ({ course, activeLesson, onSelectLesson }) => {
                                 ) : isLocked ? (
                                     <Lock className={`w-7 h-7 ${iconColor}`} />
                                 ) : (
-                                    <Star className={`w-8 h-8 fill-current ${iconColor}`} />
+                                    lesson.lesson_type === 'theory' ? (
+                                        <BookOpen className={`w-8 h-8 fill-current ${iconColor}`} />
+                                    ) : (
+                                        <Code2 className={`w-8 h-8 fill-current ${iconColor}`} />
+                                    )
                                 )}
                             </button>
 
