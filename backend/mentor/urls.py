@@ -15,6 +15,7 @@ urlpatterns = [
     path('submit-test/', SubmitTestView.as_view(), name='submit-test'),
     path('lessons/complete/', CompleteLessonView.as_view(), name='complete-lesson'),
     path('mentor/chat/', MentorChatView.as_view(), name='mentor-chat'),
+    path('courses/generate-report/', GenerateReportView.as_view(), name='generate-report'),
     path('progress/', UserProgressView.as_view(), name='progress'),
     path('homework/', HomeworkView.as_view(), name='homework'),
     path('dynamic-questions/', DynamicQuestionView.as_view(), name='dynamic-questions'),

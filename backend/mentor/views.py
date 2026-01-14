@@ -34,47 +34,60 @@ class LessonViewSet(viewsets.ReadOnlyModelViewSet):
     def check(self, request, slug=None):
         lesson = self.get_object()
         code = request.data.get('code', '')
+        task_index = request.data.get('task_index', 0)
         
-        # Simple verification
         passed = False
-        feedback = "Incorrect output."
+        feedback = "Check failed."
         
-        # In real world, use AI or sandbox execution.
-        # Here we do simple string matching or expected output check if provided
-        if lesson.verification_type == 'simple_check':
-            # This is very fragile, but serves the MVP
-            # We can also check if expected_output is in the code if it's a print statement
-            pass
-        
-        # Determine success (Mocking AI check for now or basic comparison)
-        # If code is not empty, let's assume passed for "theory" lessons, 
-        # For practice, we check if they changed the initial code.
-        if code.strip() != lesson.initial_code.strip() and len(code) > 10:
-             passed = True
-             feedback = "Great job! logic looks correct."
+        # 1. Verification Logic
+        if lesson.lesson_type == 'practice':
+            tasks = lesson.practice_tasks or []
+            if task_index < len(tasks):
+                task = tasks[task_index]
+                # If there's an expected_output, we ideally execute. 
+                # For now, if code is not empty and they've tried, let it pass in MVP.
+                # BETTER: Check for presence of task-specific keywords or logic.
+                if len(code.strip()) > len(task.get('initial_code', '').strip()) + 5:
+                    passed = True
+                    feedback = f"Task {task_index + 1} passed! 🌟"
+                else:
+                    feedback = "Try to implement more logic for this task."
+            else:
+                passed = True # All tasks done?
         else:
-             feedback = "Please write some code."
+            # Theory check? Handle "Repeat Code" here if needed, 
+            # but usually frontend handles theory steps.
+            passed = True
+            feedback = "Theory understood."
              
-        # If passed, update progress
+        # 2. Update Progress
         if passed:
             prog, _ = UserLessonProgress.objects.get_or_create(user=request.user, lesson=lesson)
-            prog.is_completed = True
+            
+            # If it's a practice lesson, we only mark final complete if last task is done
+            # For simplicity in this logic:
+            if lesson.lesson_type == 'practice':
+                tasks = lesson.practice_tasks or []
+                if task_index == len(tasks) - 1 or not tasks:
+                    prog.is_completed = True
+            else:
+                prog.is_completed = True
+                
             prog.user_code = code
             prog.save()
             
-            # Unlock next lesson
-            # Find next lesson
-            next_lesson = Lesson.objects.filter(module=lesson.module, order=lesson.order + 1).first()
-            if not next_lesson:
-                # Next module?
-                next_mod = Module.objects.filter(course=lesson.module.course, order=lesson.module.order + 1).first()
-                if next_mod:
-                    next_lesson = next_mod.lessons.first()
-            
-            if next_lesson:
-                 next_prog, _ = UserLessonProgress.objects.get_or_create(user=request.user, lesson=next_lesson)
-                 next_prog.is_unlocked = True
-                 next_prog.save()
+            # Unlock logic remains...
+            if prog.is_completed:
+                # Same unlocking logic as before
+                next_lesson = Lesson.objects.filter(module=lesson.module, order=lesson.order + 1).first()
+                if not next_lesson:
+                    next_mod = Module.objects.filter(course=lesson.module.course, order=lesson.module.order + 1).first()
+                    if next_mod:
+                        next_lesson = next_mod.lessons.first()
+                if next_lesson:
+                     next_prog, _ = UserLessonProgress.objects.get_or_create(user=request.user, lesson=next_lesson)
+                     next_prog.is_unlocked = True
+                     next_prog.save()
 
         return Response({
             "passed": passed,
@@ -629,19 +642,58 @@ class MentorChatView(views.APIView):
             "session_id": session.id
         })
 
-    def get(self, request):
-        lesson_slug = request.query_params.get('lesson_slug')
-        if not lesson_slug:
-            return Response([])
-        
-        lesson = Lesson.objects.filter(slug=lesson_slug).first()
-        session = ChatSession.objects.filter(user=request.user, lesson=lesson, is_active=True).first()
-        
-        if not session:
-            return Response([])
-            
-        msgs = session.messages.all()
         return Response([
             {"role": m.role, "content": m.content, "created_at": m.created_at}
             for m in msgs
         ])
+
+class GenerateReportView(views.APIView):
+    permission_classes = [permissions.IsAuthenticated]
+
+    def post(self, request):
+        course_slug = request.data.get('course_slug')
+        course = Course.objects.filter(slug=course_slug).first()
+        if not course:
+            return Response({"error": "Course not found"}, status=404)
+
+        # Gather progress metrics
+        user = request.user
+        lesson_progress = UserLessonProgress.objects.filter(user=user, lesson__module__course=course)
+        
+        completed_count = lesson_progress.filter(is_completed=True).count()
+        total_count = Lesson.objects.filter(module__course=course).count()
+        
+        # Simple analysis
+        is_child = user.age <= 14 if hasattr(user, 'age') else False
+        
+        # AI Logic
+        ai = GeminiService()
+        history = [] # No chat history needed for report
+        context = {
+            "type": "final_report",
+            "course": course.title_en,
+            "completion": f"{completed_count}/{total_count}",
+            "is_child": is_child
+        }
+        
+        # Generate Report using a specialized system prompt
+        report_en = ai.generate_final_report(context, lang='en')
+        report_ru = ai.generate_final_report(context, lang='ru')
+        
+        report_obj = CourseReport.objects.create(
+            user=user,
+            course=course,
+            content_en=report_en,
+            content_ru=report_ru,
+            analysis_data={
+                "completed": completed_count,
+                "total": total_count,
+                "is_child": is_child
+            }
+        )
+        
+        return Response({
+            "report_en": report_en,
+            "report_ru": report_ru,
+            "id": report_obj.id
+        })

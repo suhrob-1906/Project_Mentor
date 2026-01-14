@@ -21,6 +21,10 @@ export default function Course({ isChild }) {
     const [output, setOutput] = useState('');
     const [isLoading, setIsLoading] = useState(true);
     const [isVerifying, setIsVerifying] = useState(false);
+    const [activeStepIndex, setActiveStepIndex] = useState(0);
+    const [activeTaskIndex, setActiveTaskIndex] = useState(0);
+    const [repeatCodeInput, setRepeatCodeInput] = useState('');
+    const [stepError, setStepError] = useState(false);
 
     const fetchCourse = useCallback(async () => {
         setIsLoading(true);
@@ -52,7 +56,11 @@ export default function Course({ isChild }) {
         try {
             const res = await api.get(`/api/lessons/${lessonSlug}/`);
             setActiveLesson(res.data);
-            setUserCode(res.data.initial_code || '');
+            setActiveStepIndex(0);
+            setActiveTaskIndex(0);
+            setRepeatCodeInput('');
+            setStepError(false);
+            setUserCode(res.data.practice_tasks?.[0]?.initial_code || res.data.initial_code || '');
             setOutput('');
             window.scrollTo({ top: 0, behavior: 'smooth' });
         } catch (err) {
@@ -62,19 +70,41 @@ export default function Course({ isChild }) {
         }
     };
 
+    const handleNextStep = () => {
+        const currentStep = activeLesson.theory_steps[activeStepIndex];
+        if (currentStep.code_to_repeat && repeatCodeInput.trim() !== currentStep.code_to_repeat.trim()) {
+            setStepError(true);
+            return;
+        }
+        setStepError(false);
+        setRepeatCodeInput('');
+        if (activeStepIndex < activeLesson.theory_steps.length - 1) {
+            setActiveStepIndex(prev => prev + 1);
+        } else {
+            handleMarkUnderstood();
+        }
+    };
+
     const handleRunCode = async () => {
         setIsVerifying(true);
         setOutput("Running...");
         try {
-            const res = await api.post(`/api/lessons/${activeLesson.slug}/verify/`, {
-                code: userCode
+            const task = activeLesson.practice_tasks[activeTaskIndex];
+            const res = await api.post(`/api/lessons/${activeLesson.slug}/check/`, {
+                code: userCode,
+                task_index: activeTaskIndex
             });
-            setOutput(res.data.output || (res.data.passed ? "Success!" : "Failed."));
+            setOutput(res.data.output || res.data.feedback || (res.data.passed ? "Check passed! ✅" : "Failed. Check your logic. ❌"));
 
             if (res.data.passed) {
-                const courseRes = await api.get(`/api/courses/${slug}/`);
-                setCourse(courseRes.data);
-                setActiveLesson(prev => ({ ...prev, is_completed: true }));
+                if (activeTaskIndex < activeLesson.practice_tasks.length - 1) {
+                    setActiveTaskIndex(prev => prev + 1);
+                    setUserCode(activeLesson.practice_tasks[activeTaskIndex + 1].initial_code || '');
+                } else {
+                    const courseRes = await api.get(`/api/courses/${slug}/`);
+                    setCourse(courseRes.data);
+                    setActiveLesson(prev => ({ ...prev, is_completed: true }));
+                }
             }
         } catch (err) {
             setOutput(`Error: ${err.response?.data?.error || err.message}`);
@@ -122,6 +152,61 @@ export default function Course({ isChild }) {
                 {line}
             </p>
         ));
+    };
+
+    const renderTheoryStep = () => {
+        const step = activeLesson.theory_steps[activeStepIndex];
+        if (!step) return null;
+        return (
+            <div className="space-y-6">
+                <div className="prose prose-indigo max-w-none">
+                    {renderContent(isRu ? step.text_ru : step.text_en)}
+                </div>
+
+                {step.code_to_repeat && (
+                    <div className={`mt-8 p-6 rounded-2xl border-2 transition-all ${stepError ? 'bg-red-50 border-red-200' : 'bg-indigo-50/50 border-indigo-100'}`}>
+                        <label className="block text-[10px] font-black uppercase tracking-widest text-indigo-400 mb-3">
+                            {isRu ? "Повтори этот код:" : "Type this code:"}
+                        </label>
+                        <div className="bg-white/80 backdrop-blur-sm p-3 rounded-xl mb-4 font-mono text-sm text-indigo-900 border border-indigo-100">
+                            {step.code_to_repeat}
+                        </div>
+                        <input
+                            type="text"
+                            value={repeatCodeInput}
+                            onChange={(e) => { setRepeatCodeInput(e.target.value); setStepError(false); }}
+                            placeholder={isRu ? "Введи код точно как выше..." : "Type correctly..."}
+                            className={`w-full px-4 py-3 rounded-xl border-2 focus:outline-none transition-all font-mono text-sm ${stepError ? 'border-red-400 focus:ring-red-100' : 'border-indigo-100 focus:border-indigo-500'}`}
+                        />
+                        {stepError && (
+                            <p className="mt-2 text-[10px] font-bold text-red-500 uppercase tracking-tight">
+                                {isRu ? "❗ Упс! Код не совпадает. Проверь внимательно." : "❗ Oops! Code mismatch. Check carefully."}
+                            </p>
+                        )}
+                    </div>
+                )}
+            </div>
+        );
+    };
+
+    const renderPracticeTask = () => {
+        const task = activeLesson.practice_tasks[activeTaskIndex];
+        if (!task) return null;
+        return (
+            <div className="space-y-6">
+                <div className="flex items-center justify-between mb-4">
+                    <span className="bg-purple-100 text-purple-600 px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest">
+                        {isRu ? `Задача ${activeTaskIndex + 1} из ${activeLesson.practice_tasks.length}` : `Task ${activeTaskIndex + 1} of ${activeLesson.practice_tasks.length}`}
+                    </span>
+                </div>
+                <h2 className={`text-xl font-black ${isChild ? 'text-black' : 'text-gray-900'}`}>
+                    {isRu ? task.title_ru : task.title_en}
+                </h2>
+                <div className="prose prose-purple max-w-none">
+                    {renderContent(isRu ? task.desc_ru : task.desc_en)}
+                </div>
+            </div>
+        );
     };
 
     return (
@@ -173,8 +258,12 @@ export default function Course({ isChild }) {
                                     </div>
                                 </div>
                                 <div className="h-1 w-20 bg-indigo-100 rounded-full mb-8"></div>
-                                <div className="prose prose-indigo max-w-none mb-10">
-                                    {renderContent(content)}
+
+                                <div className="mb-10">
+                                    {activeLesson.lesson_type === 'theory'
+                                        ? renderTheoryStep()
+                                        : renderPracticeTask()
+                                    }
                                 </div>
 
                                 {activeLesson.lesson_type === 'practice' && (
@@ -190,24 +279,27 @@ export default function Course({ isChild }) {
                                     </details>
                                 )}
 
-                                <div className={`flex items-center justify-between`}>
+                                <div className={`flex items-center justify-between gap-4`}>
                                     {activeLesson.lesson_type === 'practice' ? (
                                         <button
                                             onClick={handleRunCode}
                                             disabled={isVerifying}
-                                            className={`flex-1 flex items-center justify-center gap-3 py-4 rounded-2xl font-black uppercase tracking-widest text-sm transition-all hover:scale-[1.02] active:scale-[0.98] ${isChild ? 'bg-black text-white hover:bg-gray-800' : 'bg-indigo-600 text-white hover:bg-indigo-500 shadow-xl shadow-indigo-200'}`}
+                                            className={`flex-1 flex items-center justify-center gap-3 py-4 rounded-2xl font-black uppercase tracking-widest text-sm transition-all hover:scale-[1.02] active:scale-[0.98] ${isChild ? 'bg-black text-white hover:bg-gray-800 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]' : 'bg-indigo-600 text-white hover:bg-indigo-500 shadow-xl shadow-indigo-200'}`}
                                         >
                                             {isVerifying ? <Loader2 className="w-5 h-5 animate-spin" /> : <Play className="w-5 h-5 fill-current" />}
-                                            {isRu ? "Запустить код" : "Run My Code"}
+                                            {isRu ? "Проверить" : "Check Task"}
                                         </button>
                                     ) : (
                                         <button
-                                            onClick={handleMarkUnderstood}
-                                            disabled={isVerifying || activeLesson.is_completed}
-                                            className={`flex-1 flex items-center justify-center gap-3 py-4 rounded-2xl font-black uppercase tracking-widest text-sm transition-all hover:scale-[1.02] active:scale-[0.98] ${isChild ? 'bg-emerald-500 text-white border-b-4 border-emerald-700 active:border-b-0 hover:bg-emerald-400' : 'bg-indigo-600 text-white hover:bg-indigo-500 shadow-xl shadow-indigo-200'} ${activeLesson.is_completed ? 'opacity-50 grayscale' : ''}`}
+                                            onClick={handleNextStep}
+                                            disabled={isVerifying}
+                                            className={`flex-1 flex items-center justify-center gap-3 py-4 rounded-2xl font-black uppercase tracking-widest text-sm transition-all hover:scale-[1.02] active:scale-[0.98] ${isChild ? 'bg-emerald-500 text-white border-b-4 border-emerald-700 active:border-b-0 hover:bg-emerald-400' : 'bg-indigo-600 text-white hover:bg-indigo-500 shadow-xl shadow-indigo-200'}`}
                                         >
-                                            {activeLesson.is_completed ? <Check className="w-5 h-5 stroke-[4]" /> : <Zap className="w-5 h-5 fill-current" />}
-                                            {activeLesson.is_completed ? (isRu ? "Понятно!" : "Understood!") : (isRu ? "Я понял!" : "I Understood!")}
+                                            {activeStepIndex < activeLesson.theory_steps.length - 1
+                                                ? (isRu ? "Далее" : "Next Step")
+                                                : (isRu ? "Завершить теорию" : "Finish Theory")
+                                            }
+                                            <ChevronRight className="w-5 h-5" />
                                         </button>
                                     )}
                                 </div>

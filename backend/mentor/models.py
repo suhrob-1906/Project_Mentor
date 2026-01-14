@@ -170,6 +170,13 @@ class Lesson(models.Model):
     expected_output = models.TextField(blank=True, help_text="Simple match checks")
     solution_code = models.TextField(blank=True, help_text="Reference solution for AI hints")
     
+    # Multi-Step Content (Interactive)
+    # [{"text_en": "...", "text_ru": "...", "code_to_repeat": "..."}]
+    theory_steps = models.JSONField(default=list, blank=True)
+    
+    # [{"title_en": "...", "desc_en": "...", "initial_code": "...", "expected_output": "...", "solution_code": "..."}]
+    practice_tasks = models.JSONField(default=list, blank=True)
+
     # AI/Verification Config
     verification_type = models.CharField(
         max_length=20, 
@@ -190,6 +197,11 @@ class UserLessonProgress(models.Model):
     is_completed = models.BooleanField(default=False)
     is_unlocked = models.BooleanField(default=False)
     user_code = models.TextField(blank=True) # Last saved code
+    
+    # Tracking granular progress
+    # {"completed_steps": [0, 1], "completed_tasks": [0]}
+    step_progress = models.JSONField(default=dict, blank=True)
+    
     completed_at = models.DateTimeField(null=True, blank=True)
     
     class Meta:
@@ -221,3 +233,14 @@ class ChatMessage(models.Model):
 
     def __str__(self):
         return f"{self.role}: {self.content[:50]}"
+
+class CourseReport(models.Model):
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='course_reports')
+    course = models.ForeignKey(Course, on_delete=models.CASCADE)
+    content_en = models.TextField() # AI Generated Report
+    content_ru = models.TextField(default='')
+    analysis_data = models.JSONField(default=dict) # Metrics used for generation
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"Report for {self.user.username} - {self.course.slug}"

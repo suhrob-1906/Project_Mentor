@@ -83,7 +83,7 @@ function App() {
           />
           <Route
             path="/courses/:slug/completion"
-            element={<ProtectedRoute><CourseCompletion /></ProtectedRoute>}
+            element={<ProtectedRoute><Results isChild={isChild} /></ProtectedRoute>}
           />
         </Routes>
       </div>

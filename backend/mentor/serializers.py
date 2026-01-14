@@ -65,7 +65,17 @@ class LessonSimpleSerializer(serializers.ModelSerializer):
             return True
             
         if obj.order == 1:
-            return True
+            # Check if previous module is done
+            prev_mod = Module.objects.filter(course=obj.module.course, order=obj.module.order - 1).first()
+            if not prev_mod:
+                return True # First module of course
+            
+            last_lesson = prev_mod.lessons.all().last()
+            if not last_lesson:
+                return True
+                
+            last_prog = UserLessonProgress.objects.filter(user=user, lesson=last_lesson).first()
+            return last_prog.is_completed if last_prog else False
         
         # Unlock logic: Prev lesson in module must be completed
         prev_lesson = Lesson.objects.filter(module=obj.module, order=obj.order - 1).first()
@@ -86,6 +96,7 @@ class LessonDetailSerializer(LessonSimpleSerializer):
         fields = LessonSimpleSerializer.Meta.fields + (
             'content_en', 'content_ru', 
             'initial_code', 'expected_output', 'solution_code',
+            'theory_steps', 'practice_tasks',
             'theory_content', 'practice_task', # Compat
             'theory_ref_en', 'theory_ref_ru'
         )

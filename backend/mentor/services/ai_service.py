@@ -363,3 +363,29 @@ class GeminiService:
                 return resp.text
             except:
                 return f"Chat error: {str(e)}"
+
+    def generate_final_report(self, context, lang='en'):
+        """Generates a detailed student progress report and path to Middle level."""
+        prompt = f"""
+        ACT AS A SENIOR PROGRAMMING MENTOR.
+        User has finished the course: {context['course']}.
+        Completion: {context['completion']}.
+        Is Child: {context['is_child']}.
+        Language: {lang}.
+
+        TASK: Write a 'Path to Middle Programmer' report.
+        INCLUDE:
+        1. Praise for accomplishments.
+        2. Analysis of skills acquired based on the modules passed.
+        3. A strategic 6-month learning plan to reach Middle seniority.
+        4. Links/References to advanced topics (System Design, TDD, Design Patterns, Cloud).
+        
+        TONE: {"Playful, encouraging and simplified (for a young student)" if context['is_child'] else "Professional, strategic, and detailed (for an adult)"}.
+        FORMAT: Use beautiful Markdown with headers and bullet points.
+        """
+        try:
+            model = genai.GenerativeModel('gemini-1.5-pro')
+            response = model.generate_content(prompt)
+            return response.text
+        except Exception as e:
+            return f"Error generating report: {str(e)}"
