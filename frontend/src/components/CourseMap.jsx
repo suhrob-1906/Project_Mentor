@@ -1,5 +1,5 @@
 import React, { useRef, useEffect, useState } from 'react';
-import { Check, Lock, Star, Play, Flag, BookOpen, Code2 } from 'lucide-react';
+import { Check, Lock, Star, Play, Flag, BookOpen, Code2, Award } from 'lucide-react';
 
 const CourseMap = ({ course, activeLesson, onSelectLesson }) => {
     if (!course) return null;
@@ -173,8 +173,20 @@ const CourseMap = ({ course, activeLesson, onSelectLesson }) => {
             </div>
 
             <div className="h-32 text-center text-gray-300 text-sm font-bold uppercase tracking-widest flex items-center justify-center gap-2">
-                <Lock className="w-4 h-4" />
-                More levels coming soon
+                {allLessons.every(l => l.is_completed) ? (
+                    <button
+                        onClick={() => window.location.href = `/courses/${course.slug}/completion`}
+                        className="px-8 py-3 bg-gradient-to-r from-yellow-400 to-yellow-500 hover:from-yellow-300 hover:to-yellow-400 text-yellow-900 font-black rounded-2xl shadow-xl shadow-yellow-200/50 transition-all hover:scale-105 active:scale-95 flex items-center gap-2 animate-bounce-slow"
+                    >
+                        <Award className="w-5 h-5" />
+                        Get Your Certificate
+                    </button>
+                ) : (
+                    <>
+                        <Lock className="w-4 h-4" />
+                        More levels coming soon
+                    </>
+                )}
             </div>
         </div>
     );

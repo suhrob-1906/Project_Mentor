@@ -12,7 +12,10 @@ console.log("API Base URL:", api.defaults.baseURL);
 api.interceptors.request.use(
     (config) => {
         const token = localStorage.getItem('access_token');
-        if (token) {
+        // Don't attach token for auth endpoints to prevent 401 if token is invalid
+        const isAuthEndpoint = config.url.includes('/auth/register/') || config.url.includes('/auth/login/');
+
+        if (token && !isAuthEndpoint) {
             config.headers.Authorization = `Bearer ${token}`;
         }
         return config;

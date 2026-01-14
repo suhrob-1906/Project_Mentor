@@ -7,6 +7,7 @@ import Landing from './pages/Landing';
 import Test from './pages/Test';
 import Homework from './pages/Homework';
 import Course from './pages/Course';
+import CourseCompletion from './pages/CourseCompletion';
 import { useState, useEffect } from 'react';
 import api from './api';
 
@@ -93,6 +94,13 @@ function App() {
             element={
               <ProtectedRoute>
                 <Course />
+              </ProtectedRoute>
+            }
+          <Route
+            path="/courses/:slug/completion"
+            element={
+              <ProtectedRoute>
+                <CourseCompletion />
               </ProtectedRoute>
             }
           />
