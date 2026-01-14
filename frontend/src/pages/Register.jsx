@@ -28,7 +28,9 @@ export default function Register() {
             if (resp.data.access) {
                 localStorage.setItem('access_token', resp.data.access);
                 localStorage.setItem('refresh_token', resp.data.refresh);
-                navigate('/courses');
+                // Redirect directly to course based on track
+                const courseSlug = formData.track === 'backend' ? 'python' : 'javascript';
+                navigate(`/courses/${courseSlug}`);
             } else {
                 navigate('/login');
             }

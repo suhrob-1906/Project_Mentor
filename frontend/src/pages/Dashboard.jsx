@@ -3,41 +3,55 @@ import { useNavigate } from 'react-router-dom';
 import api from '../api';
 import { useTranslation } from 'react-i18next';
 import {
-    Terminal, Cpu, Globe,
-    BookOpen, Sparkles, Languages, Code, Rocket, Map,
-    Lock, Star, Play, Award, Zap, AlertCircle, Clock, Shield, Trophy,
-    ChevronRight, Info
+    BookOpen, Languages, Rocket,
+    Lock, Star, Award, Zap, AlertCircle, Trophy,
+    ChevronRight
 } from 'lucide-react';
 
 export default function Dashboard({ isChild }) {
     const { t, i18n } = useTranslation();
     const navigate = useNavigate();
-    const [selectedLanguage, setSelectedLanguage] = useState('python');
+    const [userTrack, setUserTrack] = useState(null); // 'backend' or 'frontend'
+    const [courseSlug, setCourseSlug] = useState(null); // 'python' or 'javascript'
     const [modules, setModules] = useState([]);
     const [progress, setProgress] = useState({ unlocked: [], completed: {} });
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState(null);
 
-    const languages = [
-        { id: 'python', name: 'Python', icon: <Terminal className="w-8 h-8" />, color: 'indigo', desc: 'Masters of Logic' },
-        { id: 'javascript', name: 'Frontend', icon: <Code className="w-8 h-8" />, color: 'purple', desc: 'Web Wizards' },
-        { id: 'go', name: 'Go', icon: <Cpu className="w-8 h-8" />, color: 'emerald', desc: 'Speed Demons' },
-        { id: 'java', name: 'Java', icon: <Globe className="w-8 h-8" />, color: 'amber', desc: 'Enterprise Titans' },
-    ];
+    // Fetch user profile to get their track
+    useEffect(() => {
+        const fetchUserTrack = async () => {
+            try {
+                const res = await api.get('/auth/profile/');
+                const track = res.data.track || 'backend';
+                setUserTrack(track);
+                // Map track to course slug
+                setCourseSlug(track === 'backend' ? 'python' : 'javascript');
+            } catch (err) {
+                console.error("Failed to fetch user track:", err);
+                // Default to backend/python
+                setUserTrack('backend');
+                setCourseSlug('python');
+            }
+        };
+        fetchUserTrack();
+    }, []);
 
     const fetchData = useCallback(async () => {
+        if (!courseSlug) return;
+
         setIsLoading(true);
         setError(null);
         try {
-            const courseRes = await api.get(`/api/courses/${selectedLanguage}/`);
+            const courseRes = await api.get(`/api/courses/${courseSlug}/`);
             setModules(courseRes.data.modules.map(m => ({
                 id: m.slug || m.id,
                 name: (i18n.language || 'en').startsWith('ru') ? m.title_ru : m.title_en,
                 icon: <BookOpen className="w-6 h-6" />,
-                color: languages.find(l => l.id === selectedLanguage)?.color || 'indigo'
+                color: courseSlug === 'python' ? 'indigo' : 'purple'
             })));
 
-            const progRes = await api.get(`/api/progress/?language=${selectedLanguage}`);
+            const progRes = await api.get(`/api/progress/?language=${courseSlug}`);
             setProgress(progRes.data);
         } catch (err) {
             console.error("Data fetch error:", err);
@@ -46,7 +60,7 @@ export default function Dashboard({ isChild }) {
         } finally {
             setIsLoading(false);
         }
-    }, [selectedLanguage, i18n.language]);
+    }, [courseSlug, i18n.language]);
 
     useEffect(() => {
         fetchData();
@@ -95,187 +109,133 @@ export default function Dashboard({ isChild }) {
             </nav>
 
             <main className="max-w-7xl mx-auto px-6 py-16">
-                {/* Hero Selection */}
-                <div className="mb-20">
-                    <div className="flex items-center gap-4 mb-8">
-                        <div className={`w-12 h-1.5 rounded-full ${isChild ? 'bg-black' : 'bg-indigo-600'}`}></div>
-                        <h2 className={`font-black uppercase tracking-[0.2em] text-sm ${isChild ? 'text-black' : 'text-gray-400'}`}>
-                            {isRu ? "ВЫБЕРИ СВОЙ ПУТЬ" : "CHOOSE YOUR DESTINY"}
+                {/* Main Content Area */}
+                <div className="flex flex-col gap-8">
+
+                    {/* Course Title Header */}
+                    <div className="text-center mb-8">
+                        <h2 className={`font-black text-4xl mb-2 ${isChild ? 'text-black' : 'text-gray-900'}`}>
+                            {userTrack === 'backend'
+                                ? (isRu ? 'Python Путь' : 'Python Path')
+                                : (isRu ? 'Frontend Путь' : 'Frontend Path')
+                            }
                         </h2>
+                        <p className="text-gray-500 font-bold text-sm">
+                            {userTrack === 'backend'
+                                ? (isRu ? 'Бэкенд разработка с Python' : 'Backend Development with Python')
+                                : (isRu ? 'Фронтенд разработка с HTML/CSS/JS' : 'Frontend Development with HTML/CSS/JS')
+                            }
+                        </p>
                     </div>
 
-                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-                        {languages.map((lang) => (
-                            <button
-                                key={lang.id}
-                                onClick={() => setSelectedLanguage(lang.id)}
-                                className={`group relative p-8 rounded-[2.5rem] border-4 transition-all text-left overflow-hidden
-                                    ${selectedLanguage === lang.id
-                                        ? (isChild ? 'bg-white border-black shadow-[12px_12px_0_0_rgba(0,0,0,1)] scale-105' : 'bg-white border-indigo-600 shadow-2xl scale-105')
-                                        : (isChild ? 'bg-black/5 border-black/10 hover:bg-white/40' : 'bg-white border-gray-100 opacity-60 hover:opacity-100 hover:border-gray-200')
-                                    }`}
-                            >
-                                <div className={`mb-6 p-4 rounded-3xl w-fit transition-transform group-hover:scale-110 group-hover:rotate-3
-                                    ${selectedLanguage === lang.id ? 'bg-indigo-500 text-white' : 'bg-gray-100 text-gray-400'}`}>
-                                    {lang.icon}
-                                </div>
-                                <h3 className={`font-black text-2xl mb-1 ${isChild ? 'text-black' : 'text-gray-900'}`}>{lang.name}</h3>
-                                <p className={`text-xs font-bold uppercase tracking-widest ${isChild ? 'text-black/40' : 'text-gray-400'}`}>{lang.desc}</p>
+                    {/* Main Course Map (Full Width) */}
+                    <div className={`w-full max-w-4xl mx-auto p-8 rounded-[2.5rem] border-4 border-black relative overflow-hidden min-h-[600px] flex flex-col items-center
+                        ${isChild ? 'bg-white shadow-[12px_12px_0_0_rgba(0,0,0,1)]' : 'bg-white shadow-2xl shadow-indigo-100'}`}>
 
-                                {selectedLanguage === lang.id && (
-                                    <div className="absolute top-4 right-4">
-                                        <div className="p-1 bg-yellow-400 rounded-full border-2 border-black animate-bounce">
-                                            <Star className="w-4 h-4 text-black fill-current" />
-                                        </div>
-                                    </div>
-                                )}
-                            </button>
-                        ))}
-                    </div>
-                </div>
-
-                {/* Content Section */}
-                <div className="grid lg:grid-cols-12 gap-12">
-                    {/* Main Roadmap Area */}
-                    <div className="lg:col-span-8">
-                        <div className={`p-10 rounded-[3rem] border-4 border-black relative overflow-hidden min-h-[600px] flex flex-col items-center justify-center
-                            ${isChild ? 'bg-white shadow-[16px_16px_0_0_rgba(0,0,0,1)]' : 'bg-white shadow-2xl shadow-indigo-100'}`}>
-
-                            {isLoading ? (
-                                <div className="flex flex-col items-center gap-4">
-                                    <Loader2 className="w-12 h-12 text-indigo-500 animate-spin" />
-                                    <span className="font-black uppercase tracking-widest text-sm text-gray-400">Loading Journey...</span>
+                        {isLoading ? (
+                            <div className="flex flex-col items-center gap-4 m-auto">
+                                <Loader2 className="w-12 h-12 text-indigo-500 animate-spin" />
+                                <span className="font-black uppercase tracking-widest text-sm text-gray-400">Loading Journey...</span>
+                            </div>
+                        ) : error === 'empty_database' ? (
+                            <div className="text-center max-w-md px-10 m-auto">
+                                <div className="w-24 h-24 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-8 border-4 border-red-200">
+                                    <AlertCircle className="w-12 h-12 text-red-500" />
                                 </div>
-                            ) : error === 'empty_database' ? (
-                                <div className="text-center max-w-md px-10">
-                                    <div className="w-24 h-24 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-8 border-4 border-red-200">
-                                        <AlertCircle className="w-12 h-12 text-red-500" />
-                                    </div>
-                                    <h3 className="font-black text-3xl text-gray-900 mb-4 uppercase leading-tight">
-                                        {isRu ? "Мир ещё не создан" : "The world is empty"}
-                                    </h3>
-                                    <p className="text-gray-500 font-bold mb-8 text-sm leading-relaxed">
-                                        {isRu
-                                            ? "База данных пуста. Я настроил автоматическое заполнение через build.sh, просто сделайте PUSH!"
-                                            : "Your database is empty. I've set up auto-population in build.sh, just do a PUSH!"}
-                                    </p>
-                                    <div className="bg-gray-100 p-4 rounded-2xl font-mono text-xs text-left mb-8 border-2 border-gray-200">
-                                        python scripts/populate_massive_curriculum.py
-                                    </div>
-                                    <button
-                                        onClick={fetchData}
-                                        className="w-full py-4 bg-black text-white font-black uppercase tracking-widest rounded-2xl hover:scale-[1.02] active:scale-95 transition-all shadow-xl"
-                                    >
-                                        {isRu ? "Попробовать снова" : "Retry Sync"}
-                                    </button>
-                                </div>
-                            ) : modules.length > 0 ? (
-                                <div className="w-full">
-                                    <div className="flex justify-between items-center mb-12">
-                                        <h4 className="font-black text-3xl uppercase tracking-tighter">
-                                            {selectedLanguage} {isRu ? "Приключение" : "Adventure"}
+                                <h3 className="font-black text-3xl text-gray-900 mb-4 uppercase leading-tight">
+                                    {isRu ? "Мир пустоват..." : "It's empty here..."}
+                                </h3>
+                                <p className="text-gray-500 font-bold mb-8 text-sm leading-relaxed">
+                                    {isRu
+                                        ? "База данных еще не заполнена. Сделайте Push, чтобы запустить авто-наполнение!"
+                                        : "Database is empty. Push your code to trigger auto-population!"}
+                                </p>
+                                <button
+                                    onClick={fetchData}
+                                    className="w-full py-4 bg-black text-white font-black uppercase tracking-widest rounded-2xl hover:scale-[1.02] active:scale-95 transition-all shadow-xl"
+                                >
+                                    {isRu ? "Обновить" : "Refresh"}
+                                </button>
+                            </div>
+                        ) : modules.length > 0 ? (
+                            <div className="w-full">
+                                <div className="flex justify-between items-center mb-12 px-4">
+                                    <div>
+                                        <h4 className="font-black text-3xl uppercase tracking-tighter mb-2">
+                                            {courseSlug === 'python' ? 'Python Journey' : 'Frontend Journey'}
                                         </h4>
-                                        <button
-                                            onClick={() => navigate(`/courses/${selectedLanguage}`)}
-                                            className="px-6 py-3 bg-indigo-600 text-white font-black uppercase text-xs rounded-2xl flex items-center gap-2 hover:bg-indigo-500 transition-all shadow-xl shadow-indigo-200"
-                                        >
-                                            <Map className="w-4 h-4" />
-                                            {isRu ? "ОТКРЫТЬ КАРТУ" : "OPEN FULL MAP"}
-                                        </button>
+                                        <p className="font-bold text-gray-400 text-xs tracking-widest uppercase">
+                                            {progress.unlocked.length} / {modules.length} Levels Unlocked
+                                        </p>
                                     </div>
+                                    <div className="flex items-center gap-2 px-4 py-2 bg-yellow-100 text-yellow-700 rounded-xl font-black text-xs border-2 border-yellow-200">
+                                        <Trophy className="w-4 h-4" />
+                                        <span>{Object.values(progress.completed).filter(v => v >= 100).length} COMPLETED</span>
+                                    </div>
+                                </div>
 
-                                    <div className="space-y-4">
-                                        {modules.slice(0, 5).map((mod, idx) => (
+                                <div className="space-y-4 max-w-2xl mx-auto relative">
+                                    {/* Vertical Line */}
+                                    <div className="absolute left-[2.85rem] top-8 bottom-8 w-1 bg-gray-200 -z-10"></div>
+
+                                    {modules.map((mod, idx) => {
+                                        const isUnlocked = progress.unlocked.includes(mod.id);
+                                        const isCompleted = (progress.completed[mod.id] || 0) >= 100;
+
+                                        return (
                                             <div
                                                 key={mod.id}
-                                                className={`flex items-center gap-6 p-6 rounded-3xl border-2 transition-all cursor-pointer hover:border-black hover:translate-x-2
-                                                    ${progress.unlocked.includes(mod.id) ? 'bg-gray-50 border-gray-100' : 'bg-gray-100 border-transparent opacity-40'}`}
+                                                onClick={() => isUnlocked && navigate(`/courses/${courseSlug}`)}
+                                                className={`group flex items-center gap-6 p-4 rounded-3xl transition-all relative
+                                                    ${isUnlocked
+                                                        ? 'cursor-pointer hover:bg-gray-50'
+                                                        : 'opacity-50 grayscale cursor-not-allowed'}`}
                                             >
-                                                <div className={`w-14 h-14 rounded-2xl flex items-center justify-center font-black text-xl
-                                                    ${progress.unlocked.includes(mod.id) ? 'bg-white border-2 border-black shadow-[4px_4px_0_0_rgba(0,0,0,1)]' : 'bg-gray-200 text-gray-400'}`}>
-                                                    {idx + 1}
+                                                <div className={`relative w-20 h-20 rounded-full flex items-center justify-center font-black text-2xl border-b-8 transition-transform group-hover:scale-110 group-active:scale-95 group-active:border-b-0 group-active:translate-y-2
+                                                    ${isCompleted
+                                                        ? 'bg-yellow-400 border-yellow-600 text-yellow-900 shadow-xl'
+                                                        : isUnlocked
+                                                            ? `bg-${mod.color}-500 border-${mod.color}-700 text-white shadow-xl`
+                                                            : 'bg-gray-200 border-gray-300 text-gray-400'
+                                                    }`}
+                                                >
+                                                    {isCompleted ? <Star className="w-8 h-8 fill-current" /> : (idx + 1)}
+
+                                                    {/* Floating Stars for completed */}
+                                                    {isCompleted && (
+                                                        <div className="absolute -top-2 -right-2 bg-white border-2 border-yellow-400 text-yellow-500 rounded-full p-1 animate-bounce">
+                                                            <Award className="w-4 h-4" />
+                                                        </div>
+                                                    )}
                                                 </div>
-                                                <div className="flex-1">
-                                                    <h5 className="font-black text-lg text-gray-900">{mod.name}</h5>
-                                                    <div className="h-2 bg-gray-200 rounded-full mt-2 w-full overflow-hidden">
-                                                        <div
-                                                            className="h-full bg-emerald-500 rounded-full transition-all duration-1000"
-                                                            style={{ width: `${progress.completed[mod.id] || 0}%` }}
-                                                        />
-                                                    </div>
+
+                                                <div className={`flex-1 p-6 rounded-2xl border-b-4 transition-all
+                                                    ${isUnlocked
+                                                        ? `bg-white border-gray-200 group-hover:border-${mod.color}-300 shadow-sm`
+                                                        : 'bg-transparent border-transparent'}`}>
+                                                    <h5 className={`font-black text-lg mb-1 ${isUnlocked ? 'text-gray-900' : 'text-gray-400'}`}>
+                                                        {mod.name}
+                                                    </h5>
+                                                    {isUnlocked && (
+                                                        <div className="w-full bg-gray-100 h-3 rounded-full overflow-hidden">
+                                                            <div
+                                                                className={`h-full bg-${mod.color}-500 transition-all duration-1000`}
+                                                                style={{ width: `${progress.completed[mod.id] || 0}%` }}
+                                                            ></div>
+                                                        </div>
+                                                    )}
                                                 </div>
-                                                {progress.unlocked.includes(mod.id) ? (
-                                                    <ChevronRight className="w-6 h-6 text-indigo-400" />
-                                                ) : (
-                                                    <Lock className="w-6 h-6 text-gray-300" />
-                                                )}
                                             </div>
-                                        ))}
-                                        <div className="text-center py-6">
-                                            <p className="text-gray-400 font-bold italic text-sm">
-                                                And {modules.length - 5} more exciting levels to discover...
-                                            </p>
-                                        </div>
-                                    </div>
-                                </div>
-                            ) : (
-                                <div className="text-center opacity-40">
-                                    <Rocket className="w-20 h-20 mx-auto mb-6 text-gray-300 animate-float" />
-                                    <p className="font-black uppercase tracking-widest text-sm">Select a language to begin your journey</p>
-                                </div>
-                            )}
-                        </div>
-                    </div>
-
-                    {/* Stats Sidebar */}
-                    <div className="lg:col-span-4 space-y-8">
-                        <div className={`p-8 rounded-[2.5rem] border-4 border-black relative overflow-hidden
-                            ${isChild ? 'bg-indigo-600 text-white shadow-[12px_12px_0_0_rgba(0,0,0,1)]' : 'bg-gray-900 text-white shadow-2xl'}`}>
-                            <h4 className="font-black uppercase tracking-widest text-xs mb-6 opacity-60">My Progress</h4>
-                            <div className="grid grid-cols-2 gap-6">
-                                <div>
-                                    <div className="text-4xl font-black mb-1">{progress.unlocked.length}</div>
-                                    <div className="text-[10px] font-black uppercase tracking-[0.2em] opacity-40">Levels Unlocked</div>
-                                </div>
-                                <div>
-                                    <div className="text-4xl font-black mb-1 text-yellow-400">
-                                        {Object.values(progress.completed).filter(v => v >= 70).length}
-                                    </div>
-                                    <div className="text-[10px] font-black uppercase tracking-[0.2em] opacity-40">Final Tests Passed</div>
+                                        );
+                                    })}
                                 </div>
                             </div>
-                        </div>
-
-                        <div className={`p-8 rounded-[2.5rem] border-4 border-black bg-white shadow-[12px_12px_0_0_rgba(0,0,0,1)]`}>
-                            <div className="flex items-center gap-3 mb-6">
-                                <Trophy className="w-6 h-6 text-yellow-500 fill-current" />
-                                <h4 className="font-black uppercase tracking-widest text-sm text-black">Top Performers</h4>
+                        ) : (
+                            <div className="text-center opacity-40 m-auto">
+                                <Rocket className="w-20 h-20 mx-auto mb-6 text-gray-300 animate-float" />
+                                <p className="font-black uppercase tracking-widest text-sm">Loading your course...</p>
                             </div>
-                            <div className="space-y-4">
-                                {[
-                                    { name: 'Alex M.', score: 980, color: 'indigo' },
-                                    { name: 'Sarah J.', score: 945, color: 'purple' },
-                                    { name: 'You', score: progress.unlocked.length * 10, color: 'yellow' }
-                                ].map((p, i) => (
-                                    <div key={i} className="flex items-center gap-3">
-                                        <div className={`w-8 h-8 rounded-full border-2 border-black flex items-center justify-center font-black text-xs bg-${p.color}-400`}>
-                                            {i + 1}
-                                        </div>
-                                        <span className={`font-bold flex-1 ${p.name === 'You' ? 'text-black font-black' : 'text-gray-500'}`}>{p.name}</span>
-                                        <span className="font-black text-black">{p.score}⚡</span>
-                                    </div>
-                                ))}
-                            </div>
-                        </div>
-
-                        <div className={`p-6 bg-yellow-50 border-2 border-yellow-200 rounded-3xl flex items-start gap-3`}>
-                            <Info className="w-5 h-5 text-yellow-600 shrink-0 mt-1" />
-                            <p className="text-[11px] font-bold text-yellow-800/80 leading-relaxed">
-                                {isRu
-                                    ? "Изучайте теорию, проходите практику и сдавайте тесты, чтобы открывать новые уровни приключений!"
-                                    : "Learn theory, pass practice tasks, and complete tests to unlock new levels of your adventure!"}
-                            </p>
-                        </div>
+                        )}
                     </div>
                 </div>
             </main>

@@ -20,7 +20,18 @@ export default function Login() {
             const res = await api.post('/auth/login/', formData);
             localStorage.setItem('access_token', res.data.access);
             localStorage.setItem('refresh_token', res.data.refresh);
-            navigate('/dashboard');
+
+            // Fetch user profile to get their track
+            try {
+                const profileRes = await api.get('/auth/profile/');
+                const track = profileRes.data.track || 'backend';
+                const courseSlug = track === 'backend' ? 'python' : 'javascript';
+                navigate(`/courses/${courseSlug}`);
+            } catch {
+                // Fallback to dashboard if profile fetch fails
+                navigate('/dashboard');
+            }
+
             window.location.reload();
         } catch (err) {
             console.error("Login error:", err);
