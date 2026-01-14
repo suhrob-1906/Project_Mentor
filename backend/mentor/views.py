@@ -1,12 +1,13 @@
 from rest_framework import views, generics, permissions, status
 from rest_framework.response import Response
-from .models import Submission, AnalysisResult, Roadmap, ProjectRecommendation, TestQuestion, TestResult, UserProgress, Homework, Course, Module, Lesson, UserLessonProgress
+from .models import Submission, AnalysisResult, Roadmap, ProjectRecommendation, TestQuestion, TestResult, UserProgress, Homework, Course, Module, Lesson, UserLessonProgress, ChatSession, ChatMessage
 from .serializers import (
     SubmissionSerializer, RoadmapSerializer, ProjectRecommendationSerializer,
     TestQuestionSerializer, TestResultSerializer, CourseSerializer, LessonDetailSerializer, UserLessonProgressSerializer
 )
 from rest_framework import viewsets, mixins
 from rest_framework.decorators import action
+from .services.ai_service import GeminiService
 
 class CourseViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = Course.objects.all()
@@ -543,7 +544,38 @@ class SubmitTestView(views.APIView):
             return [f"🌟 {task}" for task in selected]
         
         return selected
-class MentorChatView(APIView):
+class CompleteLessonView(views.APIView):
+    permission_classes = [permissions.IsAuthenticated]
+
+    def post(self, request):
+        lesson_slug = request.data.get('lesson_slug')
+        if not lesson_slug:
+            return Response({"error": "lesson_slug is required"}, status=400)
+            
+        lesson = Lesson.objects.filter(slug=lesson_slug).first()
+        if not lesson:
+            return Response({"error": "Lesson not found"}, status=404)
+            
+        progress, created = UserLessonProgress.objects.get_or_create(
+            user=request.user,
+            lesson=lesson
+        )
+        progress.is_completed = True
+        progress.save()
+        
+        # Also ensure NEXT lesson is marked as unlocked in DB
+        next_lesson = Lesson.objects.filter(module=lesson.module, order=lesson.order + 1).first()
+        if next_lesson:
+            next_prog, _ = UserLessonProgress.objects.get_or_create(
+                user=request.user,
+                lesson=next_lesson
+            )
+            next_prog.is_unlocked = True
+            next_prog.save()
+            
+        return Response({"message": "Lesson completed successfully"})
+
+class MentorChatView(views.APIView):
     permission_classes = [permissions.IsAuthenticated]
 
     def post(self, request):
