@@ -108,19 +108,19 @@ const resources = {
                 "note": "Use this solution to understand the concepts and move forward!"
             },
             "roadmap": {
-                "basics": "1. Basics & Data Types",
-                "logic": "2. Variables & Logic",
-                "arrays": "3. Lists & Collections",
-                "functions": "4. Functions & Methods",
-                "objects": "5. Objects & Classes",
-                "errors": "6. Error Handling",
-                "async": "7. Asynchrony",
-                "apis": "8. APIs & Networking",
-                "patterns": "9. Architecture & Patterns",
-                "final": "10. Final Quest"
+                "theory": "Theory",
+                "practice": "Practice",
+                "start": "Start",
+                "module": "Module",
+                "keep_going": "Keep going to reach the top",
+                "claim_reward": "CLAIM YOUR REWARD",
+                "theory_short": "T",
+                "practice_short": "P"
             },
             "common": {
-                "back": "Back to Roadmap"
+                "back": "Back",
+                "next": "Next",
+                "finish": "Finish"
             }
         }
     },
@@ -230,19 +230,19 @@ const resources = {
                 "note": "Используй это решение, чтобы понять принципы и двигаться дальше!"
             },
             "roadmap": {
-                "basics": "1. Основы и Типы данных",
-                "logic": "2. Переменные и Логика",
-                "arrays": "3. Списки и Коллекции",
-                "functions": "4. Функции и Методы",
-                "objects": "5. Объекты и Классы",
-                "errors": "6. Обработка ошибок",
-                "async": "7. Асинхронность",
-                "apis": "8. Работа с API и Сетью",
-                "patterns": "9. Архитектура и Паттерны",
-                "final": "10. Финальное испытание"
+                "theory": "Теория",
+                "practice": "Практика",
+                "start": "Старт",
+                "module": "Модуль",
+                "keep_going": "Продолжай путь к вершине",
+                "claim_reward": "ПОЛУЧИТЬ НАГРАДУ",
+                "theory_short": "Т",
+                "practice_short": "П"
             },
             "common": {
-                "back": "Назад к карте"
+                "back": "Назад",
+                "next": "Далее",
+                "finish": "Завершить"
             }
         }
     }

@@ -4,7 +4,7 @@ import { Check, Lock, Star, Play, Flag, BookOpen, Code2, Award } from 'lucide-re
 import { useTranslation } from 'react-i18next';
 
 const CourseMap = ({ course, activeLesson, onSelectLesson, isCompact = false }) => {
-    const { i18n } = useTranslation();
+    const { t, i18n } = useTranslation();
     const navigate = useNavigate();
     if (!course) return null;
 
@@ -18,13 +18,14 @@ const CourseMap = ({ course, activeLesson, onSelectLesson, isCompact = false }) 
 
     // Helper to calculate position of a lesson node
     const getPosition = (index) => {
-        // We calculate row based on pairs (Module)
-        // Each module has 2 lessons: Theory and Practice
         const row = Math.floor(index / 2);
         const isPractice = index % 2 === 1;
 
-        // Theory on left (-curveWidth), Practice on right (+curveWidth)
-        const x = isPractice ? curveWidth : -curveWidth;
+        // Wavy logic: x oscillates based on row
+        const waveOffset = Math.sin(row * 0.8) * 40;
+        const columnX = isPractice ? curveWidth : -curveWidth;
+
+        const x = columnX + waveOffset;
         const y = startY + (row * stepHeight);
 
         return { x, y };
@@ -38,14 +39,18 @@ const CourseMap = ({ course, activeLesson, onSelectLesson, isCompact = false }) 
 
         for (let i = 0; i < numRows; i++) {
             const theoryPos = getPosition(i * 2);
-            const practicePos = getPosition(i * 2 + 1);
+            const practicePos = getPosition(i * 2 + 1 || i * 2); // Fallback for last node if odd
 
             if (i === 0) {
                 theoryPath += `M ${theoryPos.x + 400} ${theoryPos.y}`;
                 practicePath += `M ${practicePos.x + 400} ${practicePos.y}`;
             } else {
-                theoryPath += ` L ${theoryPos.x + 400} ${theoryPos.y}`;
-                practicePath += ` L ${practicePos.x + 400} ${practicePos.y}`;
+                // Curved segments
+                const prevTheoryPos = getPosition((i - 1) * 2);
+                const prevPracticePos = getPosition((i - 1) * 2 + 1);
+
+                theoryPath += ` C ${prevTheoryPos.x + 400} ${prevTheoryPos.y + stepHeight / 2}, ${theoryPos.x + 400} ${theoryPos.y - stepHeight / 2}, ${theoryPos.x + 400} ${theoryPos.y}`;
+                practicePath += ` C ${prevPracticePos.x + 400} ${prevPracticePos.y + stepHeight / 2}, ${practicePos.x + 400} ${practicePos.y - stepHeight / 2}, ${practicePos.x + 400} ${practicePos.y}`;
             }
         }
         return { theoryPath, practicePath };
@@ -69,10 +74,10 @@ const CourseMap = ({ course, activeLesson, onSelectLesson, isCompact = false }) 
             {!isCompact && (
                 <div className="w-full flex justify-between absolute top-[280px] px-24 pointer-events-none opacity-20">
                     <div className="text-xl font-black uppercase tracking-tighter text-indigo-900 flex flex-col items-center gap-2">
-                        <BookOpen className="w-8 h-8" /> Theory
+                        <BookOpen className="w-8 h-8" /> {t('roadmap.theory')}
                     </div>
                     <div className="text-xl font-black uppercase tracking-tighter text-purple-900 flex flex-col items-center gap-2">
-                        <Code2 className="w-8 h-8" /> Practice
+                        <Code2 className="w-8 h-8" /> {t('roadmap.practice')}
                     </div>
                 </div>
             )}
@@ -164,8 +169,9 @@ const CourseMap = ({ course, activeLesson, onSelectLesson, isCompact = false }) 
                                     <span className="text-[10px] font-black text-gray-400 uppercase tracking-[0.2em]">
                                         {(() => {
                                             const mod = course.modules.find(m => m.lessons.some(l => l.slug === lesson.slug));
-                                            return (i18n.language || 'en').startsWith('ru') ? mod?.title_ru : mod?.title_en;
-                                        })() || "MODULE"}
+                                            const title = (i18n.language || 'en').startsWith('ru') ? mod?.title_ru : mod?.title_en;
+                                            return title || t('roadmap.module');
+                                        })()}
                                     </span>
                                 </div>
                             )}
@@ -214,7 +220,7 @@ const CourseMap = ({ course, activeLesson, onSelectLesson, isCompact = false }) 
                         <div className="p-3 bg-white border-2 border-dashed border-gray-100 rounded-full">
                             <Flag className="w-5 h-5" />
                         </div>
-                        START
+                        {t('roadmap.start')}
                     </div>
                 )}
 
@@ -228,12 +234,12 @@ const CourseMap = ({ course, activeLesson, onSelectLesson, isCompact = false }) 
                             className="px-10 py-5 bg-gradient-to-r from-yellow-400 to-yellow-500 hover:from-yellow-300 hover:to-yellow-400 text-yellow-900 font-black rounded-[2rem] shadow-2xl shadow-yellow-200/50 transition-all hover:scale-105 active:scale-95 flex items-center gap-3 border-b-8 border-yellow-700 active:border-b-0 animate-bounce-slow"
                         >
                             <Award className="w-6 h-6" />
-                            CLAIM YOUR REWARD
+                            {t('roadmap.claim_reward')}
                         </button>
                     ) : (
                         <div className="opacity-40 flex items-center gap-2">
                             <Lock className="w-4 h-4" />
-                            Keep going to reach the top
+                            {t('roadmap.keep_going')}
                         </div>
                     )}
                 </div>

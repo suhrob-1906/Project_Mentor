@@ -372,20 +372,27 @@ class GeminiService:
         Completion: {context['completion']}.
         Is Child: {context['is_child']}.
         Language: {lang}.
+        
+        PERFORMANCE DATA (Mental model of the student):
+        - Modules completed: {context.get('modules_passed')}
+        - Strengths: {context.get('strengths', 'Rapid progress and consistency')}
+        - Weaknesses/Errors: {context.get('weaknesses', 'Initial logic patterns and edge cases')}
 
         TASK: Write a 'Path to Middle Programmer' report.
         INCLUDE:
-        1. Praise for accomplishments.
-        2. Analysis of skills acquired based on the modules passed.
-        3. A strategic 6-month learning plan to reach Middle seniority.
-        4. Links/References to advanced topics (System Design, TDD, Design Patterns, Cloud).
+        1. Praise for accomplishments and persistence.
+        2. Detailed Analysis: "Where you were good" vs "Where you made mistakes". Mention specific topics like Loops, Arrays, or Functions based on the course: {context['course']}.
+        3. A strategic 6-month learning plan to reach Middle seniority. This should be a step-by-step roadmap.
+        4. Focus areas for improvement based on the errors mentioned.
+        5. Career wisdom: How to build a portfolio and what to learn next (System Design, TDD, Design Patterns).
         
         TONE: {"Playful, encouraging and simplified (for a young student)" if context['is_child'] else "Professional, strategic, and detailed (for an adult)"}.
-        FORMAT: Use beautiful Markdown with headers and bullet points.
+        FORMAT: Use beautiful Markdown with headers, bullet points, and high-impact sections.
+        
+        Response MUST be in Russian.
         """
         try:
-            model = genai.GenerativeModel('gemini-1.5-pro')
-            response = model.generate_content(prompt)
+            response = self._generate_with_fallback(prompt)
             return response.text
         except Exception as e:
             return f"Error generating report: {str(e)}"

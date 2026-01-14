@@ -13,6 +13,7 @@ class CourseViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = Course.objects.all()
     serializer_class = CourseSerializer
     permission_classes = [permissions.AllowAny]
+    lookup_field = 'slug'
 
     def get_serializer_context(self):
         ctx = super().get_serializer_context()
@@ -49,9 +50,9 @@ class LessonViewSet(viewsets.ReadOnlyModelViewSet):
                 # BETTER: Check for presence of task-specific keywords or logic.
                 if len(code.strip()) > len(task.get('initial_code', '').strip()) + 5:
                     passed = True
-                    feedback = f"Task {task_index + 1} passed! 🌟"
+                    feedback = "Success! Next task unlocked. 🌟"
                 else:
-                    feedback = "Try to implement more logic for this task."
+                    feedback = "Not quite right. Try a different approach! ❌"
             else:
                 passed = True # All tasks done?
         else:
@@ -61,11 +62,12 @@ class LessonViewSet(viewsets.ReadOnlyModelViewSet):
             feedback = "Theory understood."
              
         # 2. Update Progress
+        prog, _ = UserLessonProgress.objects.get_or_create(user=request.user, lesson=lesson)
+        
         if passed:
-            prog, _ = UserLessonProgress.objects.get_or_create(user=request.user, lesson=lesson)
+            prog.failed_attempts = 0 # Reset on pass
             
             # If it's a practice lesson, we only mark final complete if last task is done
-            # For simplicity in this logic:
             if lesson.lesson_type == 'practice':
                 tasks = lesson.practice_tasks or []
                 if task_index == len(tasks) - 1 or not tasks:
@@ -88,10 +90,14 @@ class LessonViewSet(viewsets.ReadOnlyModelViewSet):
                      next_prog, _ = UserLessonProgress.objects.get_or_create(user=request.user, lesson=next_lesson)
                      next_prog.is_unlocked = True
                      next_prog.save()
+        else:
+            prog.failed_attempts = (prog.failed_attempts or 0) + 1
+            prog.save()
 
         return Response({
             "passed": passed,
-            "feedback": feedback
+            "feedback": feedback,
+            "failed_attempts": prog.failed_attempts
         })
 
     @action(detail=True, methods=['post'])
@@ -675,9 +681,21 @@ class GenerateReportView(views.APIView):
         completed_count = lesson_progress.filter(is_completed=True).count()
         total_count = Lesson.objects.filter(module__course=course).count()
         
-        # Simple analysis
+        # Advanced Analysis for AI
         is_child = user.age <= 14 if hasattr(user, 'age') else False
+        strengths = []
+        weaknesses = []
         
+        # Look at modules with many failures
+        struggled_progress = lesson_progress.filter(failed_attempts__gte=2)
+        if struggled_progress.exists():
+            weaknesses = [f"{p.lesson.module.title_en}: {p.lesson.title_en}" for p in struggled_progress[:5]]
+        
+        # Look at modules completed quickly or with 0 failures
+        strength_progress = lesson_progress.filter(is_completed=True, failed_attempts=0)
+        if strength_progress.exists():
+            strengths = [f"{p.lesson.module.title_en}" for p in strength_progress[:5]]
+
         # AI Logic
         ai = GeminiService()
         history = [] # No chat history needed for report
@@ -685,7 +703,10 @@ class GenerateReportView(views.APIView):
             "type": "final_report",
             "course": course.title_en,
             "completion": f"{completed_count}/{total_count}",
-            "is_child": is_child
+            "is_child": is_child,
+            "strengths": ", ".join(strengths) if strengths else "Consistent progress",
+            "weaknesses": ", ".join(weaknesses) if weaknesses else "Minor logic errors",
+            "modules_passed": ", ".join([m.title_en for m in course.modules.all()[:10]])
         }
         
         # Generate Report using a specialized system prompt

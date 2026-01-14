@@ -4,7 +4,7 @@ import api from '../api';
 import {
     Check, ArrowLeft, BookOpen, Code2,
     Play, ChevronRight, Award,
-    Terminal, Zap, Sparkles, Brain, Flag, Loader2
+    Terminal, Zap, Sparkles, Brain, Flag, Loader2, Languages
 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import Editor from '@monaco-editor/react';
@@ -25,6 +25,9 @@ export default function Course({ isChild }) {
     const [activeTaskIndex, setActiveTaskIndex] = useState(0);
     const [repeatCodeInput, setRepeatCodeInput] = useState('');
     const [stepError, setStepError] = useState(false);
+    const [failedAttempts, setFailedAttempts] = useState(0);
+    const [showSolution, setShowSolution] = useState(false);
+    const [solutionVisible, setSolutionVisible] = useState(false);
 
     const fetchCourse = useCallback(async () => {
         setIsLoading(true);
@@ -97,6 +100,9 @@ export default function Course({ isChild }) {
             setOutput(res.data.output || res.data.feedback || (res.data.passed ? "Check passed! ✅" : "Failed. Check your logic. ❌"));
 
             if (res.data.passed) {
+                setFailedAttempts(0);
+                setShowSolution(false);
+                setSolutionVisible(false);
                 if (activeTaskIndex < activeLesson.practice_tasks.length - 1) {
                     setActiveTaskIndex(prev => prev + 1);
                     setUserCode(activeLesson.practice_tasks[activeTaskIndex + 1].initial_code || '');
@@ -105,6 +111,8 @@ export default function Course({ isChild }) {
                     setCourse(courseRes.data);
                     setActiveLesson(prev => ({ ...prev, is_completed: true }));
                 }
+            } else {
+                setFailedAttempts(prev => prev + 1);
             }
         } catch (err) {
             setOutput(`Error: ${err.response?.data?.error || err.message}`);
@@ -221,18 +229,28 @@ export default function Course({ isChild }) {
                         {t('common.back', 'Back')}
                     </button>
 
-                    <div className="flex items-center gap-3">
-                        {activeLesson && (
-                            <div className={`px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest border-2 ${activeLesson.lesson_type === 'theory' ? 'bg-indigo-50 border-indigo-100 text-indigo-500' : 'bg-purple-50 border-purple-100 text-purple-500'}`}>
-                                {activeLesson.lesson_type}
-                            </div>
-                        )}
-                        {activeLesson?.is_completed && (
-                            <div className="bg-emerald-100 text-emerald-600 px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest flex items-center gap-1">
-                                <Check className="w-3 h-3 stroke-[4]" />
-                                {isRu ? "Пройдено!" : "Passed!"}
-                            </div>
-                        )}
+                    <div className="flex items-center gap-4">
+                        <button
+                            onClick={() => i18n.changeLanguage(i18n.language.startsWith('ru') ? 'en' : 'ru')}
+                            className={`flex items-center gap-2 px-3 py-1.5 rounded-xl transition-all font-bold text-[10px] ${isChild ? 'bg-black text-white hover:scale-105' : 'hover:bg-gray-50 border border-gray-100 text-gray-700'}`}
+                        >
+                            <Languages className="w-3 h-3" />
+                            {i18n.language.toUpperCase()}
+                        </button>
+
+                        <div className="flex items-center gap-3">
+                            {activeLesson && (
+                                <div className={`px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest border-2 ${activeLesson.lesson_type === 'theory' ? 'bg-indigo-50 border-indigo-100 text-indigo-500' : 'bg-purple-50 border-purple-100 text-purple-500'}`}>
+                                    {activeLesson.lesson_type}
+                                </div>
+                            )}
+                            {activeLesson?.is_completed && (
+                                <div className="bg-emerald-100 text-emerald-600 px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest flex items-center gap-1">
+                                    <Check className="w-3 h-3 stroke-[4]" />
+                                    {t('results.mastered', 'Passed!')}
+                                </div>
+                            )}
+                        </div>
                     </div>
                 </div>
             </nav>
@@ -279,28 +297,81 @@ export default function Course({ isChild }) {
                                     </details>
                                 )}
 
-                                <div className={`flex items-center justify-between gap-4`}>
-                                    {activeLesson.lesson_type === 'practice' ? (
-                                        <button
-                                            onClick={handleRunCode}
-                                            disabled={isVerifying}
-                                            className={`flex-1 flex items-center justify-center gap-3 py-4 rounded-2xl font-black uppercase tracking-widest text-sm transition-all hover:scale-[1.02] active:scale-[0.98] ${isChild ? 'bg-black text-white hover:bg-gray-800 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]' : 'bg-indigo-600 text-white hover:bg-indigo-500 shadow-xl shadow-indigo-200'}`}
-                                        >
-                                            {isVerifying ? <Loader2 className="w-5 h-5 animate-spin" /> : <Play className="w-5 h-5 fill-current" />}
-                                            {isRu ? "Проверить" : "Check Task"}
-                                        </button>
-                                    ) : (
-                                        <button
-                                            onClick={handleNextStep}
-                                            disabled={isVerifying}
-                                            className={`flex-1 flex items-center justify-center gap-3 py-4 rounded-2xl font-black uppercase tracking-widest text-sm transition-all hover:scale-[1.02] active:scale-[0.98] ${isChild ? 'bg-emerald-500 text-white border-b-4 border-emerald-700 active:border-b-0 hover:bg-emerald-400' : 'bg-indigo-600 text-white hover:bg-indigo-500 shadow-xl shadow-indigo-200'}`}
-                                        >
-                                            {activeStepIndex < activeLesson.theory_steps.length - 1
-                                                ? (isRu ? "Далее" : "Next Step")
-                                                : (isRu ? "Завершить теорию" : "Finish Theory")
-                                            }
-                                            <ChevronRight className="w-5 h-5" />
-                                        </button>
+                                <div className={`flex flex-col gap-4`}>
+                                    <div className="flex items-center justify-between gap-4">
+                                        {activeLesson.lesson_type === 'practice' ? (
+                                            <button
+                                                onClick={handleRunCode}
+                                                disabled={isVerifying}
+                                                className={`flex-1 flex items-center justify-center gap-3 py-4 rounded-2xl font-black uppercase tracking-widest text-sm transition-all hover:scale-[1.02] active:scale-[0.98] ${isChild ? 'bg-black text-white hover:bg-gray-800 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]' : 'bg-indigo-600 text-white hover:bg-indigo-500 shadow-xl shadow-indigo-200'}`}
+                                            >
+                                                {isVerifying ? <Loader2 className="w-5 h-5 animate-spin" /> : <Play className="w-5 h-5 fill-current" />}
+                                                {isRu ? "Проверить" : "Check Task"}
+                                            </button>
+                                        ) : (
+                                            <button
+                                                onClick={handleNextStep}
+                                                disabled={isVerifying}
+                                                className={`flex-1 flex items-center justify-center gap-3 py-4 rounded-2xl font-black uppercase tracking-widest text-sm transition-all hover:scale-[1.02] active:scale-[0.98] ${isChild ? 'bg-emerald-500 text-white border-b-4 border-emerald-700 active:border-b-0 hover:bg-emerald-400' : 'bg-indigo-600 text-white hover:bg-indigo-500 shadow-xl shadow-indigo-200'}`}
+                                            >
+                                                {activeStepIndex < activeLesson.theory_steps.length - 1
+                                                    ? (isRu ? "Далее" : "Next Step")
+                                                    : (isRu ? "Завершить теорию" : "Finish Theory")
+                                                }
+                                                <ChevronRight className="w-5 h-5" />
+                                            </button>
+                                        )}
+                                    </div>
+
+                                    {activeLesson.lesson_type === 'practice' && failedAttempts >= 3 && (
+                                        <div className="animate-in fade-in slide-in-from-top-4 duration-500">
+                                            <div className={`p-5 rounded-[2rem] border-2 transition-all group ${isChild ? 'bg-amber-50 border-amber-300' : 'bg-amber-50/30 border-amber-100'}`}>
+                                                <div className="flex items-center gap-3 mb-4">
+                                                    <div className="w-10 h-10 bg-amber-100 rounded-full flex items-center justify-center">
+                                                        <Zap className="w-5 h-5 text-amber-600" />
+                                                    </div>
+                                                    <div>
+                                                        <h4 className="text-sm font-black text-amber-900 uppercase tracking-tight">
+                                                            {isRu ? "Нужна помощь?" : "Need a boost?"}
+                                                        </h4>
+                                                        <p className="text-[11px] font-bold text-amber-700/70 leading-tight">
+                                                            {isRu ? "Ты старался! Можешь спросить AI или посмотреть готовое решение." : "You've tried hard! Ask the AI or check the solution below."}
+                                                        </p>
+                                                    </div>
+                                                </div>
+
+                                                <div className="flex flex-col gap-2">
+                                                    <button
+                                                        onClick={() => setSolutionVisible(!solutionVisible)}
+                                                        className={`w-full py-3 rounded-xl border-2 border-dashed font-black uppercase tracking-widest text-[10px] transition-all
+                                                            ${isChild ? 'bg-white border-amber-400 text-amber-600 hover:scale-[1.02]' : 'bg-white/50 border-amber-200 text-amber-500 hover:bg-white'}`}
+                                                    >
+                                                        {solutionVisible ? (isRu ? "Скрыть ответ" : "Hide Solution") : (isRu ? "Посмотреть ответ" : "Show Solution")}
+                                                    </button>
+
+                                                    {solutionVisible && (
+                                                        <div className="mt-4 p-4 bg-gray-900 rounded-2xl border-2 border-black shadow-xl overflow-hidden">
+                                                            <div className="flex justify-between items-center mb-3">
+                                                                <span className="text-[10px] font-mono text-gray-400 uppercase tracking-widest">solution_v1.py</span>
+                                                                <button
+                                                                    onClick={() => {
+                                                                        const sol = activeLesson.practice_tasks[activeTaskIndex].solution_code;
+                                                                        setUserCode(sol);
+                                                                        setSolutionVisible(false);
+                                                                    }}
+                                                                    className="text-[10px] font-black text-yellow-400 hover:text-yellow-300 underline underline-offset-4 decoration-dotted"
+                                                                >
+                                                                    {isRu ? "Копировать" : "Copy to Editor"}
+                                                                </button>
+                                                            </div>
+                                                            <pre className="text-xs font-mono text-emerald-400 overflow-x-auto p-2 bg-black/30 rounded-lg">
+                                                                {activeLesson.practice_tasks[activeTaskIndex].solution_code}
+                                                            </pre>
+                                                        </div>
+                                                    )}
+                                                </div>
+                                            </div>
+                                        </div>
                                     )}
                                 </div>
                             </div>

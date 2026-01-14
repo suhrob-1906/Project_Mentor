@@ -197,6 +197,7 @@ class UserLessonProgress(models.Model):
     is_completed = models.BooleanField(default=False)
     is_unlocked = models.BooleanField(default=False)
     user_code = models.TextField(blank=True) # Last saved code
+    failed_attempts = models.IntegerField(default=0)
     
     # Tracking granular progress
     # {"completed_steps": [0, 1], "completed_tasks": [0]}
