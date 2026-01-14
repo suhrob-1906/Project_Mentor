@@ -1,6 +1,6 @@
 from rest_framework import views, generics, permissions, status
 from rest_framework.response import Response
-from .models import Submission, AnalysisResult, Roadmap, ProjectRecommendation, TestQuestion, TestResult, UserProgress, Homework, Course, Module, Lesson, UserLessonProgress, ChatSession, ChatMessage
+from .models import Submission, AnalysisResult, Roadmap, ProjectRecommendation, TestQuestion, TestResult, UserProgress, Homework, Course, Module, Lesson, UserLessonProgress, ChatSession, ChatMessage, CourseReport
 from .serializers import (
     SubmissionSerializer, RoadmapSerializer, ProjectRecommendationSerializer,
     TestQuestionSerializer, TestResultSerializer, CourseSerializer, LessonDetailSerializer, UserLessonProgressSerializer
@@ -642,6 +642,18 @@ class MentorChatView(views.APIView):
             "session_id": session.id
         })
 
+    def get(self, request):
+        lesson_slug = request.query_params.get('lesson_slug')
+        lesson = None
+        if lesson_slug:
+            lesson = Lesson.objects.filter(slug=lesson_slug).first()
+        
+        session = ChatSession.objects.filter(user=request.user, lesson=lesson, is_active=True).first()
+        
+        if not session:
+            return Response([])
+            
+        msgs = session.messages.all()
         return Response([
             {"role": m.role, "content": m.content, "created_at": m.created_at}
             for m in msgs

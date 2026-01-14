@@ -23,56 +23,59 @@ def populate():
     )
 
     py_modules = [
-        ("Module 1: Start and print()", "Модуль 1: Старт и print()", [{"text_en": "print() outputs text. Example: print('Hello')", "text_ru": "print() выводит текст. Пример: print('Hello')", "code_to_repeat": "print('Hello')"}], [{"title_en": "First Code", "title_ru": "Первый код", "desc_en": "Print 'Hello, World!'", "desc_ru": "Выведи 'Hello, World!'", "initial_code": "", "expected_output": "Hello, World!"}]),
-        ("Module 2: Variables", "Модуль 2: Переменные", [{"text_en": "name = 'Alice' assigns a value.", "text_ru": "name = 'Alice' присваивает значение.", "code_to_repeat": "name = 'Alice'"}], [{"title_en": "Variable Test", "title_ru": "Тест переменных", "desc_en": "Create name='Python' and print it.", "desc_ru": "Создай name='Python' и выведи.", "initial_code": "", "expected_output": "Python"}]),
-        ("Module 3: Data Types", "Модуль 3: Типы данных", [{"text_en": "int, float, str, bool.", "text_ru": "int, float, str, bool.", "code_to_repeat": "x = 5"}], [{"title_en": "Sum", "title_ru": "Сумма", "desc_en": "Sum 10 + 5", "desc_ru": "Сложи 10 + 5", "initial_code": "", "expected_output": "15"}]),
-        ("Module 4: Input()", "Модуль 4: Ввод input()", [{"text_en": "input() reads a string.", "text_ru": "input() читает строку.", "code_to_repeat": "input('Name: ')"}], []),
-        ("Module 5: Arithmetic", "Модуль 5: Арифметика", [], []),
-        ("Module 6: Conditions if/else", "Модуль 6: Условия if/else", [], []),
-        ("Module 7: elif and Nesting", "Модуль 7: elif и вложенность", [], []),
-        ("Module 8: Logic and/or/not", "Модуль 8: Логика and/or/not", [], []),
-        ("Module 9: while Loops", "Модуль 9: Цикл while", [], []),
-        ("Module 10: for Loops and range", "Модуль 10: Цикл for и range", [], []),
-        ("Module 11: Strings & Slicing", "Модуль 11: Строки и срезы", [], []),
-        ("Module 12: String Methods", "Модуль 12: Методы строк", [], []),
-        ("Module 13: Lists Foundations", "Модуль 13: Списки основы", [], []),
-        ("Module 14: List Processing", "Модуль 14: Перебор списков", [], []),
-        ("Module 15: Dictionaries (dict)", "Модуль 15: Словари (dict)", [], []),
-        ("Module 16: Functions (def)", "Модуль 16: Функции (def)", [], []),
-        ("Module 17: Return and Results", "Модуль 17: Return и результаты", [], []),
-        ("Module 18: Scope and Globals", "Модуль 18: Область видимости", [], []),
-        ("Module 19: Errors (try/except)", "Модуль 19: Ошибки (try/except)", [], []),
-        ("Module 20: Files (IO)", "Модуль 20: Работа с файлами", [], []),
-        ("Module 21: Modules and Imports", "Модуль 21: Модули и импорт", [], []),
-        ("Module 22: Small Projects", "Модуль 22: Мини-проекты", [], []),
-        ("Module 23: OOP: Classes", "Модуль 23: ООП: Классы", [], []),
-        ("Module 24: OOP: Init & Methods", "Модуль 24: ООП: Методы", [], []),
-        ("Module 25: Final Python Project", "Модуль 25: Итоговый проект", [], []),
+        ("Start and print()", "Старт и print()", 
+         [{"text_en": "print() outputs text.", "text_ru": "print() выводит текст.", "code_to_repeat": "print('Hello')"},
+          {"text_en": "You can print numbers too.", "text_ru": "Можно выводить и числа.", "code_to_repeat": "print(123)"}], 
+         [{"title_en": "Hello World", "title_ru": "Привет, Мир", "desc_en": "Print 'Hello, World!'", "desc_ru": "Выведи 'Hello, World!'", "initial_code": "", "expected_output": "Hello, World!"}]),
+        
+        ("Variables", "Переменные", 
+         [{"text_en": "x = 5 creates a variable.", "text_ru": "x = 5 создает переменную.", "code_to_repeat": "x = 5"}], 
+         [{"title_en": "Create Name", "title_ru": "Создай имя", "desc_en": "Set name = 'Python'", "desc_ru": "Установи name = 'Python'", "initial_code": "", "expected_output": "Python"}]),
+        
+        ("Data Types", "Типы данных", [], []),
+        ("Arithmetic", "Арифметика", [], []),
+        ("Input()", "Ввод input()", [], []),
+        ("Strings", "Строки", [], []),
+        ("Slicing", "Срезы строк", [], []),
+        ("If/Else", "Условия", [], []),
+        ("Elif & Nesting", "Сложные условия", [], []),
+        ("Logic", "Логика (and/or)", [], []),
+        ("While Loops", "Цикл While", [], []),
+        ("For Loops", "Цикл For", [], []),
+        ("Range()", "Функция range()", [], []),
+        ("Break/Continue", "Управление циклом", [], []),
+        ("Lists Basics", "Списки: Основы", [], []),
+        ("List Methods", "Методы списков", [], []),
+        ("List Comprehension", "Генераторы списков", [], []),
+        ("Tuples (tuple)", "Кортежи (tuple)", [], []),
+        ("Dictionaries", "Словари (dict)", [], []),
+        ("Sets (set)", "Множества (set)", [], []),
+        ("Functions", "Функции (def)", [], []),
+        ("Arguments & Return", "Аргументы и Return", [], []),
+        ("Lambda", "Лямбда-функции", [], []),
+        ("Modules", "Модули и import", [], []),
+        ("Pip & Packages", "Pip и пакеты", [], []),
+        ("Errors (Try/Except)", "Ошибки", [], []),
+        ("File IO", "Файлы", [], []),
+        ("OOP: Classes", "ООП: Классы", [], []),
+        ("OOP: Inheritance", "ООП: Наследование", [], []),
+        ("OOP: Practice", "ООП: Практика", [], []),
+        ("Decorators", "Декораторы", [], []),
+        ("Iterators", "Итераторы", [], []),
+        ("Advanced Project", "Финальный проект", [], []),
     ]
 
     for i, (te, tr, steps, tasks) in enumerate(py_modules, 1):
         mod = Module.objects.create(course=backend, title_en=te, title_ru=tr, order=i)
-        
-        # THEORY LESSON
-        theory = Lesson.objects.create(
-            module=mod,
-            slug=f"py-m{i}-theory",
-            order=1,
-            lesson_type='theory',
-            title_en="Theory Track",
-            title_ru="Теория",
+        Lesson.objects.create(
+            module=mod, slug=f"py-m{i}-theory", order=1, lesson_type='theory',
+            title_en="Theory", title_ru="Теория",
             theory_steps=steps or [{"text_en": f"Learn {te}...", "text_ru": f"Изучи {tr}...", "code_to_repeat": "pass"}]
         )
-
-        # PRACTICE LESSON
-        practice = Lesson.objects.create(
-            module=mod,
-            slug=f"py-m{i}-practice",
-            order=2,
-            lesson_type='practice',
-            title_en="Practice Track",
-            title_ru="Практика",
-            practice_tasks=tasks or [{"title_en": "Challenge", "title_ru": "Задание", "desc_en": "Solve...", "desc_ru": "Реши...", "initial_code": "", "expected_output": "ok"}]
+        Lesson.objects.create(
+            module=mod, slug=f"py-m{i}-practice", order=2, lesson_type='practice',
+            title_en="Practice", title_ru="Практика",
+            practice_tasks=tasks or [{"title_en": "Task", "title_ru": "Задание", "desc_en": "Solve...", "desc_ru": "Реши...", "initial_code": "", "expected_output": "ok"}]
         )
 
     # --- 2. FRONTEND (HTML/CSS/JS) ---
@@ -84,82 +87,32 @@ def populate():
         description_ru='Стань мастером веба: от HTML до работы с API.'
     )
 
-    # 40 Modules for Frontend
-    fe_modules = [
-        # HTML
-        ("HTML: Doc Structure", "HTML: Структура документа"),
-        ("Text Tags & Lists", "Текстовые теги и списки"),
-        ("Links & Images", "Ссылки и изображения"),
-        ("Forms & Inputs", "Формы и input"),
-        ("Semantic HTML", "Семантические теги"),
-        ("Tables & Media", "Таблицы и Медиа"),
-        # CSS
-        ("CSS Basics & Selectors", "CSS: База и селекторы"),
-        ("Box Model", "Box model"),
-        ("Display & Positioning", "Display и позиционирование"),
-        ("Flexbox Magic", "Магия Flexbox"),
-        ("Grid Systems", "CSS Grid"),
-        ("Responsive Design", "Адаптивность"),
-        ("Hover & Pseudo", "Псевдоклассы и hover"),
-        ("Variables & Themes", "Переменные и темы"),
-        ("Animations", "Анимации"),
-        # JS
-        ("JS Intro & Console", "JS: Интро и консоль"),
-        ("JS Variables & Types", "JS: Переменные и типы"),
-        ("JS Logic & If", "JS: Логика и условия"),
-        ("JS Loops", "JS: Циклы"),
-        ("JS Functions", "JS: Функции"),
-        ("JS Arrays", "JS: Массивы"),
-        ("JS Objects", "JS: Объекты"),
-        ("DOM Basics", "DOM: Основы"),
-        ("DOM Events", "DOM: События"),
-        ("Async & Fetch", "Async и Fetch"),
-        ("Final Web App", "Финальный веб-проект"),
+    fe_names = [
+        "HTML: Tags", "HTML: Lists", "HTML: Links", "HTML: Tables", "HTML: Forms",
+        "HTML: Semantic", "CSS: Selectors", "CSS: Colors", "CSS: Box Model", "CSS: Flexbox",
+        "CSS: Grid", "CSS: Position", "CSS: Animations", "CSS: Responsiveness", "CSS: Variables",
+        "CSS: Transitions", "CSS: Shadows", "CSS: Transforms", "CSS: Pseudo-classes", "CSS: Media Queries",
+        "JS: Intro", "JS: Variables", "JS: Types", "JS: Logic", "JS: If/Else",
+        "JS: Loops", "JS: Functions", "JS: Arrow Functions", "JS: Arrays", "JS: Objects",
+        "JS: DOM Selectors", "JS: DOM Events", "JS: DOM Manipulation", "JS: LocalStorage", "JS: JSON",
+        "JS: Callbacks", "JS: Promises", "JS: Async/Await", "JS: Fetch API", "JS: Classes",
+        "JS: Modules", "JS: Error Handling", "JS: Debugging", "JS: Final Project", "JS: Optimization"
     ]
-    # (Note: For brevity in this script, I'm providing 26 key blocks; 
-    # real population would expand these to 45 if necessary)
 
-    for i, (te, tr) in enumerate(fe_modules, 1):
-        mod = Module.objects.create(course=frontend, title_en=te, title_ru=tr, order=i)
-        
-        # THEORY
+    for i, name in enumerate(fe_names, 1):
+        mod = Module.objects.create(course=frontend, title_en=name, title_ru=name, order=i)
         Lesson.objects.create(
-            module=mod,
-            slug=f"fe-m{i}-theory",
-            order=1,
-            lesson_type='theory',
-            title_en="Theory Track",
-            title_ru="Теория",
-            theory_steps=[
-                {
-                    "text_en": f"Learning {te} step by step.",
-                    "text_ru": f"Изучаем {tr} шаг за шагом.",
-                    "code_to_repeat": "<h1>Hello</h1>" if i < 7 else ".card { color: red; }"
-                }
-            ]
+            module=mod, slug=f"fe-m{i}-theory", order=1, lesson_type='theory',
+            title_en="Theory", title_ru="Теория",
+            theory_steps=[{"text_en": f"Learn {name}...", "text_ru": f"Изучи {name}...", "code_to_repeat": "<h1></h1>"}]
+        )
+        Lesson.objects.create(
+            module=mod, slug=f"fe-m{i}-practice", order=2, lesson_type='practice',
+            title_en="Practice", title_ru="Практика",
+            practice_tasks=[{"title_en": "Apply", "title_ru": "Примени", "desc_en": "Code...", "desc_ru": "Напиши код...", "initial_code": "", "expected_output": "done"}]
         )
 
-        # PRACTICE
-        Lesson.objects.create(
-            module=mod,
-            slug=f"fe-m{i}-practice",
-            order=2,
-            lesson_type='practice',
-            title_en="Practice Track",
-            title_ru="Практика",
-            practice_tasks=[
-                {
-                    "title_en": "Build it!",
-                    "title_ru": "Сделай это!",
-                    "desc_en": f"Apply {te} in code.",
-                    "desc_ru": f"Примени {tr} в коде.",
-                    "initial_code": "<!-- Start here -->",
-                    "expected_output": "success"
-                }
-            ]
-        )
-
-    print("Successfully populated Massive Curriculum!")
+    print(f"Successfully populated {len(py_modules)} Python and {len(fe_names)} Frontend modules!")
 
 if __name__ == '__main__':
     populate()

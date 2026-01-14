@@ -1,6 +1,6 @@
 from django.urls import path, include
 from rest_framework.routers import DefaultRouter
-from .views import AnalyzeView, RoadmapView, ProjectView, TestQuestionsView, SubmitTestView, UserProgressView, HomeworkView, DynamicQuestionView, CourseViewSet, LessonViewSet, CompleteLessonView, MentorChatView
+from .views import AnalyzeView, RoadmapView, ProjectView, TestQuestionsView, SubmitTestView, UserProgressView, HomeworkView, DynamicQuestionView, CourseViewSet, LessonViewSet, CompleteLessonView, MentorChatView, GenerateReportView
 
 router = DefaultRouter()
 router.register(r'courses', CourseViewSet)
