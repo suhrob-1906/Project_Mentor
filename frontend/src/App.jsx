@@ -96,6 +96,7 @@ function App() {
                 <Course />
               </ProtectedRoute>
             }
+          />
           <Route
             path="/courses/:slug/completion"
             element={
