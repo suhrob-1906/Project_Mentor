@@ -70,7 +70,7 @@ export default function Dashboard({ isChild }) {
                             <Rocket className={`w-8 h-8 ${isChild ? 'text-yellow-400' : 'text-white'}`} />
                         </div>
                         <span className={`font-black text-2xl tracking-tighter uppercase ${isChild ? 'text-black' : 'text-gray-900'}`}>
-                            MentorAI
+                            {isRu ? "НАСТАВНИК" : "MentorAI"}
                         </span>
                     </div>
 
@@ -156,11 +156,11 @@ export default function Dashboard({ isChild }) {
                                     </h3>
                                     <p className="text-gray-500 font-bold mb-8 text-sm leading-relaxed">
                                         {isRu
-                                            ? "Похоже, база данных на Render пуста. Зайдите в Shell и выполните скрипт наполнения!"
-                                            : "Your database seems empty. Please run the population script in Render's Shell to see the magic!"}
+                                            ? "База данных пуста. Я настроил автоматическое заполнение через build.sh, просто сделайте PUSH!"
+                                            : "Your database is empty. I've set up auto-population in build.sh, just do a PUSH!"}
                                     </p>
                                     <div className="bg-gray-100 p-4 rounded-2xl font-mono text-xs text-left mb-8 border-2 border-gray-200">
-                                        python backend/scripts/populate_massive_curriculum.py
+                                        python scripts/populate_massive_curriculum.py
                                     </div>
                                     <button
                                         onClick={fetchData}
