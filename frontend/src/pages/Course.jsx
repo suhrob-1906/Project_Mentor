@@ -74,8 +74,14 @@ export default function Course({ isChild }) {
     };
 
     const handleNextStep = () => {
+        // Handle case when theory_steps is empty
+        if (!activeLesson.theory_steps || activeLesson.theory_steps.length === 0) {
+            handleMarkUnderstood();
+            return;
+        }
+
         const currentStep = activeLesson.theory_steps[activeStepIndex];
-        if (currentStep.code_to_repeat && repeatCodeInput.trim() !== currentStep.code_to_repeat.trim()) {
+        if (currentStep?.code_to_repeat && repeatCodeInput.trim() !== currentStep.code_to_repeat.trim()) {
             setStepError(true);
             return;
         }
@@ -163,6 +169,17 @@ export default function Course({ isChild }) {
     };
 
     const renderTheoryStep = () => {
+        // If no theory_steps, show content directly
+        if (!activeLesson.theory_steps || activeLesson.theory_steps.length === 0) {
+            return (
+                <div className="space-y-6">
+                    <div className="prose prose-indigo max-w-none">
+                        {renderContent(content)}
+                    </div>
+                </div>
+            );
+        }
+
         const step = activeLesson.theory_steps[activeStepIndex];
         if (!step) return null;
         return (
@@ -262,22 +279,57 @@ export default function Course({ isChild }) {
                             <CourseMap course={course} onSelectLesson={handleSelectLesson} activeLesson={activeLesson} />
                         </div>
                     ) : (
-                        <div className={`rounded-[2.5rem] overflow-hidden border-4 transition-all duration-500 ${isChild ? 'bg-white border-black shadow-[12px_12px_0px_0px_rgba(0,0,0,1)]' : 'bg-white border-gray-50 shadow-2xl'}`}>
-                            <div className="p-8">
-                                <div className="flex items-center gap-4 mb-6">
-                                    <div className={`w-14 h-14 rounded-2xl flex items-center justify-center shadow-lg ${activeLesson.lesson_type === 'theory' ? 'bg-indigo-600 text-white' : 'bg-purple-600 text-white'}`}>
-                                        {activeLesson.lesson_type === 'theory' ? <BookOpen className="w-7 h-7" /> : <Code2 className="w-7 h-7" />}
-                                    </div>
-                                    <div>
-                                        <h1 className={`text-2xl font-black tracking-tight ${isChild ? 'text-black' : 'text-gray-900'}`}>{title}</h1>
-                                        <p className="text-gray-400 text-xs font-bold uppercase tracking-widest mt-1">
-                                            {slug.toUpperCase()} • {activeLesson.lesson_type.toUpperCase()}
-                                        </p>
-                                    </div>
-                                </div>
-                                <div className="h-1 w-20 bg-indigo-100 rounded-full mb-8"></div>
+                        <div className={`rounded-[2.5rem] overflow-hidden border-4 transition-all duration-500 animate-in fade-in slide-in-from-bottom-4 ${isChild ? 'bg-white border-black shadow-[12px_12px_0px_0px_rgba(0,0,0,1)]' : 'bg-gradient-to-br from-white to-indigo-50/30 border-indigo-100 shadow-2xl shadow-indigo-100/50'}`}>
+                            {/* Progress Bar */}
+                            <div className="h-2 bg-gray-100">
+                                <div
+                                    className="h-full bg-gradient-to-r from-emerald-400 to-emerald-500 transition-all duration-700 rounded-r-full"
+                                    style={{ width: activeLesson?.is_completed ? '100%' : '10%' }}
+                                />
+                            </div>
 
-                                <div className="mb-10">
+                            <div className="p-8">
+                                {/* Header with icon */}
+                                <div className="flex items-center gap-5 mb-8">
+                                    <div className={`w-16 h-16 rounded-2xl flex items-center justify-center shadow-xl border-b-4 transition-transform hover:scale-110 ${activeLesson.lesson_type === 'theory'
+                                        ? 'bg-gradient-to-br from-indigo-500 to-indigo-600 border-indigo-700 text-white'
+                                        : 'bg-gradient-to-br from-purple-500 to-purple-600 border-purple-700 text-white'
+                                        }`}>
+                                        {activeLesson.lesson_type === 'theory'
+                                            ? <BookOpen className="w-8 h-8" />
+                                            : <Code2 className="w-8 h-8" />
+                                        }
+                                    </div>
+                                    <div className="flex-1">
+                                        <h1 className={`text-2xl font-black tracking-tight ${isChild ? 'text-black' : 'text-gray-900'}`}>
+                                            {title}
+                                        </h1>
+                                        <div className="flex items-center gap-2 mt-2">
+                                            <span className={`px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest ${activeLesson.lesson_type === 'theory'
+                                                ? 'bg-indigo-100 text-indigo-600'
+                                                : 'bg-purple-100 text-purple-600'
+                                                }`}>
+                                                {activeLesson.lesson_type === 'theory' ? '📚 ТЕОРИЯ' : '💻 ПРАКТИКА'}
+                                            </span>
+                                            <span className="text-gray-300">•</span>
+                                            <span className="text-gray-400 text-xs font-bold">{slug.toUpperCase()}</span>
+                                        </div>
+                                    </div>
+                                    {activeLesson?.is_completed && (
+                                        <div className="w-12 h-12 bg-gradient-to-br from-emerald-400 to-emerald-500 rounded-full flex items-center justify-center shadow-lg animate-bounce">
+                                            <Check className="w-6 h-6 text-white stroke-[3]" />
+                                        </div>
+                                    )}
+                                </div>
+
+                                {/* Decorative line */}
+                                <div className="flex items-center gap-2 mb-8">
+                                    <div className="h-1 flex-1 bg-gradient-to-r from-indigo-200 to-transparent rounded-full"></div>
+                                    <Sparkles className="w-4 h-4 text-indigo-300" />
+                                </div>
+
+                                {/* Content */}
+                                <div className="mb-10 bg-white/50 p-6 rounded-2xl border border-indigo-50">
                                     {activeLesson.lesson_type === 'theory'
                                         ? renderTheoryStep()
                                         : renderPracticeTask()
@@ -303,20 +355,20 @@ export default function Course({ isChild }) {
                                             <button
                                                 onClick={handleRunCode}
                                                 disabled={isVerifying}
-                                                className={`flex-1 flex items-center justify-center gap-3 py-4 rounded-2xl font-black uppercase tracking-widest text-sm transition-all hover:scale-[1.02] active:scale-[0.98] ${isChild ? 'bg-black text-white hover:bg-gray-800 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]' : 'bg-indigo-600 text-white hover:bg-indigo-500 shadow-xl shadow-indigo-200'}`}
+                                                className={`flex-1 flex items-center justify-center gap-3 py-5 rounded-2xl font-black uppercase tracking-widest text-sm transition-all border-b-4 active:border-b-0 active:translate-y-1 ${isChild ? 'bg-purple-500 text-white hover:bg-purple-400 border-purple-700 shadow-lg' : 'bg-gradient-to-br from-purple-500 to-purple-600 text-white hover:from-purple-400 hover:to-purple-500 border-purple-700 shadow-xl shadow-purple-200'}`}
                                             >
                                                 {isVerifying ? <Loader2 className="w-5 h-5 animate-spin" /> : <Play className="w-5 h-5 fill-current" />}
-                                                {isRu ? "Проверить" : "Check Task"}
+                                                {isRu ? "🚀 Проверить" : "🚀 Check Task"}
                                             </button>
                                         ) : (
                                             <button
                                                 onClick={handleNextStep}
                                                 disabled={isVerifying}
-                                                className={`flex-1 flex items-center justify-center gap-3 py-4 rounded-2xl font-black uppercase tracking-widest text-sm transition-all hover:scale-[1.02] active:scale-[0.98] ${isChild ? 'bg-emerald-500 text-white border-b-4 border-emerald-700 active:border-b-0 hover:bg-emerald-400' : 'bg-indigo-600 text-white hover:bg-indigo-500 shadow-xl shadow-indigo-200'}`}
+                                                className={`flex-1 flex items-center justify-center gap-3 py-5 rounded-2xl font-black uppercase tracking-widest text-sm transition-all border-b-4 active:border-b-0 active:translate-y-1 ${isChild ? 'bg-emerald-500 text-white hover:bg-emerald-400 border-emerald-700 shadow-lg' : 'bg-gradient-to-br from-emerald-400 to-emerald-500 text-white hover:from-emerald-300 hover:to-emerald-400 border-emerald-600 shadow-xl shadow-emerald-200'}`}
                                             >
-                                                {activeStepIndex < activeLesson.theory_steps.length - 1
-                                                    ? (isRu ? "Далее" : "Next Step")
-                                                    : (isRu ? "Завершить теорию" : "Finish Theory")
+                                                {(!activeLesson.theory_steps || activeLesson.theory_steps.length === 0 || activeStepIndex >= activeLesson.theory_steps.length - 1)
+                                                    ? (isRu ? "✅ Завершить теорию" : "✅ Finish Theory")
+                                                    : (isRu ? "Далее →" : "Next Step →")
                                                 }
                                                 <ChevronRight className="w-5 h-5" />
                                             </button>
