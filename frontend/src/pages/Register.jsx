@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import api from '../api';
-import { Loader2, UserPlus } from 'lucide-react';
+import { Loader2, UserPlus, Sparkles, Wand2 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 
 export default function Register() {
@@ -62,50 +62,55 @@ export default function Register() {
     };
 
     return (
-        <div className="min-h-screen flex items-center justify-center bg-[#F8FAFC] px-4 py-12">
-            <div className="bg-white p-10 rounded-[3rem] shadow-2xl shadow-indigo-100/50 w-full max-w-lg border border-gray-100 relative overflow-hidden">
-                <div className="absolute top-0 left-0 w-48 h-48 bg-indigo-50 rounded-full -ml-24 -mt-24 blur-3xl opacity-50"></div>
+        <div className="min-h-screen flex items-center justify-center bg-[#f7f7f7] px-4 py-12 pattern-grid">
+            <div className="bg-white p-8 md:p-10 rounded-3xl border-4 border-black shadow-[12px_12px_0px_0px_rgba(0,0,0,1)] w-full max-w-lg relative overflow-hidden transform transition-all hover:translate-y-[-4px] hover:shadow-[16px_16px_0px_0px_rgba(0,0,0,1)]">
 
-                <div className="flex justify-center mb-6">
-                    <div className="p-4 bg-indigo-600 rounded-3xl shadow-lg shadow-indigo-200">
-                        <UserPlus className="w-8 h-8 text-white" />
-                    </div>
+                <div className="absolute top-0 right-0 p-4 opacity-10 pointer-events-none">
+                    <Sparkles className="w-24 h-24 text-indigo-500" />
                 </div>
 
-                <h2 className="text-3xl font-black mb-2 text-center text-gray-900 tracking-tight">
-                    {t('register.title', 'Create Account')}
-                </h2>
-                <p className="text-center text-gray-500 mb-10 font-medium">
-                    {t('register.subtitle', 'Start your journey to mastery')}
-                </p>
+                <div className="flex flex-col items-center mb-8">
+                    <div className="mb-6 p-4 bg-indigo-500 rounded-2xl border-4 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] transform rotate-[-6deg]">
+                        <UserPlus className="w-8 h-8 text-white" />
+                    </div>
+                    <h2 className="text-3xl font-black text-center text-black tracking-tight uppercase">
+                        {t('register.title', 'Create Account')}
+                    </h2>
+                    <p className="text-center text-gray-500 font-bold mt-2">
+                        {t('register.subtitle', 'Start your journey to mastery')}
+                    </p>
+                </div>
 
                 {error && (
-                    <div className="bg-rose-50 text-rose-600 p-4 rounded-2xl text-sm mb-6 border border-rose-100 font-bold animate-shake">
+                    <div className="bg-red-100 text-red-600 p-4 rounded-xl border-2 border-black text-sm mb-6 font-bold animate-shake flex items-center gap-2">
+                        <span className="text-xl">🚨</span>
                         {error}
                     </div>
                 )}
 
-                <form onSubmit={handleSubmit} className="space-y-6">
+                <form onSubmit={handleSubmit} className="space-y-5">
                     <div className="grid grid-cols-2 gap-4">
                         <div>
-                            <label className="block text-xs font-black text-gray-400 uppercase tracking-widest mb-2 ml-1">
+                            <label className="block text-xs font-black text-gray-500 uppercase tracking-widest mb-2 ml-1">
                                 {t('register.username', 'Username')}
                             </label>
                             <input
                                 type="text"
-                                className="w-full px-5 py-4 bg-gray-50 border-2 border-transparent focus:border-indigo-500 focus:bg-white rounded-2xl transition-all outline-none font-bold text-gray-700 shadow-sm"
+                                className="w-full px-5 py-3 bg-white border-2 border-gray-200 focus:border-black rounded-xl transition-all outline-none font-bold text-gray-800 placeholder-gray-300"
+                                placeholder="neo_coder"
                                 value={formData.username}
                                 onChange={(e) => setFormData({ ...formData, username: e.target.value })}
                                 required
                             />
                         </div>
                         <div>
-                            <label className="block text-xs font-black text-gray-400 uppercase tracking-widest mb-2 ml-1">
+                            <label className="block text-xs font-black text-gray-500 uppercase tracking-widest mb-2 ml-1">
                                 {t('register.email', 'Email')}
                             </label>
                             <input
                                 type="email"
-                                className="w-full px-5 py-4 bg-gray-50 border-2 border-transparent focus:border-indigo-500 focus:bg-white rounded-2xl transition-all outline-none font-bold text-gray-700 shadow-sm"
+                                className="w-full px-5 py-3 bg-white border-2 border-gray-200 focus:border-black rounded-xl transition-all outline-none font-bold text-gray-800 placeholder-gray-300"
+                                placeholder="hello@example.com"
                                 value={formData.email}
                                 onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                                 required
@@ -114,26 +119,28 @@ export default function Register() {
                     </div>
 
                     <div>
-                        <label className="block text-xs font-black text-gray-400 uppercase tracking-widest mb-2 ml-1">
+                        <label className="block text-xs font-black text-gray-500 uppercase tracking-widest mb-2 ml-1">
                             {t('register.password', 'Password')}
                         </label>
                         <input
                             type="password"
-                            className="w-full px-5 py-4 bg-gray-50 border-2 border-transparent focus:border-indigo-500 focus:bg-white rounded-2xl transition-all outline-none font-bold text-gray-700 shadow-sm"
+                            className="w-full px-5 py-3 bg-white border-2 border-gray-200 focus:border-black rounded-xl transition-all outline-none font-bold text-gray-800 placeholder-gray-300"
+                            placeholder="••••••••"
                             value={formData.password}
                             onChange={(e) => setFormData({ ...formData, password: e.target.value })}
                             required
                         />
+                        <p className="text-[10px] text-gray-400 font-bold mt-1 ml-1">Min. 8 chars, mixed case recommended.</p>
                     </div>
 
                     <div className="grid grid-cols-2 gap-4">
                         <div>
-                            <label className="block text-xs font-black text-gray-400 uppercase tracking-widest mb-2 ml-1">
+                            <label className="block text-xs font-black text-gray-500 uppercase tracking-widest mb-2 ml-1">
                                 {t('register.age', 'Age')}
                             </label>
                             <input
                                 type="number"
-                                className="w-full px-5 py-4 bg-gray-50 border-2 border-transparent focus:border-indigo-500 focus:bg-white rounded-2xl transition-all outline-none font-bold text-gray-700 shadow-sm"
+                                className="w-full px-5 py-3 bg-white border-2 border-gray-200 focus:border-black rounded-xl transition-all outline-none font-bold text-gray-800"
                                 value={formData.age}
                                 onChange={(e) => setFormData({ ...formData, age: parseInt(e.target.value) || 18 })}
                                 required
@@ -142,30 +149,35 @@ export default function Register() {
                             />
                         </div>
                         <div>
-                            <label className="block text-xs font-black text-gray-400 uppercase tracking-widest mb-2 ml-1">
+                            <label className="block text-xs font-black text-gray-500 uppercase tracking-widest mb-2 ml-1">
                                 Track
                             </label>
-                            <select
-                                className="w-full px-5 py-4 bg-gray-50 border-2 border-transparent focus:border-indigo-500 focus:bg-white rounded-2xl transition-all outline-none font-bold text-gray-700 shadow-sm appearance-none"
-                                value={formData.track}
-                                onChange={(e) => setFormData({ ...formData, track: e.target.value })}
-                            >
-                                <option value="backend">Backend (Python)</option>
-                                <option value="frontend">Frontend (JS)</option>
-                            </select>
+                            <div className="relative">
+                                <select
+                                    className="w-full px-5 py-3 bg-white border-2 border-gray-200 focus:border-black rounded-xl transition-all outline-none font-bold text-gray-800 appearance-none cursor-pointer"
+                                    value={formData.track}
+                                    onChange={(e) => setFormData({ ...formData, track: e.target.value })}
+                                >
+                                    <option value="backend">Backend (Python)</option>
+                                    <option value="frontend">Frontend (JS)</option>
+                                </select>
+                                <div className="absolute right-4 top-1/2 transform -translate-y-1/2 pointer-events-none">
+                                    <Wand2 className="w-4 h-4 text-gray-400" />
+                                </div>
+                            </div>
                         </div>
                     </div>
 
                     <button
                         type="submit"
                         disabled={loading}
-                        className="w-full bg-gray-900 text-white py-4 rounded-2xl font-black text-lg hover:bg-indigo-600 transition-all duration-300 disabled:opacity-70 flex items-center justify-center gap-2 mt-4 shadow-xl shadow-gray-200 hover:shadow-indigo-100 active:scale-95"
+                        className="w-full bg-indigo-600 text-white py-4 rounded-2xl font-black text-lg border-b-[6px] border-indigo-800 hover:bg-indigo-500 hover:border-indigo-700 active:border-b-0 active:translate-y-1.5 transition-all flex items-center justify-center gap-2 mt-6 uppercase tracking-widest"
                     >
                         {loading ? <Loader2 className="animate-spin w-6 h-6" /> : t('register.title', 'Create Account')}
                     </button>
                 </form>
 
-                <p className="mt-8 text-center text-gray-500 font-medium text-sm">
+                <p className="mt-8 text-center text-gray-400 font-bold text-sm">
                     {t('register.have_account', 'Already have an account?')} {' '}
                     <Link to="/login" className="text-indigo-600 font-black hover:underline underline-offset-4 ml-1">
                         {t('login.submit', 'Login')}
