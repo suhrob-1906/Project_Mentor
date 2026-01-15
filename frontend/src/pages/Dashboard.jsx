@@ -12,7 +12,7 @@ export default function Dashboard({ isChild }) {
     const { t, i18n } = useTranslation();
     const navigate = useNavigate();
     const [userTrack, setUserTrack] = useState(null); // 'backend' or 'frontend'
-    const [courseSlug, setCourseSlug] = useState(null); // 'python' or 'javascript'
+    const [courseSlug, setCourseSlug] = useState(null); // 'backend' or 'frontend'
     const [modules, setModules] = useState([]);
     const [progress, setProgress] = useState({ unlocked: [], completed: {} });
     const [isLoading, setIsLoading] = useState(true);
@@ -26,12 +26,12 @@ export default function Dashboard({ isChild }) {
                 const track = res.data.track || 'backend';
                 setUserTrack(track);
                 // Map track to course slug
-                setCourseSlug(track === 'backend' ? 'python' : 'javascript');
+                setCourseSlug(track === 'backend' ? 'backend' : 'frontend');
             } catch (err) {
                 console.error("Failed to fetch user track:", err);
                 // Default to backend/python
                 setUserTrack('backend');
-                setCourseSlug('python');
+                setCourseSlug('backend');
             }
         };
         fetchUserTrack();
@@ -48,7 +48,7 @@ export default function Dashboard({ isChild }) {
                 id: m.slug || m.id,
                 name: (i18n.language || 'en').startsWith('ru') ? m.title_ru : m.title_en,
                 icon: <BookOpen className="w-6 h-6" />,
-                color: courseSlug === 'python' ? 'indigo' : 'purple'
+                color: courseSlug === 'backend' ? 'indigo' : 'purple'
             })));
 
             const progRes = await api.get(`/api/progress/?language=${courseSlug}`);
@@ -90,7 +90,7 @@ export default function Dashboard({ isChild }) {
 
                     <div className="flex items-center gap-6">
                         <button
-                            onClick={() => navigate('/homework', { state: { language: courseSlug || 'python' } })}
+                            onClick={() => navigate('/homework', { state: { language: courseSlug || 'backend' } })}
                             className="hidden md:flex items-center gap-2 px-6 py-3 bg-white border-4 border-black font-black uppercase tracking-widest text-xs rounded-2xl shadow-[4px_4px_0_0_rgba(0,0,0,1)] active:shadow-none active:translate-x-1 active:translate-y-1 transition-all"
                         >
                             <Zap className="w-4 h-4 text-yellow-500 fill-current" />
@@ -170,7 +170,7 @@ export default function Dashboard({ isChild }) {
                                 <div className="flex justify-between items-center mb-12 px-4">
                                     <div>
                                         <h4 className="font-black text-3xl uppercase tracking-tighter mb-2">
-                                            {courseSlug === 'python' ? 'Python Journey' : 'Frontend Journey'}
+                                            {courseSlug === 'backend' ? 'Python Journey' : 'Frontend Journey'}
                                         </h4>
                                         <p className="font-bold text-gray-400 text-xs tracking-widest uppercase">
                                             {progress.unlocked.length} / {modules.length} Levels Unlocked

@@ -25,7 +25,7 @@ export default function Login() {
             try {
                 const profileRes = await api.get('/auth/profile/');
                 const track = profileRes.data.track || 'backend';
-                const courseSlug = track === 'backend' ? 'python' : 'javascript';
+                const courseSlug = track === 'backend' ? 'backend' : 'frontend';
                 navigate(`/courses/${courseSlug}`);
             } catch {
                 // Fallback to dashboard if profile fetch fails

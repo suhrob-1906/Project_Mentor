@@ -32,7 +32,7 @@ export default function Register() {
                 localStorage.setItem('access_token', resp.data.access);
                 localStorage.setItem('refresh_token', resp.data.refresh);
                 // Redirect directly to course based on track
-                const courseSlug = formData.track === 'backend' ? 'python' : 'javascript';
+                const courseSlug = formData.track === 'backend' ? 'backend' : 'frontend';
                 navigate(`/courses/${courseSlug}`);
             } else {
                 navigate('/login');
