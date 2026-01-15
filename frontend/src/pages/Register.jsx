@@ -119,7 +119,7 @@ export default function Register() {
                                 type="number"
                                 className="w-full px-5 py-4 bg-gray-50 border-2 border-transparent focus:border-indigo-500 focus:bg-white rounded-2xl transition-all outline-none font-bold text-gray-700 shadow-sm"
                                 value={formData.age}
-                                onChange={(e) => setFormData({ ...formData, age: e.target.value })}
+                                onChange={(e) => setFormData({ ...formData, age: parseInt(e.target.value) || 18 })}
                                 required
                                 min="1"
                                 max="100"
