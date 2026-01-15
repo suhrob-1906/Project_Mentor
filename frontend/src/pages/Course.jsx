@@ -146,15 +146,35 @@ export default function Course({ isChild }) {
 
     if (!course) return <div>Course not found</div>;
 
+    // Calculate Verification Progress
+    const totalLessons = course.modules.reduce((acc, m) => acc + m.lessons.length, 0);
+    const completedLessons = course.modules.reduce((acc, m) => acc + m.lessons.filter(l => l.is_completed).length, 0);
+    const progressPercent = totalLessons > 0 ? Math.round((completedLessons / totalLessons) * 100) : 0;
+
     // --- RENDER MAP VIEW ---
     if (!activeLesson) {
         return (
             <div className={`min-h-screen ${isChild ? "bg-yellow-400 font-['Outfit'] space-pattern" : "bg-gray-50 font-sans"}`}>
                 <nav className={`sticky top-0 z-50 px-6 py-4 transition-all duration-300 ${isChild ? 'bg-white border-b-4 border-black' : 'bg-white/80 backdrop-blur-md border-b border-gray-100'}`}>
                     <div className="max-w-4xl mx-auto flex justify-between items-center">
-                        <button onClick={() => navigate('/dashboard')} className="flex items-center gap-2 font-black uppercase tracking-widest text-xs text-gray-500 hover:text-black">
-                            <ArrowLeft className="w-4 h-4" /> {t('common.back', 'Dashboard')}
-                        </button>
+                        <div className="flex items-center gap-2 font-black uppercase tracking-widest text-xl text-gray-900">
+                            {isRu ? 'Наставник' : 'MentorAI'}
+                        </div>
+
+                        {/* Global Progress Bar in Navbar */}
+                        <div className="hidden md:flex flex-col w-1/3 mx-4">
+                            <div className="flex justify-between text-[10px] font-bold uppercase text-gray-400 mb-1 tracking-widest">
+                                <span>{isRu ? 'Прогресс курса' : 'Course Progress'}</span>
+                                <span>{progressPercent}%</span>
+                            </div>
+                            <div className="w-full h-3 bg-gray-200 rounded-full overflow-hidden">
+                                <div
+                                    className="h-full bg-indigo-500 transition-all duration-1000 ease-out"
+                                    style={{ width: `${progressPercent}%` }}
+                                />
+                            </div>
+                        </div>
+
                         <div className="flex items-center gap-4">
                             <button
                                 onClick={() => i18n.changeLanguage(i18n.language.startsWith('ru') ? 'en' : 'ru')}

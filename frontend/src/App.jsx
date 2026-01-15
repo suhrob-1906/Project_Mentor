@@ -58,9 +58,10 @@ function App() {
           <Route path="/" element={<Landing />} />
           <Route path="/login" element={<Login onLoginSuccess={fetchProfile} />} />
           <Route path="/register" element={<Register />} />
+          {/* Redirect Dashboard to Course Map */}
           <Route
             path="/dashboard"
-            element={<ProtectedRoute><Dashboard isChild={isChild} /></ProtectedRoute>}
+            element={<Navigate to="/courses/backend" replace />}
           />
           <Route
             path="/test"
@@ -71,16 +72,12 @@ function App() {
             element={<ProtectedRoute><Results isChild={isChild} /></ProtectedRoute>}
           />
           <Route
-            path="/homework"
-            element={<ProtectedRoute><Homework isChild={isChild} /></ProtectedRoute>}
-          />
-          <Route
             path="/chat"
             element={<ProtectedRoute><Chat /></ProtectedRoute>}
           />
           <Route
             path="/courses"
-            element={<Navigate to="/dashboard" replace />}
+            element={<Navigate to="/courses/backend" replace />}
           />
           <Route
             path="/courses/:slug"
