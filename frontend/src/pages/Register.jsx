@@ -13,7 +13,10 @@ export default function Register() {
         password: '',
         email: '',
         age: 18,
-        track: 'backend'
+        track: 'backend',
+        // Backend ожидает эти поля (есть в сериалайзере), используем разумные значения по умолчанию
+        primary_language: 'python',
+        goal: 'job'
     });
     const [error, setError] = useState('');
     const [loading, setLoading] = useState(false);
