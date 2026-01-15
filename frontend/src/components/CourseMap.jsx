@@ -15,6 +15,9 @@ const CourseMap = ({ course, activeLesson, onSelectLesson, isCompact = false }) 
 
     course.modules.forEach(m => {
         m.lessons.forEach(l => {
+            // Inject module reference for checks
+            l.module = m;
+
             if (l.lesson_type === 'theory') theoryLessons.push(l);
             else practiceLessons.push(l);
         });
