@@ -49,40 +49,49 @@ class LessonSimpleSerializer(serializers.ModelSerializer):
         fields = ('id', 'slug', 'title', 'title_en', 'title_ru', 'order', 'lesson_type', 'is_completed', 'is_unlocked')
 
     def get_is_completed(self, obj):
-        user = self.context.get('user')
-        if user and user.is_authenticated:
-            progress = UserLessonProgress.objects.filter(user=user, lesson=obj).first()
-            return progress.is_completed if progress else False
+        try:
+            user = self.context.get('user')
+            if user and user.is_authenticated:
+                progress = UserLessonProgress.objects.filter(user=user, lesson=obj).first()
+                return progress.is_completed if progress else False
+        except Exception as e:
+            print(f"Error in get_is_completed: {e}")
         return False
 
     def get_is_unlocked(self, obj):
-        user = self.context.get('user')
-        if not user or not user.is_authenticated:
-            return obj.order == 1
-        
-        progress = UserLessonProgress.objects.filter(user=user, lesson=obj).first()
-        if progress and progress.is_unlocked:
-            return True
+        try:
+            user = self.context.get('user')
+            if not user or not user.is_authenticated:
+                return obj.order == 1
             
-        if obj.order == 1:
-            # Check if previous module is done
-            prev_mod = Module.objects.filter(course=obj.module.course, order=obj.module.order - 1).first()
-            if not prev_mod:
-                return True # First module of course
-            
-            last_lesson = prev_mod.lessons.all().last()
-            if not last_lesson:
+            progress = UserLessonProgress.objects.filter(user=user, lesson=obj).first()
+            if progress and progress.is_unlocked:
                 return True
                 
-            last_prog = UserLessonProgress.objects.filter(user=user, lesson=last_lesson).first()
-            return last_prog.is_completed if last_prog else False
-        
-        # Unlock logic: Prev lesson in module must be completed
-        prev_lesson = Lesson.objects.filter(module=obj.module, order=obj.order - 1).first()
-        if prev_lesson:
-             prev_prog = UserLessonProgress.objects.filter(user=user, lesson=prev_lesson).first()
-             return prev_prog.is_completed if prev_prog else False
-             
+            if obj.order == 1:
+                # First lesson in module - check if previous module is done
+                if obj.module.order == 1:
+                    return True  # First module, first lesson - always unlocked
+                    
+                prev_mod = Module.objects.filter(course=obj.module.course, order=obj.module.order - 1).first()
+                if not prev_mod:
+                    return True # First module of course
+                
+                last_lesson = prev_mod.lessons.order_by('-order').first()
+                if not last_lesson:
+                    return True
+                    
+                last_prog = UserLessonProgress.objects.filter(user=user, lesson=last_lesson).first()
+                return last_prog.is_completed if last_prog else False
+            
+            # Unlock logic: Prev lesson in module must be completed
+            prev_lesson = Lesson.objects.filter(module=obj.module, order=obj.order - 1).first()
+            if prev_lesson:
+                 prev_prog = UserLessonProgress.objects.filter(user=user, lesson=prev_lesson).first()
+                 return prev_prog.is_completed if prev_prog else False
+        except Exception as e:
+            print(f"Error in get_is_unlocked: {e}")
+                 
         return False
 
 class LessonDetailSerializer(LessonSimpleSerializer):
