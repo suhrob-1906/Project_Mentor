@@ -7,6 +7,8 @@ const CourseMap = ({ course, activeLesson, onSelectLesson, isCompact = false }) 
     const { t, i18n } = useTranslation();
     const navigate = useNavigate();
 
+    const isRu = (i18n.language || 'en').startsWith('ru');
+
     if (!course) return null;
 
     // Separate theory and practice lessons
@@ -74,13 +76,17 @@ const CourseMap = ({ course, activeLesson, onSelectLesson, isCompact = false }) 
                         <div className="bg-indigo-100 p-3 rounded-2xl mb-2 border-2 border-indigo-200">
                             <BookOpen className="w-8 h-8 text-indigo-600" />
                         </div>
-                        <span className="font-black text-indigo-900 uppercase tracking-widest text-xs">Theory Path</span>
+                        <span className="font-black text-indigo-900 uppercase tracking-widest text-xs">
+                            {isRu ? 'Теория' : 'Theory Path'}
+                        </span>
                     </div>
                     <div className="flex flex-col items-center">
                         <div className="bg-purple-100 p-3 rounded-2xl mb-2 border-2 border-purple-200">
                             <Code2 className="w-8 h-8 text-purple-600" />
                         </div>
-                        <span className="font-black text-purple-900 uppercase tracking-widest text-xs">Practice Path</span>
+                        <span className="font-black text-purple-900 uppercase tracking-widest text-xs">
+                            {isRu ? 'Практика' : 'Practice Path'}
+                        </span>
                     </div>
                 </div>
             )}
@@ -153,9 +159,17 @@ const CourseMap = ({ course, activeLesson, onSelectLesson, isCompact = false }) 
 
 // Sub-component for individual nodes to keep main cleaner
 const LessonNode = ({ lesson, activeLesson, onSelect, x, y, type, compact }) => {
+    const { i18n } = useTranslation();
+    const isRu = (i18n.language || 'en').startsWith('ru');
+
     const isLocked = !lesson.is_unlocked;
     const isCompleted = lesson.is_completed;
     const isActive = activeLesson?.slug === lesson.slug;
+
+    // Use parent module title for the topic name
+    const displayTitle = isRu
+        ? (lesson.module?.title_ru || lesson.title)
+        : (lesson.module?.title_en || lesson.title);
 
     // Styles based on type
     const colorClass = type === 'theory'
@@ -184,7 +198,7 @@ const LessonNode = ({ lesson, activeLesson, onSelect, x, y, type, compact }) => 
                     bg-gray-900 text-white text-[10px] font-bold py-2 px-3 rounded-xl whitespace-nowrap
                     pointer-events-none transform translate-y-2 group-hover:translate-y-0 shadow-xl
                 `}>
-                    {lesson.title}
+                    {displayTitle}
                 </div>
             )}
 
@@ -217,6 +231,19 @@ const LessonNode = ({ lesson, activeLesson, onSelect, x, y, type, compact }) => 
             {lesson.order === 1 && lesson.module.order === 1 && !compact && type === 'theory' && (
                 <div className="absolute -left-12 top-2 animate-bounce-slow">
                     <Flag className="w-6 h-6 text-emerald-500 fill-current" />
+                </div>
+            )}
+
+            {/* Persistent Title Label */}
+            {!compact && (
+                <div className={`
+                    mt-4 px-2 py-1 text-center
+                    text-[11px] font-black uppercase tracking-tight text-gray-600
+                    max-w-[140px] transition-colors leading-tight
+                    ${isActive ? 'text-indigo-600' : ''}
+                    ${isLocked ? 'opacity-40' : 'group-hover:text-gray-900'}
+                `}>
+                    {displayTitle}
                 </div>
             )}
         </div>
