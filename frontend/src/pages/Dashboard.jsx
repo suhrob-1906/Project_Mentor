@@ -90,11 +90,19 @@ export default function Dashboard({ isChild }) {
 
                     <div className="flex items-center gap-6">
                         <button
-                            onClick={() => navigate('/homework', { state: { language: selectedLanguage } })}
+                            onClick={() => navigate('/homework', { state: { language: courseSlug || 'python' } })}
                             className="hidden md:flex items-center gap-2 px-6 py-3 bg-white border-4 border-black font-black uppercase tracking-widest text-xs rounded-2xl shadow-[4px_4px_0_0_rgba(0,0,0,1)] active:shadow-none active:translate-x-1 active:translate-y-1 transition-all"
                         >
                             <Zap className="w-4 h-4 text-yellow-500 fill-current" />
                             {isRu ? "ЛАБОРАТОРИЯ ДЗ" : "HOMEWORK LAB"}
+                        </button>
+
+                        <button
+                            onClick={() => navigate('/chat')}
+                            className={`hidden md:flex items-center gap-2 px-5 py-3 rounded-2xl font-black text-xs uppercase tracking-widest border-2 transition-all ${isChild ? 'bg-black text-yellow-300 border-black hover:scale-105' : 'bg-indigo-50 text-indigo-700 border-indigo-100 hover:bg-indigo-100'}`}
+                        >
+                            <Languages className="w-4 h-4" />
+                            {isRu ? "ЧАТ С ИИ" : "AI CHAT"}
                         </button>
 
                         <button

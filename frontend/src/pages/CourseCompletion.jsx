@@ -15,9 +15,18 @@ export default function CourseCompletion() {
     useEffect(() => {
         const fetchReport = async () => {
             try {
-                const resp = await api.get(`/api/courses/${slug}/report/?lang=${i18n.language}`);
-                setReport(resp.data.report);
-                setSuggested(resp.data.suggested_course);
+                // Use backend endpoint that generates a detailed AI report
+                const resp = await api.post('/api/courses/generate-report/', {
+                    course_slug: slug,
+                });
+
+                const text = (i18n.language || 'en').startsWith('ru')
+                    ? resp.data.report_ru
+                    : resp.data.report_en;
+
+                setReport(text);
+                // Optional cross-сell на следующий курс можно добавить позже
+                setSuggested(null);
             } catch (err) {
                 console.error(err);
                 setReport("## Completion Confirmed.\n\nCould not generate AI report at this time, but you have successfully finished the course!");

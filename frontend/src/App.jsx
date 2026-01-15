@@ -8,6 +8,7 @@ import Test from './pages/Test';
 import Homework from './pages/Homework';
 import Course from './pages/Course';
 import CourseCompletion from './pages/CourseCompletion';
+import Chat from './pages/Chat';
 import { useState, useEffect } from 'react';
 import api from './api';
 
@@ -72,6 +73,10 @@ function App() {
           <Route
             path="/homework"
             element={<ProtectedRoute><Homework isChild={isChild} /></ProtectedRoute>}
+          />
+          <Route
+            path="/chat"
+            element={<ProtectedRoute><Chat /></ProtectedRoute>}
           />
           <Route
             path="/courses"
