@@ -20,9 +20,9 @@ def populate():
     print("🚀 Clearing old curriculum (FORCED RESET)..." if force else "🌱 Initializing curriculum for the first time...")
     Course.objects.all().delete()
 
-    # --- 1. PYTHON COURSE ---
+    # --- 1. PYTHON COURSE (Backend Track) ---
     python_course = Course.objects.create(
-        slug='python',
+        slug='backend',
         title_en='Python Mastery',
         title_ru='Мастерство Python',
         description_en='From zero to backend hero with Python.',
@@ -59,9 +59,9 @@ def populate():
             solution_code="# This is a secret solution\nprint('done')"
         )
 
-    # --- 2. JAVASCRIPT COURSE ---
+    # --- 2. JAVASCRIPT COURSE (Frontend Track) ---
     js_course = Course.objects.create(
-        slug='javascript',
+        slug='frontend',
         title_en='Frontend Magic',
         title_ru='Магия Фронтенда',
         description_en='Build beautiful web interfaces with JS/HTML/CSS.',

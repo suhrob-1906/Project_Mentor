@@ -393,13 +393,13 @@ export default function Course({ isChild }) {
                                     <div className="w-2.5 h-2.5 rounded-full bg-red-400"></div>
                                     <div className="w-2.5 h-2.5 rounded-full bg-yellow-400"></div>
                                     <div className="w-2.5 h-2.5 rounded-full bg-green-400"></div>
-                                    <span className={`text-[10px] font-black uppercase tracking-widest ml-2 ${isChild ? 'text-black' : 'text-gray-400'}`}>main.{slug === 'python' ? 'py' : 'js'}</span>
+                                    <span className={`text-[10px] font-black uppercase tracking-widest ml-2 ${isChild ? 'text-black' : 'text-gray-400'}`}>main.{slug === 'backend' ? 'py' : 'js'}</span>
                                 </div>
                             </div>
                             <div className="flex-1">
                                 <Editor
                                     height="300px"
-                                    defaultLanguage={slug}
+                                    defaultLanguage={slug === 'backend' ? 'python' : 'javascript'}
                                     theme={isChild ? "light" : "vs-dark"}
                                     value={userCode}
                                     onChange={setUserCode}
