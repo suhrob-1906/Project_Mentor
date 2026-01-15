@@ -40,7 +40,22 @@ export default function Register() {
         } catch (err) {
             // Показываем в консоли подробный ответ бэкенда, чтобы видеть, почему 400
             console.error("Registration error:", err.response?.data || err);
-            setError(t('register.fail', 'Registration failed'));
+
+            // Парсим конкретные ошибки от бэкенда
+            const errors = err.response?.data;
+            if (errors) {
+                if (errors.username) {
+                    setError(t('register.username_taken', 'This username is already taken'));
+                } else if (errors.email) {
+                    setError(t('register.email_taken', 'This email is already registered'));
+                } else if (errors.password) {
+                    setError(errors.password[0] || t('register.password_error', 'Password is too weak'));
+                } else {
+                    setError(t('register.fail', 'Registration failed. Please try again.'));
+                }
+            } else {
+                setError(t('register.fail', 'Registration failed. Please try again.'));
+            }
         } finally {
             setLoading(false);
         }
