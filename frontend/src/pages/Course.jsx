@@ -188,6 +188,8 @@ export default function Course({ isChild }) {
                 <div className="max-w-4xl mx-auto py-10 px-4">
                     <CourseMap course={course} onSelectLesson={handleSelectLesson} />
                 </div>
+
+                <MentorChat lessonSlug={activeLesson?.slug || null} userCode={userCode} isChild={isChild} />
             </div>
         );
     }
