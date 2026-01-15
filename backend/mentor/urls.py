@@ -7,7 +7,6 @@ router.register(r'courses', CourseViewSet)
 router.register(r'lessons', LessonViewSet)
 
 urlpatterns = [
-    path('', include(router.urls)),
     path('analyze/', AnalyzeView.as_view(), name='analyze'),
     path('roadmap/', RoadmapView.as_view(), name='roadmap'),
     path('projects/', ProjectView.as_view(), name='projects'),
@@ -19,4 +18,5 @@ urlpatterns = [
     path('progress/', UserProgressView.as_view(), name='progress'),
     path('homework/', HomeworkView.as_view(), name='homework'),
     path('dynamic-questions/', DynamicQuestionView.as_view(), name='dynamic-questions'),
+    path('', include(router.urls)),
 ]

@@ -1,10 +1,9 @@
-import { useState, useEffect, useCallback, useRef } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import api from '../api';
 import {
     Check, ArrowLeft, BookOpen, Code2,
-    Play, ChevronRight, Award,
-    Terminal, Zap, Sparkles, Brain, Flag, Loader2, Languages
+    Play, ChevronRight, Award, Zap, Sparkles, Brain, Flag, Loader2, Languages, Map
 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import Editor from '@monaco-editor/react';
@@ -26,7 +25,6 @@ export default function Course({ isChild }) {
     const [repeatCodeInput, setRepeatCodeInput] = useState('');
     const [stepError, setStepError] = useState(false);
     const [failedAttempts, setFailedAttempts] = useState(0);
-    const [showSolution, setShowSolution] = useState(false);
     const [solutionVisible, setSolutionVisible] = useState(false);
 
     const fetchCourse = useCallback(async () => {
@@ -34,15 +32,7 @@ export default function Course({ isChild }) {
         try {
             const res = await api.get(`/api/courses/${slug}/`);
             setCourse(res.data);
-
-            const allLessons = res.data.modules.flatMap(m => m.lessons);
-            const firstIncomplete = allLessons.find(l => !l.is_completed && l.is_unlocked) || allLessons[0];
-
-            if (firstIncomplete) {
-                const lessonRes = await api.get(`/api/lessons/${firstIncomplete.slug}/`);
-                setActiveLesson(lessonRes.data);
-                setUserCode(lessonRes.data.initial_code || '');
-            }
+            // Don't auto-select lesson, show map first
         } catch (err) {
             console.error("Course fetch error:", err);
         } finally {
@@ -73,8 +63,12 @@ export default function Course({ isChild }) {
         }
     };
 
+    const handleBackToMap = () => {
+        setActiveLesson(null);
+        fetchCourse(); // Refresh progress
+    };
+
     const handleNextStep = () => {
-        // Handle case when theory_steps is empty
         if (!activeLesson.theory_steps || activeLesson.theory_steps.length === 0) {
             handleMarkUnderstood();
             return;
@@ -98,7 +92,6 @@ export default function Course({ isChild }) {
         setIsVerifying(true);
         setOutput("Running...");
         try {
-            const task = activeLesson.practice_tasks[activeTaskIndex];
             const res = await api.post(`/api/lessons/${activeLesson.slug}/check/`, {
                 code: userCode,
                 task_index: activeTaskIndex
@@ -107,15 +100,12 @@ export default function Course({ isChild }) {
 
             if (res.data.passed) {
                 setFailedAttempts(0);
-                setShowSolution(false);
                 setSolutionVisible(false);
                 if (activeTaskIndex < activeLesson.practice_tasks.length - 1) {
                     setActiveTaskIndex(prev => prev + 1);
                     setUserCode(activeLesson.practice_tasks[activeTaskIndex + 1].initial_code || '');
                 } else {
-                    const courseRes = await api.get(`/api/courses/${slug}/`);
-                    setCourse(courseRes.data);
-                    setActiveLesson(prev => ({ ...prev, is_completed: true }));
+                    await handleMarkUnderstood(true); // Helper to complete without closing
                 }
             } else {
                 setFailedAttempts(prev => prev + 1);
@@ -127,7 +117,7 @@ export default function Course({ isChild }) {
         }
     };
 
-    const handleMarkUnderstood = async () => {
+    const handleMarkUnderstood = async (stayInLesson = false) => {
         setIsVerifying(true);
         try {
             await api.post(`/api/lessons/complete/`, {
@@ -136,6 +126,9 @@ export default function Course({ isChild }) {
             const courseRes = await api.get(`/api/courses/${slug}/`);
             setCourse(courseRes.data);
             setActiveLesson(prev => ({ ...prev, is_completed: true }));
+            if (!stayInLesson) {
+                handleBackToMap();
+            }
         } catch (err) {
             console.error("Failed to complete lesson", err);
         } finally {
@@ -145,339 +138,203 @@ export default function Course({ isChild }) {
 
     const isRu = (i18n.language || 'en').startsWith('ru');
 
-    if (isLoading && !course) return (
+    if (isLoading && !course && !activeLesson) return (
         <div className="min-h-screen flex items-center justify-center bg-gray-50">
-            <div className={`p-8 rounded-3xl animate-pulse flex flex-col items-center gap-4 ${isChild ? 'bg-yellow-400' : 'bg-white shadow-xl'}`}>
-                <Brain className="w-12 h-12 text-indigo-600 animate-bounce" />
-                <span className="font-black uppercase tracking-widest text-indigo-900">Loading Adventure...</span>
-            </div>
+            <Loader2 className="w-12 h-12 text-indigo-600 animate-spin" />
         </div>
     );
 
     if (!course) return <div>Course not found</div>;
 
+    // --- RENDER MAP VIEW ---
+    if (!activeLesson) {
+        return (
+            <div className={`min-h-screen ${isChild ? "bg-yellow-400 font-['Outfit'] space-pattern" : "bg-gray-50 font-sans"}`}>
+                <nav className={`sticky top-0 z-50 px-6 py-4 transition-all duration-300 ${isChild ? 'bg-white border-b-4 border-black' : 'bg-white/80 backdrop-blur-md border-b border-gray-100'}`}>
+                    <div className="max-w-4xl mx-auto flex justify-between items-center">
+                        <button onClick={() => navigate('/dashboard')} className="flex items-center gap-2 font-black uppercase tracking-widest text-xs text-gray-500 hover:text-black">
+                            <ArrowLeft className="w-4 h-4" /> {t('common.back', 'Dashboard')}
+                        </button>
+                        <div className="flex items-center gap-4">
+                            <button
+                                onClick={() => i18n.changeLanguage(i18n.language.startsWith('ru') ? 'en' : 'ru')}
+                                className="flex items-center gap-2 px-3 py-1.5 rounded-xl border border-gray-200 text-xs font-bold hover:bg-gray-100"
+                            >
+                                <Languages className="w-3 h-3" /> {i18n.language.toUpperCase()}
+                            </button>
+                        </div>
+                    </div>
+                </nav>
+                <div className="max-w-4xl mx-auto py-10 px-4">
+                    <CourseMap course={course} onSelectLesson={handleSelectLesson} />
+                </div>
+            </div>
+        );
+    }
+
+    // --- RENDER LESSON VIEW ---
     const title = isRu ? activeLesson?.title_ru : activeLesson?.title_en;
     const content = isRu ? activeLesson?.content_ru : activeLesson?.content_en;
 
-    const renderContent = (text) => {
-        if (!text) return null;
-        return text.split('\n').map((line, i) => (
-            <p key={i} className="mb-4 text-gray-700 leading-relaxed font-medium">
-                {line}
-            </p>
-        ));
-    };
-
-    const renderTheoryStep = () => {
-        // If no theory_steps, show content directly
-        if (!activeLesson.theory_steps || activeLesson.theory_steps.length === 0) {
-            return (
-                <div className="space-y-6">
-                    <div className="prose prose-indigo max-w-none">
-                        {renderContent(content)}
-                    </div>
-                </div>
-            );
-        }
-
-        const step = activeLesson.theory_steps[activeStepIndex];
-        if (!step) return null;
-        return (
-            <div className="space-y-6">
-                <div className="prose prose-indigo max-w-none">
-                    {renderContent(isRu ? step.text_ru : step.text_en)}
-                </div>
-
-                {step.code_to_repeat && (
-                    <div className={`mt-8 p-6 rounded-2xl border-2 transition-all ${stepError ? 'bg-red-50 border-red-200' : 'bg-indigo-50/50 border-indigo-100'}`}>
-                        <label className="block text-[10px] font-black uppercase tracking-widest text-indigo-400 mb-3">
-                            {isRu ? "Повтори этот код:" : "Type this code:"}
-                        </label>
-                        <div className="bg-white/80 backdrop-blur-sm p-3 rounded-xl mb-4 font-mono text-sm text-indigo-900 border border-indigo-100">
-                            {step.code_to_repeat}
-                        </div>
-                        <input
-                            type="text"
-                            value={repeatCodeInput}
-                            onChange={(e) => { setRepeatCodeInput(e.target.value); setStepError(false); }}
-                            placeholder={isRu ? "Введи код точно как выше..." : "Type correctly..."}
-                            className={`w-full px-4 py-3 rounded-xl border-2 focus:outline-none transition-all font-mono text-sm ${stepError ? 'border-red-400 focus:ring-red-100' : 'border-indigo-100 focus:border-indigo-500'}`}
-                        />
-                        {stepError && (
-                            <p className="mt-2 text-[10px] font-bold text-red-500 uppercase tracking-tight">
-                                {isRu ? "❗ Упс! Код не совпадает. Проверь внимательно." : "❗ Oops! Code mismatch. Check carefully."}
-                            </p>
-                        )}
-                    </div>
-                )}
-            </div>
-        );
-    };
-
-    const renderPracticeTask = () => {
-        const task = activeLesson.practice_tasks[activeTaskIndex];
-        if (!task) return null;
-        return (
-            <div className="space-y-6">
-                <div className="flex items-center justify-between mb-4">
-                    <span className="bg-purple-100 text-purple-600 px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest">
-                        {isRu ? `Задача ${activeTaskIndex + 1} из ${activeLesson.practice_tasks.length}` : `Task ${activeTaskIndex + 1} of ${activeLesson.practice_tasks.length}`}
-                    </span>
-                </div>
-                <h2 className={`text-xl font-black ${isChild ? 'text-black' : 'text-gray-900'}`}>
-                    {isRu ? task.title_ru : task.title_en}
-                </h2>
-                <div className="prose prose-purple max-w-none">
-                    {renderContent(isRu ? task.desc_ru : task.desc_en)}
-                </div>
-            </div>
-        );
-    };
+    const renderContent = (text) => text ? text.split('\n').map((line, i) => (
+        <p key={i} className="mb-4 text-gray-700 leading-relaxed font-medium text-lg">{line}</p>
+    )) : null;
 
     return (
-        <div className={`min-h-screen ${isChild ? "bg-yellow-400 font-['Outfit'] space-pattern" : "bg-gray-50 font-sans"}`}>
-            <nav className={`sticky top-0 z-50 px-6 py-4 transition-all duration-300 ${isChild ? 'bg-white border-b-4 border-black' : 'bg-white/80 backdrop-blur-md border-b border-gray-100'}`}>
+        <div className={`min-h-screen ${isChild ? "bg-yellow-400 font-['Outfit']" : "bg-gray-50 font-sans"}`}>
+            {/* Lesson Navbar */}
+            <nav className="sticky top-0 z-50 bg-white border-b border-gray-200 px-6 py-3 shadow-sm">
                 <div className="max-w-7xl mx-auto flex justify-between items-center">
-                    <button
-                        onClick={() => navigate('/dashboard')}
-                        className={`flex items-center gap-2 font-black uppercase tracking-widest text-xs transition-all ${isChild ? 'bg-black text-white px-4 py-2 rounded-xl hover:scale-105' : 'text-gray-400 hover:text-gray-900'}`}
-                    >
-                        <ArrowLeft className="w-4 h-4" />
-                        {t('common.back', 'Back')}
+                    <button onClick={handleBackToMap} className="flex items-center gap-2 hover:bg-gray-100 px-3 py-2 rounded-xl transition-colors">
+                        <ArrowLeft className="w-5 h-5 text-gray-600" />
+                        <span className="font-black text-xs uppercase tracking-widest text-gray-500">Map</span>
                     </button>
 
-                    <div className="flex items-center gap-4">
-                        <button
-                            onClick={() => i18n.changeLanguage(i18n.language.startsWith('ru') ? 'en' : 'ru')}
-                            className={`flex items-center gap-2 px-3 py-1.5 rounded-xl transition-all font-bold text-[10px] ${isChild ? 'bg-black text-white hover:scale-105' : 'hover:bg-gray-50 border border-gray-100 text-gray-700'}`}
-                        >
-                            <Languages className="w-3 h-3" />
-                            {i18n.language.toUpperCase()}
-                        </button>
-
-                        <div className="flex items-center gap-3">
-                            {activeLesson && (
-                                <div className={`px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest border-2 ${activeLesson.lesson_type === 'theory' ? 'bg-indigo-50 border-indigo-100 text-indigo-500' : 'bg-purple-50 border-purple-100 text-purple-500'}`}>
-                                    {activeLesson.lesson_type}
-                                </div>
-                            )}
-                            {activeLesson?.is_completed && (
-                                <div className="bg-emerald-100 text-emerald-600 px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest flex items-center gap-1">
-                                    <Check className="w-3 h-3 stroke-[4]" />
-                                    {t('results.mastered', 'Passed!')}
-                                </div>
-                            )}
+                    <div className="flex items-center gap-2">
+                        {activeLesson?.is_completed && (
+                            <div className="bg-emerald-100 text-emerald-600 px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest flex items-center gap-1">
+                                <Check className="w-3 h-3 stroke-[4]" /> Passed
+                            </div>
+                        )}
+                        <div className="w-32 h-2 bg-gray-100 rounded-full overflow-hidden">
+                            <div
+                                className="h-full bg-emerald-500 transition-all duration-500"
+                                style={{
+                                    width: activeLesson.lesson_type === 'theory'
+                                        ? `${(activeStepIndex / (activeLesson.theory_steps?.length || 1)) * 100}%`
+                                        : `${(activeTaskIndex / (activeLesson.practice_tasks?.length || 1)) * 100}%`
+                                }}
+                            />
                         </div>
                     </div>
                 </div>
             </nav>
 
-            <main className="max-w-7xl mx-auto px-6 py-10 grid grid-cols-1 lg:grid-cols-12 gap-10">
-                <div className="lg:col-span-7 flex flex-col gap-6 order-2 lg:order-1">
-                    {!activeLesson ? (
-                        <div className={`rounded-[2.5rem] p-10 flex flex-col items-center justify-center min-h-[600px] border-4 ${isChild ? 'bg-white border-black shadow-[12px_12px_0px_0px_rgba(0,0,0,1)]' : 'bg-white border-gray-50 shadow-2xl'}`}>
-                            <CourseMap course={course} onSelectLesson={handleSelectLesson} activeLesson={activeLesson} />
-                        </div>
-                    ) : (
-                        <div className={`rounded-[2.5rem] overflow-hidden border-4 transition-all duration-500 animate-in fade-in slide-in-from-bottom-4 ${isChild ? 'bg-white border-black shadow-[12px_12px_0px_0px_rgba(0,0,0,1)]' : 'bg-gradient-to-br from-white to-indigo-50/30 border-indigo-100 shadow-2xl shadow-indigo-100/50'}`}>
-                            {/* Progress Bar */}
-                            <div className="h-2 bg-gray-100">
-                                <div
-                                    className="h-full bg-gradient-to-r from-emerald-400 to-emerald-500 transition-all duration-700 rounded-r-full"
-                                    style={{ width: activeLesson?.is_completed ? '100%' : '10%' }}
+            <main className="max-w-7xl mx-auto px-4 py-8 grid grid-cols-1 lg:grid-cols-2 gap-8 h-[calc(100vh-80px)]">
+
+                {/* Left Panel: Content */}
+                <div className="flex flex-col gap-6 overflow-y-auto pr-2 scrollbar-hide">
+                    <div className="bg-white p-8 rounded-[2rem] border-4 border-gray-100 shadow-xl">
+                        <h1 className="text-3xl font-black text-gray-900 mb-6">{title}</h1>
+
+                        {activeLesson.lesson_type === 'theory' ? (
+                            <div className="prose prose-lg max-w-none">
+                                {activeLesson.theory_steps?.length > 0 ? (
+                                    <>
+                                        {renderContent(isRu ? activeLesson.theory_steps[activeStepIndex]?.text_ru : activeLesson.theory_steps[activeStepIndex]?.text_en)}
+                                        {activeLesson.theory_steps[activeStepIndex]?.code_to_repeat && (
+                                            <div className="mt-6 p-6 bg-gray-900 rounded-2xl border-4 border-gray-800">
+                                                <code className="block font-mono text-emerald-400 mb-4">{activeLesson.theory_steps[activeStepIndex].code_to_repeat}</code>
+                                                <input
+                                                    value={repeatCodeInput}
+                                                    onChange={(e) => { setRepeatCodeInput(e.target.value); setStepError(false); }}
+                                                    className={`w-full bg-black/50 text-white p-4 rounded-xl font-mono text-sm border-2 focus:outline-none ${stepError ? 'border-red-500' : 'border-gray-700 focus:border-indigo-500'}`}
+                                                    placeholder="Type the code above..."
+                                                />
+                                            </div>
+                                        )}
+                                    </>
+                                ) : renderContent(content)}
+                            </div>
+                        ) : (
+                            <div>
+                                <h2 className="text-xl font-bold text-gray-800 mb-4">{isRu ? activeLesson.practice_tasks[activeTaskIndex]?.title_ru : activeLesson.practice_tasks[activeTaskIndex]?.title_en}</h2>
+                                <div className="prose prose-purple">
+                                    {renderContent(isRu ? activeLesson.practice_tasks[activeTaskIndex]?.desc_ru : activeLesson.practice_tasks[activeTaskIndex]?.desc_en)}
+                                </div>
+                            </div>
+                        )}
+                    </div>
+
+                    {/* Action Button Area */}
+                    <div className="sticky bottom-4 z-10">
+                        {activeLesson.lesson_type === 'theory' ? (
+                            <button
+                                onClick={handleNextStep}
+                                className="w-full py-4 bg-emerald-500 hover:bg-emerald-400 text-white rounded-2xl font-black uppercase tracking-widest shadow-lg shadow-emerald-200 border-b-4 border-emerald-700 active:border-b-0 active:translate-y-1 transition-all flex items-center justify-center gap-2"
+                            >
+                                {isRu ? "Далее" : "Next Step"} <ChevronRight className="w-5 h-5" />
+                            </button>
+                        ) : (
+                            <div className="flex gap-2">
+                                <button
+                                    onClick={handleRunCode}
+                                    disabled={isVerifying}
+                                    className="flex-1 py-4 bg-purple-600 hover:bg-purple-500 text-white rounded-2xl font-black uppercase tracking-widest shadow-lg shadow-purple-200 border-b-4 border-purple-800 active:border-b-0 active:translate-y-1 transition-all flex items-center justify-center gap-2"
+                                >
+                                    {isVerifying ? <Loader2 className="animate-spin" /> : <Play className="fill-current w-5 h-5" />}
+                                    Run Code
+                                </button>
+                                {failedAttempts >= 2 && (
+                                    <button
+                                        onClick={() => setSolutionVisible(!solutionVisible)}
+                                        className="px-4 bg-amber-100 text-amber-600 rounded-2xl font-bold border-b-4 border-amber-300 active:border-b-0 active:translate-y-1"
+                                    >
+                                        <Zap className="w-6 h-6" />
+                                    </button>
+                                )}
+                            </div>
+                        )}
+
+                        {activeLesson.lesson_type === 'practice' && solutionVisible && (
+                            <div className="mt-4 p-4 bg-gray-900 rounded-2xl border-b-4 border-black animate-in slide-in-from-bottom-2">
+                                <div className="flex justify-between items-center mb-2">
+                                    <span className="text-gray-400 text-xs font-bold uppercase">Solution</span>
+                                    <button onClick={() => setUserCode(activeLesson.practice_tasks[activeTaskIndex]?.solution_code)} className="text-orange-400 text-xs font-bold hover:underline">Copy</button>
+                                </div>
+                                <pre className="text-emerald-400 font-mono text-xs overflow-x-auto">
+                                    {activeLesson.practice_tasks[activeTaskIndex]?.solution_code}
+                                </pre>
+                            </div>
+                        )}
+                    </div>
+                </div>
+
+                {/* Right Panel: Editor (only for Practice) or Visuals */}
+                <div className="flex flex-col h-full overflow-hidden rounded-[2rem] border-4 border-gray-900 shadow-2xl bg-[#1e1e1e]">
+                    {activeLesson.lesson_type === 'practice' ? (
+                        <>
+                            <div className="bg-[#2d2d2d] px-6 py-3 flex items-center justify-between border-b border-gray-800">
+                                <div className="flex gap-2">
+                                    <div className="w-3 h-3 rounded-full bg-red-500" />
+                                    <div className="w-3 h-3 rounded-full bg-yellow-500" />
+                                    <div className="w-3 h-3 rounded-full bg-green-500" />
+                                </div>
+                                <span className="text-gray-500 text-xs font-mono">main.{slug === 'backend' ? 'py' : 'js'}</span>
+                            </div>
+                            <div className="flex-1 relative">
+                                <Editor
+                                    height="100%"
+                                    defaultLanguage={slug === 'backend' ? 'python' : 'javascript'}
+                                    theme="vs-dark"
+                                    value={userCode}
+                                    onChange={setUserCode}
+                                    options={{
+                                        minimap: { enabled: false },
+                                        fontSize: 16,
+                                        fontFamily: "'JetBrains Mono', monospace",
+                                        padding: { top: 20 },
+                                    }}
                                 />
                             </div>
-
-                            <div className="p-8">
-                                {/* Header with icon */}
-                                <div className="flex items-center gap-5 mb-8">
-                                    <div className={`w-16 h-16 rounded-2xl flex items-center justify-center shadow-xl border-b-4 transition-transform hover:scale-110 ${activeLesson.lesson_type === 'theory'
-                                        ? 'bg-gradient-to-br from-indigo-500 to-indigo-600 border-indigo-700 text-white'
-                                        : 'bg-gradient-to-br from-purple-500 to-purple-600 border-purple-700 text-white'
-                                        }`}>
-                                        {activeLesson.lesson_type === 'theory'
-                                            ? <BookOpen className="w-8 h-8" />
-                                            : <Code2 className="w-8 h-8" />
-                                        }
-                                    </div>
-                                    <div className="flex-1">
-                                        <h1 className={`text-2xl font-black tracking-tight ${isChild ? 'text-black' : 'text-gray-900'}`}>
-                                            {title}
-                                        </h1>
-                                        <div className="flex items-center gap-2 mt-2">
-                                            <span className={`px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest ${activeLesson.lesson_type === 'theory'
-                                                ? 'bg-indigo-100 text-indigo-600'
-                                                : 'bg-purple-100 text-purple-600'
-                                                }`}>
-                                                {activeLesson.lesson_type === 'theory' ? '📚 ТЕОРИЯ' : '💻 ПРАКТИКА'}
-                                            </span>
-                                            <span className="text-gray-300">•</span>
-                                            <span className="text-gray-400 text-xs font-bold">{slug.toUpperCase()}</span>
-                                        </div>
-                                    </div>
-                                    {activeLesson?.is_completed && (
-                                        <div className="w-12 h-12 bg-gradient-to-br from-emerald-400 to-emerald-500 rounded-full flex items-center justify-center shadow-lg animate-bounce">
-                                            <Check className="w-6 h-6 text-white stroke-[3]" />
-                                        </div>
-                                    )}
-                                </div>
-
-                                {/* Decorative line */}
-                                <div className="flex items-center gap-2 mb-8">
-                                    <div className="h-1 flex-1 bg-gradient-to-r from-indigo-200 to-transparent rounded-full"></div>
-                                    <Sparkles className="w-4 h-4 text-indigo-300" />
-                                </div>
-
-                                {/* Content */}
-                                <div className="mb-10 bg-white/50 p-6 rounded-2xl border border-indigo-50">
-                                    {activeLesson.lesson_type === 'theory'
-                                        ? renderTheoryStep()
-                                        : renderPracticeTask()
-                                    }
-                                </div>
-
-                                {activeLesson.lesson_type === 'practice' && (
-                                    <details className={`rounded-2xl p-5 border-2 transition-all group mb-8 ${isChild ? 'bg-indigo-50 border-black' : 'bg-gray-50 border-gray-100'}`}>
-                                        <summary className="font-black text-xs uppercase tracking-widest text-gray-500 cursor-pointer list-none flex items-center gap-2 select-none">
-                                            <Brain className="w-4 h-4 text-indigo-500" />
-                                            {isRu ? "Вспомнить теорию" : "QUICK THEORY RECAP"}
-                                            <ChevronRight className="w-4 h-4 group-open:rotate-90 transition-transform ml-auto" />
-                                        </summary>
-                                        <div className="mt-6 text-sm border-t border-indigo-100/50 pt-4">
-                                            {renderContent(isRu ? activeLesson?.theory_ref_ru : activeLesson?.theory_ref_en)}
-                                        </div>
-                                    </details>
-                                )}
-
-                                <div className={`flex flex-col gap-4`}>
-                                    <div className="flex items-center justify-between gap-4">
-                                        {activeLesson.lesson_type === 'practice' ? (
-                                            <button
-                                                onClick={handleRunCode}
-                                                disabled={isVerifying}
-                                                className={`flex-1 flex items-center justify-center gap-3 py-5 rounded-2xl font-black uppercase tracking-widest text-sm transition-all border-b-4 active:border-b-0 active:translate-y-1 ${isChild ? 'bg-purple-500 text-white hover:bg-purple-400 border-purple-700 shadow-lg' : 'bg-gradient-to-br from-purple-500 to-purple-600 text-white hover:from-purple-400 hover:to-purple-500 border-purple-700 shadow-xl shadow-purple-200'}`}
-                                            >
-                                                {isVerifying ? <Loader2 className="w-5 h-5 animate-spin" /> : <Play className="w-5 h-5 fill-current" />}
-                                                {isRu ? "🚀 Проверить" : "🚀 Check Task"}
-                                            </button>
-                                        ) : (
-                                            <button
-                                                onClick={handleNextStep}
-                                                disabled={isVerifying}
-                                                className={`flex-1 flex items-center justify-center gap-3 py-5 rounded-2xl font-black uppercase tracking-widest text-sm transition-all border-b-4 active:border-b-0 active:translate-y-1 ${isChild ? 'bg-emerald-500 text-white hover:bg-emerald-400 border-emerald-700 shadow-lg' : 'bg-gradient-to-br from-emerald-400 to-emerald-500 text-white hover:from-emerald-300 hover:to-emerald-400 border-emerald-600 shadow-xl shadow-emerald-200'}`}
-                                            >
-                                                {(!activeLesson.theory_steps || activeLesson.theory_steps.length === 0 || activeStepIndex >= activeLesson.theory_steps.length - 1)
-                                                    ? (isRu ? "✅ Завершить теорию" : "✅ Finish Theory")
-                                                    : (isRu ? "Далее →" : "Next Step →")
-                                                }
-                                                <ChevronRight className="w-5 h-5" />
-                                            </button>
-                                        )}
-                                    </div>
-
-                                    {activeLesson.lesson_type === 'practice' && failedAttempts >= 3 && (
-                                        <div className="animate-in fade-in slide-in-from-top-4 duration-500">
-                                            <div className={`p-5 rounded-[2rem] border-2 transition-all group ${isChild ? 'bg-amber-50 border-amber-300' : 'bg-amber-50/30 border-amber-100'}`}>
-                                                <div className="flex items-center gap-3 mb-4">
-                                                    <div className="w-10 h-10 bg-amber-100 rounded-full flex items-center justify-center">
-                                                        <Zap className="w-5 h-5 text-amber-600" />
-                                                    </div>
-                                                    <div>
-                                                        <h4 className="text-sm font-black text-amber-900 uppercase tracking-tight">
-                                                            {isRu ? "Нужна помощь?" : "Need a boost?"}
-                                                        </h4>
-                                                        <p className="text-[11px] font-bold text-amber-700/70 leading-tight">
-                                                            {isRu ? "Ты старался! Можешь спросить AI или посмотреть готовое решение." : "You've tried hard! Ask the AI or check the solution below."}
-                                                        </p>
-                                                    </div>
-                                                </div>
-
-                                                <div className="flex flex-col gap-2">
-                                                    <button
-                                                        onClick={() => setSolutionVisible(!solutionVisible)}
-                                                        className={`w-full py-3 rounded-xl border-2 border-dashed font-black uppercase tracking-widest text-[10px] transition-all
-                                                            ${isChild ? 'bg-white border-amber-400 text-amber-600 hover:scale-[1.02]' : 'bg-white/50 border-amber-200 text-amber-500 hover:bg-white'}`}
-                                                    >
-                                                        {solutionVisible ? (isRu ? "Скрыть ответ" : "Hide Solution") : (isRu ? "Посмотреть ответ" : "Show Solution")}
-                                                    </button>
-
-                                                    {solutionVisible && (
-                                                        <div className="mt-4 p-4 bg-gray-900 rounded-2xl border-2 border-black shadow-xl overflow-hidden">
-                                                            <div className="flex justify-between items-center mb-3">
-                                                                <span className="text-[10px] font-mono text-gray-400 uppercase tracking-widest">solution_v1.py</span>
-                                                                <button
-                                                                    onClick={() => {
-                                                                        const sol = activeLesson.practice_tasks[activeTaskIndex].solution_code;
-                                                                        setUserCode(sol);
-                                                                        setSolutionVisible(false);
-                                                                    }}
-                                                                    className="text-[10px] font-black text-yellow-400 hover:text-yellow-300 underline underline-offset-4 decoration-dotted"
-                                                                >
-                                                                    {isRu ? "Копировать" : "Copy to Editor"}
-                                                                </button>
-                                                            </div>
-                                                            <pre className="text-xs font-mono text-emerald-400 overflow-x-auto p-2 bg-black/30 rounded-lg">
-                                                                {activeLesson.practice_tasks[activeTaskIndex].solution_code}
-                                                            </pre>
-                                                        </div>
-                                                    )}
-                                                </div>
-                                            </div>
-                                        </div>
-                                    )}
-                                </div>
+                            <div className={`h-1/3 border-t border-gray-700 bg-black p-4 font-mono text-sm overflow-auto ${output.includes('✅') ? 'text-emerald-400' : 'text-gray-300'}`}>
+                                <div className="uppercase text-[10px] text-gray-500 mb-2 tracking-widest border-b border-gray-800 pb-1">Console Output</div>
+                                {output || "Ready to run..."}
+                            </div>
+                        </>
+                    ) : (
+                        <div className="flex items-center justify-center h-full bg-indigo-900/5 text-center p-10">
+                            <div className="max-w-xs space-y-4 opacity-50">
+                                <Brain className="w-24 h-24 text-indigo-200 mx-auto" />
+                                <p className="text-indigo-300 font-bold uppercase tracking-widest text-sm">Focus Mode Active</p>
                             </div>
                         </div>
                     )}
                 </div>
 
-                <aside className="lg:col-span-5 flex flex-col gap-8 order-1 lg:order-2 sticky top-[100px] h-fit">
-                    <div className={`rounded-3xl border-4 overflow-hidden relative ${isChild ? 'bg-white border-black shadow-[8px_8px_0px_0px_rgba(0,0,0,1)]' : 'bg-white border-gray-50 shadow-xl'} h-[200px] lg:h-[300px]`}>
-                        <div className="absolute inset-0 overflow-auto scrollbar-hide scale-75 origin-top">
-                            <CourseMap course={course} onSelectLesson={handleSelectLesson} activeLesson={activeLesson} isCompact={true} />
-                        </div>
-                    </div>
-
-                    {activeLesson?.lesson_type === 'practice' && (
-                        <div className={`rounded-3xl border-4 overflow-hidden flex flex-col transition-all duration-500 ${isChild ? 'bg-white border-black shadow-[8px_8px_0px_0px_rgba(0,0,0,1)]' : 'bg-[#1e1e1e] border-gray-900 shadow-2xl'} min-h-[400px]`}>
-                            <div className={`flex items-center justify-between px-6 py-3 ${isChild ? 'bg-gray-100 border-b-2 border-black' : 'bg-gray-800'}`}>
-                                <div className="flex items-center gap-2">
-                                    <div className="w-2.5 h-2.5 rounded-full bg-red-400"></div>
-                                    <div className="w-2.5 h-2.5 rounded-full bg-yellow-400"></div>
-                                    <div className="w-2.5 h-2.5 rounded-full bg-green-400"></div>
-                                    <span className={`text-[10px] font-black uppercase tracking-widest ml-2 ${isChild ? 'text-black' : 'text-gray-400'}`}>main.{slug === 'backend' ? 'py' : 'js'}</span>
-                                </div>
-                            </div>
-                            <div className="flex-1">
-                                <Editor
-                                    height="300px"
-                                    defaultLanguage={slug === 'backend' ? 'python' : 'javascript'}
-                                    theme={isChild ? "light" : "vs-dark"}
-                                    value={userCode}
-                                    onChange={setUserCode}
-                                    options={{
-                                        minimap: { enabled: false },
-                                        fontSize: 14,
-                                        fontWeight: 'bold',
-                                        padding: { top: 20 },
-                                        scrollBeyondLastLine: false,
-                                        fontFamily: "'Fira Code', monospace"
-                                    }}
-                                />
-                            </div>
-                            {output && (
-                                <div className={`p-6 border-t-2 ${isChild ? 'bg-indigo-50 border-black' : 'bg-black/50 border-gray-800'}`}>
-                                    <pre className={`text-xs font-mono break-words whitespace-pre-wrap ${isChild ? 'text-indigo-900' : 'text-emerald-400'}`}>{output}</pre>
-                                </div>
-                            )}
-                        </div>
-                    )}
-                </aside>
             </main>
 
-            {activeLesson && (
-                <MentorChat lessonSlug={activeLesson.slug} userCode={userCode} isChild={isChild} />
-            )}
+            <MentorChat lessonSlug={activeLesson.slug} userCode={userCode} isChild={isChild} />
         </div>
     );
 }
