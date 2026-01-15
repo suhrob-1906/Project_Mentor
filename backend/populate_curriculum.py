@@ -261,6 +261,8 @@ def populate():
     python_course.modules.all().delete()
     frontend_course.modules.all().delete()
 
+    # 3. Populate Backend (Python) Course
+    print(f"Populating Python Course with {len(python_topics)} topics...")
     for i, topic in enumerate(python_topics):
         mod = Module.objects.create(
             course=python_course,
@@ -274,10 +276,14 @@ def populate():
             slug=f"py-{i+1}-theory",
             order=1,
             lesson_type='theory',
-            title_en="Theory",
-            title_ru="Теория",
+            title_en=topic['title_en'],
+            title_ru=topic['title_ru'],
             content_en=topic['theory_en'],
-            content_ru=topic['theory_ru']
+            content_ru=topic['theory_ru'],
+            theory_steps=[{
+                "text_en": topic['theory_en'],
+                "text_ru": topic['theory_ru']
+            }]
         )
         # Practice
         Lesson.objects.create(
@@ -285,16 +291,23 @@ def populate():
             slug=f"py-{i+1}-practice",
             order=2,
             lesson_type='practice',
-            title_en="Practice",
-            title_ru="Практика",
+            title_en=topic['title_en'],
+            title_ru=topic['title_ru'],
             content_en=topic['practice_en'],
             content_ru=topic['practice_ru'],
-            initial_code=topic['initial_code']
+            initial_code=topic['initial_code'],
+            practice_tasks=[{
+                "title_en": "Task",
+                "title_ru": "Задание",
+                "desc_en": topic['practice_en'],
+                "desc_ru": topic['practice_ru'],
+                "initial_code": topic['initial_code'],
+                "solution_code": ""
+            }]
         )
+    print("Python population complete.")
 
-    print(f"Populated {len(python_topics)} Python modules.")
-
-    # Frontend Topics (22)
+    # 4. Frontend Topics (22)
     frontend_topics = [
         {"title_ru": "1) HTML: структура документа", "title_en": "1) HTML: Document Structure", "theory_ru": "Теория: <!doctype html>, html, head, body.", "theory_en": "Theory: <!doctype html>, html, head, body.", "practice_ru": "Практика: Создай базовую страницу с заголовком и абзацем “I am learning Frontend”.", "practice_en": "Practice: Create base page with header and paragraph “I am learning Frontend”.", "initial_code": "<!DOCTYPE html>\n<html>\n\n</html>"},
         {"title_ru": "2) Текстовые теги и списки", "title_en": "2) Text Tags and Lists", "theory_ru": "Теория: h1-h6, p, strong, em, ul/ol/li. Семантика помогает читаемости.", "theory_en": "Theory: h1-h6, p, strong, em, ul/ol/li. Semantics help readability.", "practice_ru": "Практика: Сделай страницу “My goals” с заголовком и списком из 5 целей.", "practice_en": "Practice: Make “My goals” page with header and list of 5 goals.", "initial_code": "<h1>My Goals</h1>"},
@@ -320,6 +333,8 @@ def populate():
         {"title_ru": "22) fetch и работа с API", "title_en": "22) fetch and API in JS", "theory_ru": "Теория: fetch делает запросы. Часто используют async/await. Ошибки нужно обрабатывать.", "theory_en": "Theory: fetch makes requests. Often use async/await. Errors must be handled.", "practice_ru": "Практика: Сделай кнопку “Load”. При клике делай запрос к тестовому API и выводи данные на страницу.", "practice_en": "Practice: Make “Load” button. On click fetch from test API and output data to page.", "initial_code": ""},
     ]
 
+    # 4. Populate Frontend Course
+    print(f"Populating Frontend Course with {len(frontend_topics)} topics...")
     for i, topic in enumerate(frontend_topics):
         mod = Module.objects.create(
             course=frontend_course,
@@ -327,29 +342,42 @@ def populate():
             title_ru=topic['title_ru'],
             order=i + 1
         )
+        # Theory
         Lesson.objects.create(
             module=mod,
             slug=f"fe-{i+1}-theory",
             order=1,
             lesson_type='theory',
-            title_en="Theory",
-            title_ru="Теория",
+            title_en=topic['title_en'],
+            title_ru=topic['title_ru'],
             content_en=topic['theory_en'],
-            content_ru=topic['theory_ru']
+            content_ru=topic['theory_ru'],
+            theory_steps=[{
+                "text_en": topic['theory_en'],
+                "text_ru": topic['theory_ru']
+            }]
         )
+        # Practice
         Lesson.objects.create(
             module=mod,
             slug=f"fe-{i+1}-practice",
             order=2,
             lesson_type='practice',
-            title_en="Practice",
-            title_ru="Практика",
+            title_en=topic['title_en'],
+            title_ru=topic['title_ru'],
             content_en=topic['practice_en'],
             content_ru=topic['practice_ru'],
-            initial_code=topic['initial_code']
+            initial_code=topic['initial_code'],
+            practice_tasks=[{
+                "title_en": "Task",
+                "title_ru": "Задание",
+                "desc_en": topic['practice_en'],
+                "desc_ru": topic['practice_ru'],
+                "initial_code": topic['initial_code'],
+                "solution_code": ""
+            }]
         )
-    
-    print(f"Populated {len(frontend_topics)} Frontend modules.")
+    print("Frontend population complete.")
 
 if __name__ == "__main__":
     populate()
