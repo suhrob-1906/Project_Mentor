@@ -38,7 +38,8 @@ export default function Register() {
                 navigate('/login');
             }
         } catch (err) {
-            console.error("Registration error:", err);
+            // Показываем в консоли подробный ответ бэкенда, чтобы видеть, почему 400
+            console.error("Registration error:", err.response?.data || err);
             setError(t('register.fail', 'Registration failed'));
         } finally {
             setLoading(false);
